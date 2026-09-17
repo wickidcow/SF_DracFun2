@@ -21,6 +21,10 @@ public final class DracFunItemGroups {
         return group(addon, "modular", Material.SMITHING_TABLE, "DracFun Modular Gear");
     }
 
+    public static ItemGroup machines(SFDracFun2 addon) {
+        return group(addon, "machines", Material.RESPAWN_ANCHOR, "DracFun Machines");
+    }
+
     private static ItemGroup group(SFDracFun2 addon, String key, Material material, String name) {
         ItemStack icon = new ItemStack(material);
         ItemMeta meta = icon.getItemMeta();
