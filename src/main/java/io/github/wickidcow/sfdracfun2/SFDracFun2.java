@@ -3,6 +3,7 @@ package io.github.wickidcow.sfdracfun2;
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
 import io.github.wickidcow.sfdracfun2.modular.CapacitorService;
+import io.github.wickidcow.sfdracfun2.setup.DracFunChaosGuardianRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunEnergyCoreRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunFusionComponentRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMachineRegistry;
@@ -63,6 +64,7 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
         boolean fusionCrafting = getConfig().getBoolean("features.fusion-crafting", false);
         boolean energyCore = getConfig().getBoolean("features.energy-core", false);
         boolean reactor = getConfig().getBoolean("features.reactor", false);
+        boolean chaosGuardian = getConfig().getBoolean("features.chaos-guardian", false);
         boolean hardMode = getConfig().getBoolean("options.hard-mode", true);
         boolean useDragonEgg = getConfig().getBoolean("options.use-dragon-egg", true);
 
@@ -127,6 +129,37 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
                 } catch (IllegalStateException exception) {
                     getLogger().severe("Draconic Reactor prerequisites were unavailable; Reactor registration was skipped: "
                             + exception.getMessage());
+                }
+            }
+        }
+
+        if (chaosGuardian) {
+            if (!materialsEnabled) {
+                getLogger().warning(
+                        "Chaos Guardian requires features.materials=true; Guardian registration was skipped.");
+            } else if (!modularGear) {
+                getLogger().warning(
+                        "Chaos Guardian requires features.modular-gear=true because the legacy battle "
+                                + "requires a DracFun modular armor chestplate; Guardian registration was skipped.");
+            } else {
+                try {
+                    int sharedComponents =
+                            DracFunFusionComponentRegistry.register(this, hardMode, useDragonEgg);
+                    int guardianItems = DracFunChaosGuardianRegistry.register(this);
+                    getLogger().info("Registered " + sharedComponents
+                            + " shared material identities required by the Chaos Guardian.");
+                    getLogger().info("Registered " + guardianItems
+                            + " clean-room Chaos Guardian invocation identity.");
+
+                    if (!fusionCrafting) {
+                        getLogger().warning(
+                                "Chaos Guardian is enabled while Fusion Crafting is disabled. "
+                                        + "The Chaos Orb identity is available, but it is not survival-craftable.");
+                    }
+                } catch (IllegalStateException exception) {
+                    getLogger().severe(
+                            "Chaos Guardian prerequisites were unavailable; Guardian registration was skipped: "
+                                    + exception.getMessage());
                 }
             }
         }
