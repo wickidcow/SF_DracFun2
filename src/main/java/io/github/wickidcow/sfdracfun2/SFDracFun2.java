@@ -56,6 +56,13 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
             getLogger().info("Registered " + registered + " clean-room Item Converter identity.");
         }
 
+        if (getConfig().getBoolean("features.fusion-crafting", false)) {
+            boolean hardMode = getConfig().getBoolean("options.hard-mode", true);
+            boolean useDragonEgg = getConfig().getBoolean("options.use-dragon-egg", true);
+            int registered = DracFunMachineRegistry.registerFusionCrafters(this, hardMode, useDragonEgg);
+            getLogger().info("Registered " + registered + " clean-room Fusion Crafter identities.");
+        }
+
         if (getConfig().getBoolean("compatibility.preserve-legacy-ids", true)) {
             int registered = LegacyCompatibilityRegistry.registerMissingIdentities(this);
             getLogger().info("Registered " + registered + " hidden legacy compatibility identities.");
