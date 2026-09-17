@@ -14,11 +14,18 @@ public final class DracFunItemGroups {
     private DracFunItemGroups() {}
 
     public static ItemGroup materials(SFDracFun2 addon) {
-        ItemStack icon = new ItemStack(Material.NETHERITE_INGOT);
-        ItemMeta meta = icon.getItemMeta();
-        meta.setDisplayName(ChatColor.LIGHT_PURPLE + "DracFun Materials");
-        icon.setItemMeta(meta);
+        return group(addon, "materials", Material.NETHERITE_INGOT, "DracFun Materials");
+    }
 
-        return new ItemGroup(new NamespacedKey(addon, "materials"), icon);
+    public static ItemGroup modular(SFDracFun2 addon) {
+        return group(addon, "modular", Material.SMITHING_TABLE, "DracFun Modular Gear");
+    }
+
+    private static ItemGroup group(SFDracFun2 addon, String key, Material material, String name) {
+        ItemStack icon = new ItemStack(material);
+        ItemMeta meta = icon.getItemMeta();
+        meta.setDisplayName(ChatColor.LIGHT_PURPLE + name);
+        icon.setItemMeta(meta);
+        return new ItemGroup(new NamespacedKey(addon, key), icon);
     }
 }
