@@ -24,6 +24,10 @@ public final class ModularData {
         return Math.max(0, getInt(stack, LegacyDracFunKeys.CAPACITY));
     }
 
+    public static int getFusionPower(ItemStack stack) {
+        return Math.max(0, getInt(stack, LegacyDracFunKeys.FUSION_POWER));
+    }
+
     public static void setCharge(ItemStack stack, int charge) {
         int capacity = getCapacity(stack);
         setInt(stack, LegacyDracFunKeys.ENERGY, clamp(charge, 0, capacity));
@@ -35,6 +39,10 @@ public final class ModularData {
         if (getCharge(stack) > safeCapacity) {
             setCharge(stack, safeCapacity);
         }
+    }
+
+    public static void setFusionPower(ItemStack stack, int fusionPower) {
+        setInt(stack, LegacyDracFunKeys.FUSION_POWER, Math.max(0, fusionPower));
     }
 
     public static int addCharge(ItemStack stack, int amount) {
@@ -142,6 +150,8 @@ public final class ModularData {
                 data.remove(LegacyDracFunKeys.key(family.legacyItemId(tier)));
             }
         }
+        data.remove(LegacyDracFunKeys.SHIELD);
+        data.remove(LegacyDracFunKeys.COOLDOWN);
         data.set(LegacyDracFunKeys.ENERGY, PersistentDataType.INTEGER, 0);
         data.set(LegacyDracFunKeys.CAPACITY, PersistentDataType.INTEGER, 0);
         stack.setItemMeta(meta);
