@@ -1,2 +1,44 @@
 # SF_DracFun2
-My own rewrite 
+
+Clean-room Slimefun Legacy reimplementation of the gameplay concepts and world-compatibility surface of the discontinued **DracFun 2.0.10** addon.
+
+> **Important:** This repository does not contain Phoenix's original source code, decompiled source, or original bundled assets. It is an independent implementation maintained for modern Slimefun Legacy servers. Phoenix is credited as the author of the original DracFun project; Phoenix has not authored or endorsed this repository.
+
+## Targets
+
+- Slimefun Legacy 4.1.51+
+- Minecraft 1.21.11 through the 26.x line
+- Paper 1.21.11 / 26.2 / 26.3
+- Purpur 1.21.11 / 26.2 / 26.3 when its API is available
+- Folia 26.2+ where the implemented feature can be made region-safe
+- Java 21 release bytecode
+
+## Compatibility goals
+
+The project may preserve documented/observable legacy identifiers such as `DRACFUN_*` Slimefun IDs and persistent-data keys when needed so existing servers can migrate without silently losing registered items or machine state. New Java code lives under the `io.github.wickidcow.sfdracfun2` namespace.
+
+The implementation will not copy original method bodies, decompiled Java, textures, models, or other protected assets from the discontinued binary.
+
+## Planned restoration order
+
+1. Boot/runtime compatibility foundation and legacy ID catalog
+2. Base Draconium materials and End resource generation
+3. Energy Infuser and item conversion
+4. Fusion Crafting
+5. Modular tools, armor, capacitors, shields, and modules
+6. Energy Core multiblock
+7. Draconic Reactor
+8. Chaos Guardian encounter/invocation
+
+Each major system is kept isolated so an unavailable or incompatible subsystem cannot prevent the rest of the addon from loading.
+
+## Build output
+
+Release artifact naming:
+
+`SF_DracFun2<version>.jar`
+
+## Credits
+
+- **Phoenix** — original DracFun concept and discontinued DracFun 2.0.10 addon
+- **wickidcow** — clean-room Slimefun Legacy reimplementation and maintenance
