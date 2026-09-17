@@ -65,7 +65,10 @@ public final class CapacitorService implements Listener {
 
         for (int capacitorSlot = 0; capacitorSlot < contents.length; capacitorSlot++) {
             ItemStack capacitor = contents[capacitorSlot];
-            if (!isCapacitor(capacitor) || ModularData.getCharge(capacitor) <= 0) {
+            SlimefunItem capacitorItem = SlimefunItem.getByItem(capacitor);
+            if (!(capacitorItem instanceof ModularGearItem capacitorGear)
+                    || capacitorGear.getGearType() != GearType.CAPACITOR
+                    || ModularData.getCharge(capacitor) <= 0) {
                 continue;
             }
 
@@ -75,6 +78,10 @@ public final class CapacitorService implements Listener {
                 }
 
                 ItemStack target = contents[targetSlot];
+                if (target == null || target.getType().isAir()) {
+                    continue;
+                }
+
                 SlimefunItem targetItem = SlimefunItem.getByItem(target);
                 if (!(targetItem instanceof ModularGearItem gear) || gear.getGearType() == GearType.CAPACITOR) {
                     continue;
@@ -94,7 +101,7 @@ public final class CapacitorService implements Listener {
 
                 ModularData.removeCharge(capacitor, transfer);
                 ModularData.addCharge(target, transfer);
-                ModularLore.refresh(capacitor, (ModularGearItem) SlimefunItem.getByItem(capacitor));
+                ModularLore.refresh(capacitor, capacitorGear);
                 ModularLore.refresh(target, gear);
 
                 contents[capacitorSlot] = capacitor;
@@ -103,13 +110,5 @@ public final class CapacitorService implements Listener {
                 inventory.setItem(targetSlot, target);
             }
         }
-    }
-
-    private static boolean isCapacitor(ItemStack stack) {
-        if (stack == null || stack.getType().isAir()) {
-            return false;
-        }
-        SlimefunItem sfItem = SlimefunItem.getByItem(stack);
-        return sfItem instanceof ModularGearItem gear && gear.getGearType() == GearType.CAPACITOR;
     }
 }
