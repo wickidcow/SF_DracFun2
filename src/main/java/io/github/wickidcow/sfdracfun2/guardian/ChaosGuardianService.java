@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -67,6 +68,8 @@ public final class ChaosGuardianService implements Listener {
             LegacyDracFunKeys.key("REBORN_CHAOS_INVULNERABLE_UNTIL");
     private static final NamespacedKey MINION =
             LegacyDracFunKeys.key("REBORN_CHAOS_MINION");
+    private static final NamespacedKey CRYSTAL_COUNT =
+            LegacyDracFunKeys.key("REBORN_CHAOS_CRYSTAL_COUNT");
 
     private static final long ATTACK_PERIOD_TICKS = 600L;
     private static final double PARTICIPANT_RANGE_SQUARED = 256D * 256D;
@@ -76,7 +79,7 @@ public final class ChaosGuardianService implements Listener {
     private final boolean punishUnarmored;
     private final int witherLifetimeTicks;
     private final double laserDamageCap;
-    private final Set<UUID> pendingWorlds = new HashSet<>();
+    private final Set<UUID> pendingWorlds = ConcurrentHashMap.newKeySet();
 
     public ChaosGuardianService(SFDracFun2 plugin) {
         this.plugin = plugin;
@@ -106,8 +109,14 @@ public final class ChaosGuardianService implements Listener {
                 DragonBattle battle = world.getEnderDragonBattle();
                 EnderDragon dragon = battle == null ? null : battle.getEnderDragon();
                 if (dragon != null && isGuardian(dragon)) {
-                    initializeBossBar(dragon.getBossBar());
-                    schedulePulse(dragon);
+                    Slimefun.runSyncFor(dragon, () -> {
+                        initializeBossBar(dragon.getBossBar());
+                        dragon.getPersistentDataContainer().set(
+                                CRYSTAL_COUNT,
+                                PersistentDataType.INTEGER,
+                                battle.getHealingCrystals().size());
+                        schedulePulse(dragon);
+                    });
                 }
             });
         }
@@ -196,7 +205,7 @@ public final class ChaosGuardianService implements Listener {
             return;
         }
 
-        initializeFight(dragon, battle);
+        Slimefun.runSyncFor(dragon, () -> initializeFight(dragon, battle));
         pendingWorlds.remove(world.getUID());
     }
 
@@ -227,11 +236,19 @@ public final class ChaosGuardianService implements Listener {
 
         initializeBossBar(dragon.getBossBar());
 
-        for (EndCrystal crystal : battle.getHealingCrystals()) {
-            tag(crystal, CRYSTAL);
-            if (crystalCages) {
-                buildCage(crystal.getLocation());
-            }
+        var crystals = battle.getHealingCrystals();
+        dragon.getPersistentDataContainer().set(
+                CRYSTAL_COUNT,
+                PersistentDataType.INTEGER,
+                crystals.size());
+
+        for (EndCrystal crystal : crystals) {
+            Slimefun.runSyncFor(crystal, () -> {
+                tag(crystal, CRYSTAL);
+                if (crystalCages) {
+                    buildCage(crystal.getLocation());
+                }
+            });
         }
 
         schedulePulse(dragon);
@@ -330,7 +347,7 @@ public final class ChaosGuardianService implements Listener {
             }
 
             Location hover = dragon.getWorld().getSpawnLocation().clone().add(0D, 32D, 0D);
-            dragon.teleport(hover);
+            dragon.teleportAsync(hover);
             dragon.setPhase(EnderDragon.Phase.HOVER);
         });
 
@@ -382,7 +399,7 @@ public final class ChaosGuardianService implements Listener {
         applyEffect(player, "WITHER", 100, 2);
         player.setAllowFlight(false);
         player.setFlying(false);
-        player.teleport(player.getWorld().getSpawnLocation());
+        player.teleportAsync(player.getWorld().getSpawnLocation());
     }
 
     private void witherAttack(Player player) {
@@ -429,6 +446,7 @@ public final class ChaosGuardianService implements Listener {
         Slimefun.runSyncAt(cage, () -> {
             if (!crystal.isValid() || crystal.isDead()) {
                 cleanupCage(cage);
+                decrementCrystalCount(cage.getWorld());
             }
         }, 1L);
     }
@@ -456,7 +474,7 @@ public final class ChaosGuardianService implements Listener {
             }
         }
 
-        if (hasLiveChaosCrystal(dragon.getWorld())) {
+        if (crystalCount(dragon) > 0) {
             event.setCancelled(true);
             event.setDamage(0D);
             return;
@@ -569,10 +587,17 @@ public final class ChaosGuardianService implements Listener {
     }
 
     private void cleanupTaggedCrystals(World world) {
-        for (EndCrystal crystal : world.getEntitiesByClass(EndCrystal.class)) {
-            if (hasTag(crystal, CRYSTAL)) {
-                cleanupCage(crystal.getLocation());
-            }
+        DragonBattle battle = world.getEnderDragonBattle();
+        if (battle == null) {
+            return;
+        }
+
+        for (EndCrystal crystal : battle.getHealingCrystals()) {
+            Slimefun.runSyncFor(crystal, () -> {
+                if (hasTag(crystal, CRYSTAL)) {
+                    cleanupCage(crystal.getLocation());
+                }
+            });
         }
     }
 
@@ -588,18 +613,25 @@ public final class ChaosGuardianService implements Listener {
                         continue;
                     }
 
-                    var block = base.clone().add(x, y, z).getBlock();
-                    if (!block.getType().isAir()) {
-                        continue;
-                    }
+                    Location target = base.clone().add(x, y, z);
+                    Slimefun.runSyncAt(target, () -> {
+                        if (!plugin.isEnabled()) {
+                            return;
+                        }
 
-                    if (top) {
-                        block.setType(ThreadLocalRandom.current().nextBoolean()
-                                ? Material.CRYING_OBSIDIAN
-                                : Material.OBSIDIAN);
-                    } else {
-                        block.setType(Material.IRON_BARS);
-                    }
+                        var block = target.getBlock();
+                        if (!block.getType().isAir()) {
+                            return;
+                        }
+
+                        if (top) {
+                            block.setType(ThreadLocalRandom.current().nextBoolean()
+                                    ? Material.CRYING_OBSIDIAN
+                                    : Material.OBSIDIAN);
+                        } else {
+                            block.setType(Material.IRON_BARS);
+                        }
+                    });
                 }
             }
         }
@@ -620,13 +652,16 @@ public final class ChaosGuardianService implements Listener {
                         continue;
                     }
 
-                    var block = base.clone().add(x, y, z).getBlock();
-                    Material type = block.getType();
-                    if (type == Material.IRON_BARS
-                            || type == Material.OBSIDIAN
-                            || type == Material.CRYING_OBSIDIAN) {
-                        block.setType(Material.AIR);
-                    }
+                    Location target = base.clone().add(x, y, z);
+                    Slimefun.runSyncAt(target, () -> {
+                        var block = target.getBlock();
+                        Material type = block.getType();
+                        if (type == Material.IRON_BARS
+                                || type == Material.OBSIDIAN
+                                || type == Material.CRYING_OBSIDIAN) {
+                            block.setType(Material.AIR);
+                        }
+                    });
                 }
             }
         }
@@ -655,13 +690,28 @@ public final class ChaosGuardianService implements Listener {
                 && player.getWorld() == dragon.getWorld();
     }
 
-    private static boolean hasLiveChaosCrystal(World world) {
-        for (EndCrystal crystal : world.getEntitiesByClass(EndCrystal.class)) {
-            if (crystal.isValid() && !crystal.isDead() && hasTag(crystal, CRYSTAL)) {
-                return true;
-            }
+    private static int crystalCount(EnderDragon dragon) {
+        Integer count = dragon.getPersistentDataContainer().get(
+                CRYSTAL_COUNT,
+                PersistentDataType.INTEGER);
+        return count == null ? 0 : Math.max(0, count);
+    }
+
+    private static void decrementCrystalCount(World world) {
+        if (world == null) {
+            return;
         }
-        return false;
+
+        DragonBattle battle = world.getEnderDragonBattle();
+        EnderDragon guardian = battle == null ? null : battle.getEnderDragon();
+        if (guardian == null || !isGuardian(guardian)) {
+            return;
+        }
+
+        Slimefun.runSyncFor(guardian, () -> guardian.getPersistentDataContainer().set(
+                CRYSTAL_COUNT,
+                PersistentDataType.INTEGER,
+                Math.max(0, crystalCount(guardian) - 1)));
     }
 
     private static boolean isGuardian(Entity entity) {
