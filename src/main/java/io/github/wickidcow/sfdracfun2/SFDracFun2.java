@@ -3,6 +3,7 @@ package io.github.wickidcow.sfdracfun2;
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
 import io.github.wickidcow.sfdracfun2.modular.CapacitorService;
+import io.github.wickidcow.sfdracfun2.setup.DracFunFusionComponentRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMachineRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMaterialRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunModularRegistry;
@@ -29,7 +30,8 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
         getLogger().info("Legacy compatibility target: DracFun " + LEGACY_DRACFUN_VERSION);
         getLogger().info("No original DracFun source code or assets are bundled in this plugin.");
 
-        if (getConfig().getBoolean("features.materials", true)) {
+        boolean materialsEnabled = getConfig().getBoolean("features.materials", true);
+        if (materialsEnabled) {
             boolean endResource = getConfig().getBoolean("features.end-resource", true);
             int registered = DracFunMaterialRegistry.register(this, endResource);
             getLogger().info("Registered " + registered + " functional Draconium material identities.");
@@ -57,10 +59,21 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
         }
 
         if (getConfig().getBoolean("features.fusion-crafting", false)) {
-            boolean hardMode = getConfig().getBoolean("options.hard-mode", true);
-            boolean useDragonEgg = getConfig().getBoolean("options.use-dragon-egg", true);
-            int registered = DracFunMachineRegistry.registerFusionCrafters(this, hardMode, useDragonEgg);
-            getLogger().info("Registered " + registered + " clean-room Fusion Crafter identities.");
+            if (!materialsEnabled) {
+                getLogger().warning("Fusion Crafting requires features.materials=true; Fusion registration was skipped.");
+            } else {
+                boolean hardMode = getConfig().getBoolean("options.hard-mode", true);
+                boolean useDragonEgg = getConfig().getBoolean("options.use-dragon-egg", true);
+                try {
+                    int components = DracFunFusionComponentRegistry.register(this, hardMode, useDragonEgg);
+                    int crafters = DracFunMachineRegistry.registerFusionCrafters(this, hardMode, useDragonEgg);
+                    getLogger().info("Registered " + components + " Fusion progression component identities.");
+                    getLogger().info("Registered " + crafters + " clean-room Fusion Crafter identities.");
+                } catch (IllegalStateException exception) {
+                    getLogger().severe("Fusion Crafting prerequisites were unavailable; Fusion registration was skipped: "
+                            + exception.getMessage());
+                }
+            }
         }
 
         if (getConfig().getBoolean("compatibility.preserve-legacy-ids", true)) {
