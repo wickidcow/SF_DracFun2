@@ -443,12 +443,16 @@ public final class ChaosGuardianService implements Listener {
         }
 
         Location cage = crystal.getLocation().clone();
-        Slimefun.runSyncAt(cage, () -> {
-            if (!crystal.isValid() || crystal.isDead()) {
-                cleanupCage(cage);
-                decrementCrystalCount(cage.getWorld());
-            }
-        }, 1L);
+        DragonBattle battle = crystal.getWorld().getEnderDragonBattle();
+        EnderDragon guardian = battle == null ? null : battle.getEnderDragon();
+
+        Slimefun.runSyncFor(
+                crystal,
+                () -> {
+                    // A surviving crystal keeps its shield contribution.
+                },
+                () -> onChaosCrystalRetired(cage, guardian),
+                1L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
@@ -697,21 +701,21 @@ public final class ChaosGuardianService implements Listener {
         return count == null ? 0 : Math.max(0, count);
     }
 
-    private static void decrementCrystalCount(World world) {
-        if (world == null) {
+    private void onChaosCrystalRetired(Location cage, EnderDragon guardian) {
+        Slimefun.runSyncAt(cage, () -> cleanupCage(cage));
+
+        if (guardian == null) {
             return;
         }
 
-        DragonBattle battle = world.getEnderDragonBattle();
-        EnderDragon guardian = battle == null ? null : battle.getEnderDragon();
-        if (guardian == null || !isGuardian(guardian)) {
-            return;
-        }
-
-        Slimefun.runSyncFor(guardian, () -> guardian.getPersistentDataContainer().set(
-                CRYSTAL_COUNT,
-                PersistentDataType.INTEGER,
-                Math.max(0, crystalCount(guardian) - 1)));
+        Slimefun.runSyncFor(guardian, () -> {
+            if (isGuardian(guardian)) {
+                guardian.getPersistentDataContainer().set(
+                        CRYSTAL_COUNT,
+                        PersistentDataType.INTEGER,
+                        Math.max(0, crystalCount(guardian) - 1));
+            }
+        });
     }
 
     private static boolean isGuardian(Entity entity) {
