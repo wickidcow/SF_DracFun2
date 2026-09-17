@@ -1,4 +1,4 @@
-name: Build SF DracFun2
+name: Build SFL DracFun Reborn
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: sf-dracfun2-${{ github.workflow }}-${{ github.ref }}
+  group: sfl-dracfun-reborn-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -89,11 +89,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          JAR=build/libs/SF_DracFun20.1.0.jar
+          JAR=build/libs/SFL_DracFun-Reborn2.0.1.jar
           test -s "$JAR"
           unzip -p "$JAR" plugin.yml > build/plugin.yml
           grep -Eq '^api-version:.*1\.21\.11' build/plugin.yml
           grep -Eq '^folia-supported:[[:space:]]*true' build/plugin.yml
+          grep -Eq '^version:.*2\.0\.1' build/plugin.yml
           if unzip -l "$JAR" | grep -Eq 'me/phoenix/(dracfun|metrics)/'; then
             echo 'Original DracFun implementation classes leaked into the clean-room artifact.' >&2
             exit 1
@@ -104,7 +105,7 @@ jobs:
       - name: Upload raw JAR artifact
         uses: actions/upload-artifact@v7
         with:
-          name: SF_DracFun20.1.0.jar
-          path: build/libs/SF_DracFun20.1.0.jar
+          name: SFL_DracFun-Reborn2.0.1.jar
+          path: build/libs/SFL_DracFun-Reborn2.0.1.jar
           archive: false
           if-no-files-found: error
