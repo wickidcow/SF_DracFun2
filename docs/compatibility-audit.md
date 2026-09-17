@@ -64,6 +64,32 @@ DracFun 2.0.10's Item Converter also recognizes three older armor IDs from pre-2
 
 Those are tracked separately as migration aliases. The 2.0.10 registered armor identities are `DRACFUN_WYVERN_ARMOR`, `DRACFUN_DRACONIC_ARMOR`, and `DRACFUN_CHAOTIC_ARMOR`.
 
+## Modular persistence contract
+
+The old modular system stores item state under the original Bukkit namespace `dracfun`. SF_DracFun2 therefore creates compatibility keys with an explicit `dracfun` namespace instead of using this plugin's own namespace.
+
+Confirmed modular keys include:
+
+- `DRACFUN_ENERGY`
+- `DRACFUN_CAPACITY`
+- `DRACFUN_FUSION_POWER`
+- `DRACFUN_SHIELD`
+- `DRACFUN_COOLDOWN`
+- one integer key for each installed runtime module ID such as `DRACFUN_POWER_WYVERN_MODULE`
+
+Gear fusion-power requirements are 8,000,000 for Wyvern, 32,000,000 for Draconic, and 128,000,000 for Chaotic gear.
+
+Module storage is additive by tier. A module family can have counts at Basic, Wyvern, Draconic, and Chaotic tiers and an effect is calculated by multiplying each installed count by that tier's value and summing the result.
+
+Module-point cost is the square of the module's declared size: size 1 costs 1 point, size 2 costs 4, and size 3 costs 9. Module limits and gear compatibility are preserved in `ModuleFamily` and `GearType`.
+
+Two implementation problems in 2.0.10 are intentionally corrected without changing the persisted format:
+
+- module-point usage is derived from each ItemStack's PDC instead of a mutable counter on the singleton Slimefun item object;
+- charge is clamped to the valid range `0..capacity`, including when capacity is reduced.
+
+Removing all modules also removes legacy shield/cooldown state and resets charge/capacity, matching the observable reset behavior while avoiding shared-state leakage.
+
 ## Confirmed modern compatibility breakpoints
 
 ### Bukkit attribute names
