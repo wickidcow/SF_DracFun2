@@ -2,6 +2,7 @@ package io.github.wickidcow.sfdracfun2;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
+import io.github.wickidcow.sfdracfun2.setup.DracFunMaterialRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -24,6 +25,12 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
         getLogger().info("SF_DracFun2 clean-room compatibility layer starting.");
         getLogger().info("Legacy compatibility target: DracFun " + LEGACY_DRACFUN_VERSION);
         getLogger().info("No original DracFun source code or assets are bundled in this plugin.");
+
+        if (getConfig().getBoolean("features.materials", true)) {
+            boolean endResource = getConfig().getBoolean("features.end-resource", true);
+            int registered = DracFunMaterialRegistry.register(this, endResource);
+            getLogger().info("Registered " + registered + " functional Draconium material identities.");
+        }
 
         if (getConfig().getBoolean("compatibility.preserve-legacy-ids", true)) {
             int registered = LegacyCompatibilityRegistry.registerMissingIdentities(this);
