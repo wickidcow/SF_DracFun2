@@ -8,6 +8,7 @@ import io.github.wickidcow.sfdracfun2.modular.GearType;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
 import io.github.wickidcow.sfdracfun2.modular.ModularArmorItem;
 import io.github.wickidcow.sfdracfun2.modular.ModularGearItem;
+import io.github.wickidcow.sfdracfun2.modular.ModularWeaponItem;
 import io.github.wickidcow.sfdracfun2.modular.ModuleFamily;
 import io.github.wickidcow.sfdracfun2.modular.ModuleIntegratorMachine;
 import io.github.wickidcow.sfdracfun2.modular.ModuleItem;
@@ -101,6 +102,8 @@ public final class DracFunModularRegistry {
         SlimefunItemStack stack = new SlimefunItemStack(id, base);
         if (type == GearType.ARMOR) {
             new ModularArmorItem(group, stack, tier).register(addon);
+        } else if (type == GearType.SWORD || type == GearType.STAFF) {
+            new ModularWeaponItem(group, stack, type, tier).register(addon);
         } else {
             new ModularGearItem(group, stack, type, tier).register(addon);
         }
