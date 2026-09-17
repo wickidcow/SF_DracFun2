@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.modular.GearType;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
+import io.github.wickidcow.sfdracfun2.modular.ModularArmorItem;
 import io.github.wickidcow.sfdracfun2.modular.ModularGearItem;
 import io.github.wickidcow.sfdracfun2.modular.ModuleFamily;
 import io.github.wickidcow.sfdracfun2.modular.ModuleIntegratorMachine;
@@ -16,6 +17,10 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.attribute.AttributeModifier;
+import org.bukkit.inventory.EquipmentSlotGroup;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -87,12 +92,40 @@ public final class DracFunModularRegistry {
                 case 3 -> Color.BLACK;
                 default -> Color.WHITE;
             });
+            addArmorAttributes(addon, meta, tier);
         }
 
         base.setItemMeta(meta);
         SlimefunItemStack stack = new SlimefunItemStack(id, base);
-        new ModularGearItem(group, stack, type, tier).register(addon);
+        if (type == GearType.ARMOR) {
+            new ModularArmorItem(group, stack, tier).register(addon);
+        } else {
+            new ModularGearItem(group, stack, type, tier).register(addon);
+        }
         return 1;
+    }
+
+    private static void addArmorAttributes(SFDracFun2 addon, ItemMeta meta, int tier) {
+        double modifier = switch (tier) {
+            case 1 -> 1.25D;
+            case 2 -> 1.75D;
+            case 3 -> 2.50D;
+            default -> throw new IllegalArgumentException("Gear tier must be 1-3, got " + tier);
+        };
+
+        AttributeModifier armor = new AttributeModifier(
+                new NamespacedKey(addon, "modular_armor_" + tier),
+                20.0D * modifier,
+                AttributeModifier.Operation.ADD_NUMBER,
+                EquipmentSlotGroup.CHEST);
+        AttributeModifier toughness = new AttributeModifier(
+                new NamespacedKey(addon, "modular_armor_toughness_" + tier),
+                8.0D * modifier,
+                AttributeModifier.Operation.ADD_NUMBER,
+                EquipmentSlotGroup.CHEST);
+
+        meta.addAttributeModifier(Attribute.ARMOR, armor);
+        meta.addAttributeModifier(Attribute.ARMOR_TOUGHNESS, toughness);
     }
 
     private static int registerModule(
