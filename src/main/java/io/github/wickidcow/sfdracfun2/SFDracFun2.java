@@ -3,6 +3,7 @@ package io.github.wickidcow.sfdracfun2;
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
 import io.github.wickidcow.sfdracfun2.modular.CapacitorService;
+import io.github.wickidcow.sfdracfun2.setup.DracFunEnergyCoreRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunFusionComponentRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMachineRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMaterialRegistry;
@@ -58,19 +59,40 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
             getLogger().info("Registered " + registered + " clean-room Item Converter identity.");
         }
 
-        if (getConfig().getBoolean("features.fusion-crafting", false)) {
+        boolean fusionCrafting = getConfig().getBoolean("features.fusion-crafting", false);
+        boolean energyCore = getConfig().getBoolean("features.energy-core", false);
+        boolean hardMode = getConfig().getBoolean("options.hard-mode", true);
+        boolean useDragonEgg = getConfig().getBoolean("options.use-dragon-egg", true);
+
+        if (fusionCrafting) {
             if (!materialsEnabled) {
                 getLogger().warning("Fusion Crafting requires features.materials=true; Fusion registration was skipped.");
             } else {
-                boolean hardMode = getConfig().getBoolean("options.hard-mode", true);
-                boolean useDragonEgg = getConfig().getBoolean("options.use-dragon-egg", true);
                 try {
                     int components = DracFunFusionComponentRegistry.register(this, hardMode, useDragonEgg);
+                    int energyMaterials = DracFunEnergyCoreRegistry.registerEnergyMaterials(this, hardMode);
                     int crafters = DracFunMachineRegistry.registerFusionCrafters(this, hardMode, useDragonEgg);
                     getLogger().info("Registered " + components + " Fusion progression component identities.");
+                    getLogger().info("Registered " + energyMaterials + " shared Energy Core material identities.");
                     getLogger().info("Registered " + crafters + " clean-room Fusion Crafter identities.");
                 } catch (IllegalStateException exception) {
                     getLogger().severe("Fusion Crafting prerequisites were unavailable; Fusion registration was skipped: "
+                            + exception.getMessage());
+                }
+            }
+        }
+
+        if (energyCore) {
+            if (!materialsEnabled) {
+                getLogger().warning("Energy Core requires features.materials=true; Energy Core registration was skipped.");
+            } else {
+                try {
+                    int energyMaterials = DracFunEnergyCoreRegistry.registerEnergyMaterials(this, hardMode);
+                    int multiblocks = DracFunEnergyCoreRegistry.registerMultiblocks(this, hardMode);
+                    getLogger().info("Registered " + energyMaterials + " Energy Core material identities.");
+                    getLogger().info("Registered " + multiblocks + " Energy Core multiblock identities.");
+                } catch (IllegalStateException exception) {
+                    getLogger().severe("Energy Core prerequisites were unavailable; Energy Core registration was skipped: "
                             + exception.getMessage());
                 }
             }
