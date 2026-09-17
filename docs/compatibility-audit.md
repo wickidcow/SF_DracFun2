@@ -13,7 +13,9 @@ This document records observable compatibility facts from the discontinued DracF
 - Binary contains 84 class files total
 - 70 class files belong to the DracFun implementation namespace
 - 14 class files are a shaded metrics implementation
-- `DracFunItems` exposes 133 static `DRACFUN_*` Slimefun item definitions
+- `DracFunItems` exposes 133 static Slimefun item definitions
+- `ItemConverter` contributes one additional registered identity, `DRACFUN_ITEM_CONVERTER`
+- Total confirmed DracFun 2.0.10 registered identity surface: **134 IDs**
 
 ## Legacy configuration surface
 
@@ -44,6 +46,24 @@ The old binary exposes systems for:
 
 These systems will be restored independently so a failure in one subsystem does not prevent the rest of the addon from enabling.
 
+## Identity audit details
+
+Not every Java field name in the old binary is the actual persisted Slimefun ID. Two generated families matter for migration:
+
+- Module field names such as `DRACFUN_BASIC_AOE_MODULE` generate the runtime ID `DRACFUN_AOE_BASIC_MODULE`.
+- Staff fields such as `DRACFUN_DRACONIC_STAFF` generate `DRACFUN_DRACONIC_STAFF_OF_POWER`.
+- The old `ENERGY` module field names are generated with the module key `POWER`, e.g. `DRACFUN_POWER_WYVERN_MODULE`.
+
+The verified runtime forms are recorded in `LegacyIdentityCatalog`, rather than blindly reusing Java field names.
+
+DracFun 2.0.10's Item Converter also recognizes three older armor IDs from pre-2.0.10 data:
+
+- `DRACFUN_WYVERN_CHESTPLATE`
+- `DRACFUN_DRACONIC_CHESTPLATE`
+- `DRACFUN_CHAOTIC_CHESTPLATE`
+
+Those are tracked separately as migration aliases. The 2.0.10 registered armor identities are `DRACFUN_WYVERN_ARMOR`, `DRACFUN_DRACONIC_ARMOR`, and `DRACFUN_CHAOTIC_ARMOR`.
+
 ## Confirmed modern compatibility breakpoints
 
 ### Bukkit attribute names
@@ -71,11 +91,21 @@ The old binary references `me.mrCookieSlime.Slimefun.api.BlockStorage`. Slimefun
 
 The old JAR shades its own metrics classes. SF_DracFun2 intentionally omits that copied telemetry implementation. This avoids another runtime dependency/conflict surface and keeps the clean-room artifact limited to new project code.
 
+## Compatibility behavior during restoration
+
+Until a legacy ID has a functional clean-room implementation, SF_DracFun2 may register that ID as a hidden, recipe-less, non-placeable placeholder. This has three goals:
+
+1. allow Slimefun Legacy to recognize existing item metadata instead of treating the ID as unknown;
+2. prevent players from crafting or placing incomplete implementations;
+3. allow the placeholder to disappear automatically once a functional item has already claimed that ID.
+
+The placeholder layer is controlled by `compatibility.preserve-legacy-ids` and does not contain original DracFun assets.
+
 ## Compatibility identities
 
 Existing-world compatibility may require preservation of observable identifiers such as:
 
-- `DRACFUN_*` Slimefun item IDs
+- verified `DRACFUN_*` Slimefun item IDs
 - `DRACFUN_*` persistent-data keys
 - machine/block identities stored by Slimefun
 - the two legacy config options above
