@@ -4,6 +4,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCoreMachine;
@@ -20,27 +21,20 @@ public final class DracFunEnergyCoreRegistry {
     private DracFunEnergyCoreRegistry() {}
 
     /**
-     * Registers the three portable Energy Core material identities.
-     *
-     * <p>These are shared prerequisites for Fusion Crafting and the Energy Core
-     * multiblocks, so this method is intentionally independent from the
-     * {@code features.energy-core} toggle.</p>
+     * Registers the portable Energy Core material identities needed by Fusion and
+     * multiblock progression. Draconic/Wyvern cores are ensured here as shared
+     * prerequisites so Energy Core can be enabled without requiring Fusion startup.
      */
     public static int registerEnergyMaterials(SFDracFun2 addon, boolean hardMode) {
         ItemGroup materials = DracFunItemGroups.materials(addon);
+        int registered = registerBaseCores(addon, materials, hardMode);
+
         ItemStack draconium = required(hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
-        ItemStack awakened = required(hardMode ? "DRACFUN_AWAKENED_DRACONIUM_BLOCK" : "DRACFUN_AWAKENED_DRACONIUM_INGOT");
         ItemStack draconicCore = required("DRACFUN_DRACONIC_CORE");
         ItemStack wyvernCore = required("DRACFUN_WYVERN_CORE");
 
         SlimefunItemStack wyvernEnergyCore = stack(
                 "DRACFUN_WYVERN_ENERGY_CORE", Material.HEART_OF_THE_SEA, "&dWyvern Energy Core");
-        SlimefunItemStack draconicEnergyCore = stack(
-                "DRACFUN_DRACONIC_ENERGY_CORE", Material.ECHO_SHARD, "&5Draconic Energy Core");
-        SlimefunItemStack chaoticEnergyCore = stack(
-                "DRACFUN_CHAOTIC_ENERGY_CORE", Material.NETHER_STAR, "&5Chaotic Energy Core");
-
-        int registered = 0;
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -51,23 +45,33 @@ public final class DracFunEnergyCoreRegistry {
                         new ItemStack(Material.REDSTONE_BLOCK), draconicCore, new ItemStack(Material.REDSTONE_BLOCK),
                         draconium, new ItemStack(Material.REDSTONE_BLOCK), draconium));
 
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                draconicEnergyCore,
-                RecipeType.ENHANCED_CRAFTING_TABLE,
-                recipe(
-                        awakened, wyvernEnergyCore, awakened,
-                        wyvernEnergyCore, wyvernCore, wyvernEnergyCore,
-                        awakened, wyvernEnergyCore, awakened));
+        String awakenedId = hardMode ? "DRACFUN_AWAKENED_DRACONIUM_BLOCK" : "DRACFUN_AWAKENED_DRACONIUM_INGOT";
+        SlimefunItem awakenedItem = SlimefunItem.getById(awakenedId);
+        if (awakenedItem != null) {
+            ItemStack awakened = awakenedItem.getItem().clone();
+            SlimefunItemStack draconicEnergyCore = stack(
+                    "DRACFUN_DRACONIC_ENERGY_CORE", Material.ECHO_SHARD, "&5Draconic Energy Core");
+            SlimefunItemStack chaoticEnergyCore = stack(
+                    "DRACFUN_CHAOTIC_ENERGY_CORE", Material.NETHER_STAR, "&5Chaotic Energy Core");
 
-        // The Chaotic Energy Core is produced by Draconic-tier Fusion Crafting.
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                chaoticEnergyCore,
-                RecipeType.NULL,
-                new ItemStack[9]);
+            registered += registerUnplaceable(
+                    addon,
+                    materials,
+                    draconicEnergyCore,
+                    RecipeType.ENHANCED_CRAFTING_TABLE,
+                    recipe(
+                            awakened, wyvernEnergyCore, awakened,
+                            wyvernEnergyCore, wyvernCore, wyvernEnergyCore,
+                            awakened, wyvernEnergyCore, awakened));
+
+            // The Chaotic Energy Core is produced by Draconic-tier Fusion Crafting.
+            registered += registerUnplaceable(
+                    addon,
+                    materials,
+                    chaoticEnergyCore,
+                    RecipeType.NULL,
+                    new ItemStack[9]);
+        }
 
         return registered;
     }
@@ -159,6 +163,38 @@ public final class DracFunEnergyCoreRegistry {
                 EnergyCoreTier.TIER_3,
                 surround(new ItemStack(Material.REDSTONE_BLOCK), activator2));
 
+        return registered;
+    }
+
+    private static int registerBaseCores(SFDracFun2 addon, ItemGroup materials, boolean hardMode) {
+        ItemStack draconium = required(hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
+        ItemStack gold = hardMode ? SlimefunItems.GOLD_24K_BLOCK : SlimefunItems.GOLD_24K;
+        ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
+
+        SlimefunItemStack draconicCore = stack(
+                "DRACFUN_DRACONIC_CORE", Material.ECHO_SHARD, "&5Draconic Core");
+        SlimefunItemStack wyvernCore = stack(
+                "DRACFUN_WYVERN_CORE", Material.AMETHYST_SHARD, "&dWyvern Core");
+
+        int registered = 0;
+        registered += registerUnplaceable(
+                addon,
+                materials,
+                draconicCore,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                recipe(
+                        gold, draconium, gold,
+                        draconium, diamond, draconium,
+                        gold, draconium, gold));
+        registered += registerUnplaceable(
+                addon,
+                materials,
+                wyvernCore,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                recipe(
+                        draconium, draconicCore, draconium,
+                        draconicCore, new ItemStack(Material.NETHER_STAR), draconicCore,
+                        draconium, draconicCore, draconium));
         return registered;
     }
 
