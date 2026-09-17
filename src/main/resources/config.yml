@@ -11,9 +11,11 @@ compatibility:
   preserve-legacy-ids: true
 
 features:
-  # Systems are enabled as their clean-room implementations are completed.
-  materials: false
-  end-resource: false
+  # Completed clean-room systems are enabled by default.
+  materials: true
+  end-resource: true
+
+  # Remaining systems stay disabled until their independent implementations are complete.
   energy-infuser: false
   item-converter: false
   fusion-crafting: false
