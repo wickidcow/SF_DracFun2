@@ -1,0 +1,110 @@
+name: Build SF DracFun2
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sf-dracfun2-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: temurin
+
+      - name: Setup Gradle 9.4.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.4.1'
+
+      - name: Download Slimefun Legacy 4.1.51 API target
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p libs
+          curl -fL --retry 3 \
+            -o libs/Slimefun-Legacy.jar \
+            https://github.com/wickidcow/Slimefun-Legacy/releases/download/v4.1.51/Slimefun-Legacy4.1.51.jar
+          test -s libs/Slimefun-Legacy.jar
+
+      - name: Verify clean-room source boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '^package[[:space:]]+me\.phoenix\.dracfun|me/phoenix/dracfun' src; then
+            echo 'Original DracFun package namespace must not be used by this clean-room implementation.' >&2
+            exit 1
+          fi
+          if grep -R -nE 'me\.phoenix\.metrics|org\.bstats' src build.gradle.kts; then
+            echo 'Original telemetry/bStats implementation must not be copied into the project.' >&2
+            exit 1
+          fi
+
+      - name: Verify Paper 1.21.11 baseline
+        run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
+
+      - name: Verify Paper 26.2 compilation
+        run: gradle clean compileJava -Pplatform=paper -PplatformVersion=26.2.build.+ -PreleaseJvm=25 --stacktrace --no-daemon
+
+      - name: Verify Purpur 26.2 compilation
+        run: gradle clean compileJava -Pplatform=purpur -PplatformVersion=26.2.build.+ -PreleaseJvm=25 --stacktrace --no-daemon
+
+      - name: Verify Paper 26.3 compilation
+        run: gradle clean compileJava -Pplatform=paper -PplatformVersion=26.3.build.+ -PreleaseJvm=25 --stacktrace --no-daemon
+
+      - name: Verify Purpur 26.3 when published
+        shell: bash
+        run: |
+          set -euo pipefail
+          METADATA_URL="https://repo.purpurmc.org/snapshots/org/purpurmc/purpur/purpur-api/maven-metadata.xml"
+          if curl -fsSL "$METADATA_URL" | grep -q '<version>26\.3\.build\.'; then
+            gradle clean compileJava -Pplatform=purpur -PplatformVersion=26.3.build.+ -PreleaseJvm=25 --stacktrace --no-daemon
+          else
+            echo 'Purpur 26.3 API not published yet; skipping until available.'
+          fi
+
+      - name: Verify Folia 26.2 compilation
+        run: gradle clean compileJava -Pplatform=folia -PplatformVersion=26.2.build.+ -PreleaseJvm=25 --stacktrace --no-daemon
+
+      - name: Build universal release JAR
+        run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
+
+      - name: Verify release artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR=build/libs/SF_DracFun20.1.0.jar
+          test -s "$JAR"
+          unzip -p "$JAR" plugin.yml > build/plugin.yml
+          grep -Eq '^api-version:.*1\.21\.11' build/plugin.yml
+          grep -Eq '^folia-supported:[[:space:]]*true' build/plugin.yml
+          if unzip -l "$JAR" | grep -Eq 'me/phoenix/(dracfun|metrics)/'; then
+            echo 'Original DracFun implementation classes leaked into the clean-room artifact.' >&2
+            exit 1
+          fi
+          javap -verbose -classpath "$JAR" io.github.wickidcow.sfdracfun2.SFDracFun2 | grep -Fq 'major version: 65'
+          sha256sum "$JAR"
+
+      - name: Upload raw JAR artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: SF_DracFun20.1.0.jar
+          path: build/libs/SF_DracFun20.1.0.jar
+          archive: false
+          if-no-files-found: error
