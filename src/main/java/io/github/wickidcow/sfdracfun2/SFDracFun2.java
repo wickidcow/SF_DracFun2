@@ -8,6 +8,7 @@ import io.github.wickidcow.sfdracfun2.setup.DracFunFusionComponentRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMachineRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMaterialRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunModularRegistry;
+import io.github.wickidcow.sfdracfun2.setup.DracFunReactorRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -61,6 +62,7 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
 
         boolean fusionCrafting = getConfig().getBoolean("features.fusion-crafting", false);
         boolean energyCore = getConfig().getBoolean("features.energy-core", false);
+        boolean reactor = getConfig().getBoolean("features.reactor", false);
         boolean hardMode = getConfig().getBoolean("options.hard-mode", true);
         boolean useDragonEgg = getConfig().getBoolean("options.use-dragon-egg", true);
 
@@ -93,6 +95,37 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
                     getLogger().info("Registered " + multiblocks + " Energy Core multiblock identities.");
                 } catch (IllegalStateException exception) {
                     getLogger().severe("Energy Core prerequisites were unavailable; Energy Core registration was skipped: "
+                            + exception.getMessage());
+                }
+            }
+        }
+
+        if (reactor) {
+            if (!materialsEnabled) {
+                getLogger().warning("Draconic Reactor requires features.materials=true; Reactor registration was skipped.");
+            } else {
+                try {
+                    int sharedFusionComponents =
+                            DracFunFusionComponentRegistry.register(this, hardMode, useDragonEgg);
+                    int energyMaterials =
+                            DracFunEnergyCoreRegistry.registerEnergyMaterials(this, hardMode);
+                    int reactorItems = DracFunReactorRegistry.register(this, hardMode);
+
+                    getLogger().info("Registered " + sharedFusionComponents
+                            + " shared Fusion/material identities required by the Reactor.");
+                    getLogger().info("Registered " + energyMaterials
+                            + " shared Energy Core identities required by the Reactor.");
+                    getLogger().info("Registered " + reactorItems
+                            + " clean-room Draconic Reactor identities.");
+
+                    if (!fusionCrafting) {
+                        getLogger().warning(
+                                "Draconic Reactor is enabled while Fusion Crafting is disabled. "
+                                        + "Reactor identities are available, but the final Stabilizer, "
+                                        + "Energy Injector and Reactor Core are not survival-craftable.");
+                    }
+                } catch (IllegalStateException exception) {
+                    getLogger().severe("Draconic Reactor prerequisites were unavailable; Reactor registration was skipped: "
                             + exception.getMessage());
                 }
             }
