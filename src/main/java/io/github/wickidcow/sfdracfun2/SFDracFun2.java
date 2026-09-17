@@ -2,6 +2,7 @@ package io.github.wickidcow.sfdracfun2;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
+import io.github.wickidcow.sfdracfun2.setup.DracFunMachineRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMaterialRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunModularRegistry;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -33,9 +34,18 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
             getLogger().info("Registered " + registered + " functional Draconium material identities.");
         }
 
-        if (getConfig().getBoolean("features.modular-gear", false)) {
+        boolean modularGear = getConfig().getBoolean("features.modular-gear", false);
+        if (modularGear) {
             int registered = DracFunModularRegistry.register(this);
             getLogger().info("Registered " + registered + " clean-room modular gear/module identities.");
+        }
+
+        if (getConfig().getBoolean("features.energy-infuser", false)) {
+            if (!modularGear) {
+                getLogger().warning("Energy Infuser is enabled while modular gear is disabled; unsupported items will pass through unchanged.");
+            }
+            int registered = DracFunMachineRegistry.registerEnergyInfuser(this);
+            getLogger().info("Registered " + registered + " clean-room Energy Infuser identity.");
         }
 
         if (getConfig().getBoolean("compatibility.preserve-legacy-ids", true)) {
