@@ -93,6 +93,8 @@ public final class DracFunModularRegistry {
                 default -> Color.WHITE;
             });
             addArmorAttributes(addon, meta, tier);
+        } else {
+            addToolAttributes(addon, meta, type, tier);
         }
 
         base.setItemMeta(meta);
@@ -105,14 +107,17 @@ public final class DracFunModularRegistry {
         return 1;
     }
 
-    private static void addArmorAttributes(SFDracFun2 addon, ItemMeta meta, int tier) {
-        double modifier = switch (tier) {
+    private static double tierModifier(int tier) {
+        return switch (tier) {
             case 1 -> 1.25D;
             case 2 -> 1.75D;
             case 3 -> 2.50D;
             default -> throw new IllegalArgumentException("Gear tier must be 1-3, got " + tier);
         };
+    }
 
+    private static void addArmorAttributes(SFDracFun2 addon, ItemMeta meta, int tier) {
+        double modifier = tierModifier(tier);
         AttributeModifier armor = new AttributeModifier(
                 new NamespacedKey(addon, "modular_armor_" + tier),
                 20.0D * modifier,
@@ -126,6 +131,53 @@ public final class DracFunModularRegistry {
 
         meta.addAttributeModifier(Attribute.ARMOR, armor);
         meta.addAttributeModifier(Attribute.ARMOR_TOUGHNESS, toughness);
+    }
+
+    private static void addToolAttributes(SFDracFun2 addon, ItemMeta meta, GearType type, int tier) {
+        double baseSpeed;
+        double baseDamage;
+        switch (type) {
+            case AXE -> {
+                baseSpeed = 1.0D;
+                baseDamage = 9.0D;
+            }
+            case HOE -> {
+                baseSpeed = 4.0D;
+                baseDamage = 1.0D;
+            }
+            case PICKAXE, SHOVEL, TOOL -> {
+                baseSpeed = 1.1D;
+                baseDamage = 5.25D;
+            }
+            case SWORD -> {
+                baseSpeed = 1.6D;
+                baseDamage = 7.0D;
+            }
+            case STAFF -> {
+                baseSpeed = 0.5D;
+                baseDamage = 9.0D;
+            }
+            default -> {
+                return;
+            }
+        }
+
+        double modifier = tierModifier(tier);
+        String suffix = type.name().toLowerCase() + '_' + tier;
+        meta.addAttributeModifier(
+                Attribute.ATTACK_SPEED,
+                new AttributeModifier(
+                        new NamespacedKey(addon, "modular_attack_speed_" + suffix),
+                        baseSpeed * modifier,
+                        AttributeModifier.Operation.ADD_NUMBER,
+                        EquipmentSlotGroup.MAINHAND));
+        meta.addAttributeModifier(
+                Attribute.ATTACK_DAMAGE,
+                new AttributeModifier(
+                        new NamespacedKey(addon, "modular_attack_damage_" + suffix),
+                        baseDamage * modifier,
+                        AttributeModifier.Operation.ADD_NUMBER,
+                        EquipmentSlotGroup.MAINHAND));
     }
 
     private static int registerModule(
