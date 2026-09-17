@@ -8,6 +8,7 @@ import io.github.wickidcow.sfdracfun2.modular.GearType;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
 import io.github.wickidcow.sfdracfun2.modular.ModularGearItem;
 import io.github.wickidcow.sfdracfun2.modular.ModuleFamily;
+import io.github.wickidcow.sfdracfun2.modular.ModuleIntegratorMachine;
 import io.github.wickidcow.sfdracfun2.modular.ModuleItem;
 import io.github.wickidcow.sfdracfun2.modular.ModuleTier;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public final class DracFunModularRegistry {
             }
         }
 
+        registered += registerIntegrator(addon, group);
         return registered;
     }
 
@@ -111,6 +113,22 @@ public final class DracFunModularRegistry {
                 "&7Target: &f" + family.targetType().legacyName(),
                 "&8DracFun Reborn compatibility module");
         new ModuleItem(group, stack, family, tier).register(addon);
+        return 1;
+    }
+
+    private static int registerIntegrator(SFDracFun2 addon, ItemGroup group) {
+        String id = "DRACFUN_MODULE_INTEGRATER";
+        if (SlimefunItem.getById(id) != null) {
+            return 0;
+        }
+
+        SlimefunItemStack stack = new SlimefunItemStack(
+                id,
+                Material.SMITHING_TABLE,
+                "&dModule Integrator",
+                "&7Installs compatible modules into DracFun modular gear.",
+                "&7Can also remove all installed modules safely.");
+        new ModuleIntegratorMachine(group, stack).register(addon);
         return 1;
     }
 
