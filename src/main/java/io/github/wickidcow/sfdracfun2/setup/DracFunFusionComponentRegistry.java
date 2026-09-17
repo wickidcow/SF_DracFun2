@@ -26,8 +26,8 @@ public final class DracFunFusionComponentRegistry {
         ItemGroup materials = DracFunItemGroups.materials(addon);
         ItemGroup machines = DracFunItemGroups.machines(addon);
 
-        SlimefunItemStack draconiumIngot = required("DRACFUN_DRACONIUM_INGOT");
-        SlimefunItemStack draconiumBlock = required("DRACFUN_DRACONIUM_BLOCK");
+        ItemStack draconiumIngot = required("DRACFUN_DRACONIUM_INGOT");
+        ItemStack draconiumBlock = required("DRACFUN_DRACONIUM_BLOCK");
         ItemStack draconium = hardMode ? draconiumBlock : draconiumIngot;
         ItemStack gold = hardMode ? SlimefunItems.GOLD_24K_BLOCK : SlimefunItems.GOLD_24K;
         ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
@@ -158,12 +158,12 @@ public final class DracFunFusionComponentRegistry {
         return registered;
     }
 
-    private static SlimefunItemStack required(String id) {
+    private static ItemStack required(String id) {
         SlimefunItem item = SlimefunItem.getById(id);
         if (item == null) {
             throw new IllegalStateException("Required DracFun progression item is not registered: " + id);
         }
-        return new SlimefunItemStack(item.getItem());
+        return item.getItem().clone();
     }
 
     private static int registerUnplaceable(
