@@ -1,0 +1,178 @@
+package io.github.wickidcow.sfdracfun2.setup;
+
+import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
+import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.reactor.ReactorMachine;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+
+/**
+ * Restores the observable DracFun 2.0.10 Draconic Reactor crafting progression.
+ *
+ * <p>Fusion-produced components are registered as real identities with NULL
+ * recipes here; their actual acquisition recipes remain in FusionRecipeCatalog.</p>
+ */
+public final class DracFunReactorRegistry {
+
+    private DracFunReactorRegistry() {}
+
+    public static int register(SFDracFun2 addon, boolean hardMode) {
+        ItemGroup machines = DracFunItemGroups.machines(addon);
+
+        ItemStack draconium = required(hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
+        ItemStack awakened =
+                required(hardMode ? "DRACFUN_AWAKENED_DRACONIUM_BLOCK" : "DRACFUN_AWAKENED_DRACONIUM_INGOT");
+        ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
+        ItemStack iron = new ItemStack(hardMode ? Material.IRON_BLOCK : Material.IRON_INGOT);
+        ItemStack gold = hardMode ? SlimefunItems.GOLD_24K_BLOCK : SlimefunItems.GOLD_24K;
+
+        ItemStack draconicCore = required("DRACFUN_DRACONIC_CORE");
+        ItemStack wyvernCore = required("DRACFUN_WYVERN_CORE");
+
+        SlimefunItemStack innerRotor = stack(
+                "DRACFUN_REACTOR_STABILIZER_INNER_ROTOR",
+                Material.COPPER_INGOT,
+                "&5Reactor Stabilizer Inner Rotor");
+        SlimefunItemStack outerRotor = stack(
+                "DRACFUN_REACTOR_STABILIZER_OUTER_ROTOR",
+                Material.IRON_INGOT,
+                "&5Reactor Stabilizer Outer Rotor");
+        SlimefunItemStack rotorAssembly = stack(
+                "DRACFUN_REACTOR_STABILIZER_ROTOR_ASSEMBLY",
+                Material.PISTON,
+                "&5Reactor Stabilizer Rotor Assembly");
+        SlimefunItemStack focusRing = stack(
+                "DRACFUN_REACTOR_STABILIZER_FOCUS_RING",
+                Material.ENDER_EYE,
+                "&5Reactor Stabilizer Focus Ring");
+        SlimefunItemStack stabilizerFrame = stack(
+                "DRACFUN_REACTOR_STABILIZER_FRAME",
+                Material.IRON_BLOCK,
+                "&5Reactor Stabilizer Frame");
+
+        SlimefunItemStack energyInjector = stack(
+                "DRACFUN_REACTOR_ENERGY_INJECTOR",
+                Material.LIGHTNING_ROD,
+                "&5Reactor Energy Injector");
+        SlimefunItemStack stabilizer = stack(
+                "DRACFUN_REACTOR_STABILIZER",
+                Material.BEACON,
+                "&5Reactor Stabilizer");
+        SlimefunItemStack reactorCore = stack(
+                "DRACFUN_DRACONIC_REACTOR_CORE",
+                Material.RESPAWN_ANCHOR,
+                "&5Draconic Reactor Core");
+        SlimefunItemStack reactor = stack(
+                "DRACFUN_DRACONIC_REACTOR",
+                Material.CRYING_OBSIDIAN,
+                "&5Draconic Reactor",
+                "&7Dangerous high-output reactor.",
+                "&7Uses Awakened Draconium Blocks as fuel.");
+
+        int registered = 0;
+
+        registered += registerUnplaceable(
+                addon,
+                machines,
+                innerRotor,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                recipe(
+                        null, null, null,
+                        awakened, awakened, awakened,
+                        draconicCore, draconium, draconium));
+
+        registered += registerUnplaceable(
+                addon,
+                machines,
+                outerRotor,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                recipe(
+                        null, null, null,
+                        diamond, diamond, diamond,
+                        draconicCore, draconium, draconium));
+
+        registered += registerUnplaceable(
+                addon,
+                machines,
+                rotorAssembly,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                recipe(
+                        null, innerRotor, outerRotor,
+                        wyvernCore, draconium, draconium,
+                        null, innerRotor, outerRotor));
+
+        registered += registerUnplaceable(
+                addon,
+                machines,
+                focusRing,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                recipe(
+                        gold, diamond, gold,
+                        diamond, wyvernCore, diamond,
+                        gold, diamond, gold));
+
+        registered += registerUnplaceable(
+                addon,
+                machines,
+                stabilizerFrame,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                recipe(
+                        iron, iron, iron,
+                        wyvernCore, awakened, null,
+                        iron, iron, iron));
+
+        // These three components are produced by Chaotic-tier Fusion Crafting.
+        registered += registerUnplaceable(addon, machines, energyInjector, RecipeType.NULL, new ItemStack[9]);
+        registered += registerUnplaceable(addon, machines, stabilizer, RecipeType.NULL, new ItemStack[9]);
+        registered += registerUnplaceable(addon, machines, reactorCore, RecipeType.NULL, new ItemStack[9]);
+
+        if (SlimefunItem.getById(reactor.getItemId()) == null) {
+            ItemStack[] reactorRecipe = recipe(
+                    null, stabilizer, null,
+                    stabilizer, reactorCore, stabilizer,
+                    null, stabilizer, energyInjector);
+            new ReactorMachine(addon, machines, reactor, reactorRecipe).register(addon);
+            registered++;
+        }
+
+        return registered;
+    }
+
+    private static int registerUnplaceable(
+            SFDracFun2 addon,
+            ItemGroup group,
+            SlimefunItemStack stack,
+            RecipeType recipeType,
+            ItemStack[] recipe) {
+        if (SlimefunItem.getById(stack.getItemId()) != null) {
+            return 0;
+        }
+
+        new UnplaceableBlock(group, stack, recipeType, recipe).register(addon);
+        return 1;
+    }
+
+    private static ItemStack required(String id) {
+        SlimefunItem item = SlimefunItem.getById(id);
+        if (item == null) {
+            throw new IllegalStateException("Required Reactor prerequisite is not registered: " + id);
+        }
+        return item.getItem().clone();
+    }
+
+    private static SlimefunItemStack stack(String id, Material material, String name, String... lore) {
+        return new SlimefunItemStack(id, material, name, lore);
+    }
+
+    private static ItemStack[] recipe(
+            ItemStack a, ItemStack b, ItemStack c,
+            ItemStack d, ItemStack e, ItemStack f,
+            ItemStack g, ItemStack h, ItemStack i) {
+        return new ItemStack[] {a, b, c, d, e, f, g, h, i};
+    }
+}
