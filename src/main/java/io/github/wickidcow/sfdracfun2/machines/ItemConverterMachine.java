@@ -7,7 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import io.github.wickidcow.sfdracfun2.compat.LegacyPlaceholderItem;
+import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
 import io.github.wickidcow.sfdracfun2.compat.ProtectionCompat;
 import java.util.Map;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
@@ -130,7 +130,7 @@ public final class ItemConverterMachine extends SlimefunItem {
         }
 
         SlimefunItem target = SlimefunItem.getById(targetId);
-        if (target == null || target instanceof LegacyPlaceholderItem) {
+        if (target == null || LegacyCompatibilityRegistry.isPlaceholder(target)) {
             player.sendMessage(ChatColor.RED + "The clean-room replacement for " + targetId + " is not implemented yet.");
             return;
         }
