@@ -37,7 +37,7 @@ dependencies {
 }
 
 group = "io.github.wickidcow"
-version = "0.1.0"
+version = "2.0.1"
 description = "Clean-room DracFun compatibility addon for Slimefun Legacy"
 
 java {
@@ -62,7 +62,7 @@ tasks.withType<AbstractArchiveTask>().configureEach {
 
 tasks.shadowJar {
     archiveClassifier.set("")
-    archiveFileName.set("SF_DracFun2${project.version}.jar")
+    archiveFileName.set("SFL_DracFun-Reborn${project.version}.jar")
 }
 
 tasks.build {
