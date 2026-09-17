@@ -48,4 +48,9 @@ public final class LegacyCompatibilityRegistry {
 
         return registered;
     }
+
+    /** Returns whether an identity is still backed only by our inert compatibility placeholder. */
+    public static boolean isPlaceholder(SlimefunItem item) {
+        return item instanceof LegacyPlaceholderItem;
+    }
 }
