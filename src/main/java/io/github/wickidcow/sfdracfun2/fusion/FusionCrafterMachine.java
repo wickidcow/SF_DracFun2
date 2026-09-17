@@ -53,8 +53,9 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
             ItemGroup group,
             SlimefunItemStack item,
             FusionTier tier,
-            List<FusionRecipeSpec> recipes) {
-        super(group, item, RecipeType.NULL, new ItemStack[9]);
+            List<FusionRecipeSpec> recipes,
+            ItemStack[] craftingRecipe) {
+        super(group, item, RecipeType.ANCIENT_ALTAR, craftingRecipe);
         this.tier = tier;
         this.recipes = List.copyOf(recipes);
 
