@@ -24,6 +24,20 @@ reactor:
   # When false, a failed reactor stays in STATE_BEYOND_HOPE instead of exploding.
   meltdown-explosion-enabled: true
 
+guardian:
+  # Preserve the old caged healing-crystal mechanic without overwriting terrain.
+  crystal-cages-enabled: true
+
+  # The original battle killed nearby unarmored players when the Guardian died.
+  punish-unarmored: true
+
+  # Old laser pulses reached 5,000 damage at the end of the attack sequence.
+  laser-damage-cap: 5000.0
+
+  # Reborn removes summoned Guardian Withers after this many ticks to prevent
+  # abandoned minions from permanently accumulating in The End.
+  wither-minion-lifetime-ticks: 200
+
 features:
   # Completed clean-room systems are enabled by default.
   materials: true
