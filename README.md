@@ -4,6 +4,14 @@ Clean-room Slimefun Legacy reimplementation of the gameplay concepts and world-c
 
 > **Important:** This repository does not contain Phoenix's original source code, decompiled source, or original bundled assets. It is an independent implementation maintained for modern Slimefun Legacy servers. Phoenix is credited as the author of the original DracFun project; Phoenix has not authored or endorsed this repository.
 
+## Current project version
+
+**DracFun Reborn 2.0.1**
+
+Final release artifact:
+
+`SFL_DracFun-Reborn2.0.1.jar`
+
 ## Targets
 
 - Slimefun Legacy 4.1.51+
@@ -34,9 +42,9 @@ Each major system is kept isolated so an unavailable or incompatible subsystem c
 
 ## Build output
 
-Release artifact naming:
+Release artifact naming is fixed to:
 
-`SF_DracFun2<version>.jar`
+`SFL_DracFun-Reborn2.0.1.jar`
 
 ## Credits
 
