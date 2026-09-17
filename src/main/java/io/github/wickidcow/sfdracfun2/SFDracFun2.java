@@ -51,6 +51,11 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
             getLogger().info("Registered " + registered + " clean-room Energy Infuser identity.");
         }
 
+        if (getConfig().getBoolean("features.item-converter", false)) {
+            int registered = DracFunMachineRegistry.registerItemConverter(this);
+            getLogger().info("Registered " + registered + " clean-room Item Converter identity.");
+        }
+
         if (getConfig().getBoolean("compatibility.preserve-legacy-ids", true)) {
             int registered = LegacyCompatibilityRegistry.registerMissingIdentities(this);
             getLogger().info("Registered " + registered + " hidden legacy compatibility identities.");
