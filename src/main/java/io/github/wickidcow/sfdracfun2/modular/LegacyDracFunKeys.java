@@ -16,6 +16,9 @@ public final class LegacyDracFunKeys {
 
     public static final NamespacedKey ENERGY = key("DRACFUN_ENERGY");
     public static final NamespacedKey CAPACITY = key("DRACFUN_CAPACITY");
+    public static final NamespacedKey FUSION_POWER = key("DRACFUN_FUSION_POWER");
+    public static final NamespacedKey SHIELD = key("DRACFUN_SHIELD");
+    public static final NamespacedKey COOLDOWN = key("DRACFUN_COOLDOWN");
 
     private LegacyDracFunKeys() {}
 
