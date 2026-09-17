@@ -15,7 +15,6 @@ import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -66,9 +65,12 @@ public final class DracFunModularRegistry {
         ItemMeta meta = base.getItemMeta();
         meta.setDisplayName(colorForTier(tier) + tierName(tier) + ' ' + displayName(type));
         meta.setUnbreakable(true);
-        meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
         meta.getPersistentDataContainer().set(LegacyDracFunKeys.ENERGY, PersistentDataType.INTEGER, 0);
         meta.getPersistentDataContainer().set(LegacyDracFunKeys.CAPACITY, PersistentDataType.INTEGER, 0);
+        meta.getPersistentDataContainer().set(
+                LegacyDracFunKeys.FUSION_POWER,
+                PersistentDataType.INTEGER,
+                fusionPowerForTier(tier));
 
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY + "Energy: 0 / 0");
@@ -110,6 +112,15 @@ public final class DracFunModularRegistry {
                 "&8DracFun Reborn compatibility module");
         new ModuleItem(group, stack, family, tier).register(addon);
         return 1;
+    }
+
+    private static int fusionPowerForTier(int tier) {
+        return switch (tier) {
+            case 1 -> 8_000_000;
+            case 2 -> 32_000_000;
+            case 3 -> 128_000_000;
+            default -> throw new IllegalArgumentException("Gear tier must be 1-3, got " + tier);
+        };
     }
 
     private static Material materialFor(GearType type) {
