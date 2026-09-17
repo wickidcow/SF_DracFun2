@@ -1,0 +1,23 @@
+options:
+  # Legacy DracFun setting retained for migration compatibility.
+  hard-mode: true
+
+  # Legacy DracFun setting retained for migration compatibility.
+  # true = use the vanilla Dragon Egg where the restored recipe/system allows it.
+  use-dragon-egg: true
+
+compatibility:
+  # Keep observable DRACFUN_* identities when restored systems register items/data.
+  preserve-legacy-ids: true
+
+features:
+  # Systems are enabled as their clean-room implementations are completed.
+  materials: false
+  end-resource: false
+  energy-infuser: false
+  item-converter: false
+  fusion-crafting: false
+  modular-gear: false
+  energy-core: false
+  reactor: false
+  chaos-guardian: false
