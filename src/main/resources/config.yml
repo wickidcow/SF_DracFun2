@@ -10,6 +10,20 @@ compatibility:
   # Keep observable DRACFUN_* identities when restored systems register items/data.
   preserve-legacy-ids: true
 
+reactor:
+  # DracFun 2.0.10 used 0.25 by default for meltdown scaling.
+  explosion-multiplier: 0.25
+
+  # Reborn caps extreme fuel-scaled explosions to protect server stability.
+  explosion-power-cap: 64.0
+
+  # Legacy active-reactor break explosion was power 4 (valid range 0-10).
+  # Set to 0 to disable the break explosion while testing.
+  break-explosion-power: 4.0
+
+  # When false, a failed reactor stays in STATE_BEYOND_HOPE instead of exploding.
+  meltdown-explosion-enabled: true
+
 features:
   # Completed clean-room systems are enabled by default.
   materials: true
