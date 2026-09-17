@@ -2,6 +2,7 @@ package io.github.wickidcow.sfdracfun2;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
+import io.github.wickidcow.sfdracfun2.modular.CapacitorService;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMachineRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunMaterialRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunModularRegistry;
@@ -37,7 +38,9 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
         boolean modularGear = getConfig().getBoolean("features.modular-gear", false);
         if (modularGear) {
             int registered = DracFunModularRegistry.register(this);
+            new CapacitorService(this);
             getLogger().info("Registered " + registered + " clean-room modular gear/module identities.");
+            getLogger().info("Started player-owned modular capacitor charging service.");
         }
 
         if (getConfig().getBoolean("features.energy-infuser", false)) {
