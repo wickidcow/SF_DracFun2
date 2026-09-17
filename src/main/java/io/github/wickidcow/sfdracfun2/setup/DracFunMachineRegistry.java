@@ -12,6 +12,7 @@ import io.github.wickidcow.sfdracfun2.machines.EnergyInfuserMachine;
 import io.github.wickidcow.sfdracfun2.machines.ItemConverterMachine;
 import java.util.List;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 /** Registers completed clean-room DracFun machine implementations. */
 public final class DracFunMachineRegistry {
@@ -55,12 +56,37 @@ public final class DracFunMachineRegistry {
     public static int registerFusionCrafters(SFDracFun2 addon, boolean hardMode, boolean useDragonEgg) {
         ItemGroup group = DracFunItemGroups.machines(addon);
         List<FusionRecipeSpec> recipes = FusionRecipeCatalog.create(hardMode, useDragonEgg);
+        ItemStack fusionCore = requiredItem("DRACFUN_FUSION_CRAFTING_CORE");
         int registered = 0;
 
-        registered += registerFusionCrafter(addon, group, recipes, FusionTier.BASIC, Material.CRAFTING_TABLE);
-        registered += registerFusionCrafter(addon, group, recipes, FusionTier.WYVERN, Material.SMITHING_TABLE);
-        registered += registerFusionCrafter(addon, group, recipes, FusionTier.DRACONIC, Material.RESPAWN_ANCHOR);
-        registered += registerFusionCrafter(addon, group, recipes, FusionTier.CHAOTIC, Material.CRYING_OBSIDIAN);
+        registered += registerFusionCrafter(
+                addon,
+                group,
+                recipes,
+                FusionTier.BASIC,
+                Material.CRAFTING_TABLE,
+                altarRecipe(requiredItem("DRACFUN_BASIC_FUSION_CRAFTING_INJECTOR"), fusionCore));
+        registered += registerFusionCrafter(
+                addon,
+                group,
+                recipes,
+                FusionTier.WYVERN,
+                Material.SMITHING_TABLE,
+                altarRecipe(requiredItem("DRACFUN_WYVERN_FUSION_CRAFTING_INJECTOR"), fusionCore));
+        registered += registerFusionCrafter(
+                addon,
+                group,
+                recipes,
+                FusionTier.DRACONIC,
+                Material.RESPAWN_ANCHOR,
+                altarRecipe(requiredItem("DRACFUN_DRACONIC_FUSION_CRAFTING_INJECTOR"), fusionCore));
+        registered += registerFusionCrafter(
+                addon,
+                group,
+                recipes,
+                FusionTier.CHAOTIC,
+                Material.CRYING_OBSIDIAN,
+                altarRecipe(requiredItem("DRACFUN_CHAOTIC_FUSION_CRAFTING_INJECTOR"), fusionCore));
         return registered;
     }
 
@@ -69,7 +95,8 @@ public final class DracFunMachineRegistry {
             ItemGroup group,
             List<FusionRecipeSpec> recipes,
             FusionTier tier,
-            Material material) {
+            Material material,
+            ItemStack[] craftingRecipe) {
         if (SlimefunItem.getById(tier.machineId()) != null) {
             return 0;
         }
@@ -81,7 +108,23 @@ public final class DracFunMachineRegistry {
                 "&7Clean-room Fusion Crafting machine.",
                 "&7Capacity: &f" + tier.capacity() + " J",
                 "&7Fusion duration: &f5 seconds");
-        new FusionCrafterMachine(group, stack, tier, recipes).register(addon);
+        new FusionCrafterMachine(group, stack, tier, recipes, craftingRecipe).register(addon);
         return 1;
+    }
+
+    private static ItemStack requiredItem(String id) {
+        SlimefunItem item = SlimefunItem.getById(id);
+        if (item == null) {
+            throw new IllegalStateException("Required Fusion component is not registered: " + id);
+        }
+        return item.getItem().clone();
+    }
+
+    private static ItemStack[] altarRecipe(ItemStack injector, ItemStack core) {
+        return new ItemStack[] {
+            injector, injector, injector,
+            injector, core, injector,
+            injector, injector, injector
+        };
     }
 }
