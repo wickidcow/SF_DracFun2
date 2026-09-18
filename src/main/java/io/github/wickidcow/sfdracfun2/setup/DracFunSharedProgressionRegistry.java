@@ -7,6 +7,8 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
+import io.github.wickidcow.sfdracfun2.items.DragonHeartMobDrop;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -37,10 +39,10 @@ public final class DracFunSharedProgressionRegistry {
         ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
         ItemStack draconicCore = required("DRACFUN_DRACONIC_CORE");
 
-        SlimefunItemStack wyvernCore = stack(
+        SlimefunItemStack wyvernCore = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_WYVERN_CORE",
                 Material.AMETHYST_SHARD,
-                "&dWyvern Core");
+                "Wyvern Core");
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -52,9 +54,10 @@ public final class DracFunSharedProgressionRegistry {
                         draconium, draconicCore, draconium));
 
         SlimefunItemStack awakenedBlock = fusionOutput(
+                LegacyTheme.ADVANCED_CRAFTING,
                 "DRACFUN_AWAKENED_DRACONIUM_BLOCK",
-                Material.NETHERITE_BLOCK,
-                "&6Awakened Draconium Block",
+                Material.WAXED_COPPER_BLOCK,
+                "Awakened Draconium Block",
                 50_000_000);
         registered += registerSimple(
                 addon,
@@ -63,10 +66,10 @@ public final class DracFunSharedProgressionRegistry {
                 RecipeType.NULL,
                 emptyRecipe());
 
-        SlimefunItemStack awakenedIngot = stack(
+        SlimefunItemStack awakenedIngot = LegacyTheme.ADVANCED_CRAFTING.stack(
                 "DRACFUN_AWAKENED_DRACONIUM_INGOT",
-                Material.NETHERITE_INGOT,
-                "&6Awakened Draconium Ingot");
+                Material.COPPER_INGOT,
+                "Awakened Draconium Ingot");
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -75,10 +78,10 @@ public final class DracFunSharedProgressionRegistry {
                 center(awakenedBlock),
                 awakenedIngot.asQuantity(9));
 
-        SlimefunItemStack awakenedNugget = stack(
+        SlimefunItemStack awakenedNugget = LegacyTheme.ADVANCED_CRAFTING.stack(
                 "DRACFUN_AWAKENED_DRACONIUM_NUGGET",
                 Material.GOLD_NUGGET,
-                "&6Awakened Draconium Nugget");
+                "Awakened Draconium Nugget");
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -88,9 +91,10 @@ public final class DracFunSharedProgressionRegistry {
                 awakenedNugget.asQuantity(9));
 
         SlimefunItemStack awakenedCore = fusionOutput(
+                LegacyTheme.ADVANCED_CRAFTING,
                 "DRACFUN_AWAKENED_CORE",
                 Material.HEART_OF_THE_SEA,
-                "&6Awakened Core",
+                "Awakened Core",
                 1_000_000);
         registered += registerUnplaceable(
                 addon,
@@ -100,9 +104,10 @@ public final class DracFunSharedProgressionRegistry {
                 emptyRecipe());
 
         SlimefunItemStack chaoticCore = fusionOutput(
+                LegacyTheme.END_GAME_CRAFTING,
                 "DRACFUN_CHAOTIC_CORE",
                 Material.NETHER_STAR,
-                "&5Chaotic Core",
+                "Chaotic Core",
                 100_000_000);
         registered += registerUnplaceable(
                 addon,
@@ -111,29 +116,31 @@ public final class DracFunSharedProgressionRegistry {
                 RecipeType.NULL,
                 emptyRecipe());
 
-        SlimefunItemStack dragonHeart = stack(
+        SlimefunItemStack dragonHeart = LegacyTheme.MOB.stack(
                 "DRACFUN_DRAGON_HEART",
                 Material.DRAGON_BREATH,
-                "&5Dragon Heart");
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                dragonHeart,
-                RecipeType.NULL,
-                emptyRecipe());
+                "Dragon Heart");
+        if (SlimefunItem.getById(dragonHeart.getItemId()) == null) {
+            new DragonHeartMobDrop(
+                            materials,
+                            dragonHeart,
+                            center(enderDragonGuideIcon()))
+                    .register(addon);
+            registered++;
+        }
 
-        SlimefunItemStack smallChaos = stack(
+        SlimefunItemStack smallChaos = LegacyTheme.MOB.stack(
                 "DRACFUN_SMALL_CHAOS_FRAGMENT",
-                Material.PRISMARINE_CRYSTALS,
-                "&5Small Chaos Fragment");
-        SlimefunItemStack largeChaos = stack(
+                Material.BLACK_DYE,
+                "Small Chaos Fragment");
+        SlimefunItemStack largeChaos = LegacyTheme.MOB.stack(
                 "DRACFUN_LARGE_CHAOS_FRAGMENT",
-                Material.ECHO_SHARD,
-                "&5Large Chaos Fragment");
-        SlimefunItemStack chaosShard = stack(
+                Material.FLINT,
+                "Large Chaos Fragment");
+        SlimefunItemStack chaosShard = LegacyTheme.MOB.stack(
                 "DRACFUN_CHAOS_SHARD",
                 Material.NETHER_STAR,
-                "&5Chaos Shard");
+                "Chaos Shard");
 
         registered += registerUnplaceable(
                 addon,
@@ -156,10 +163,10 @@ public final class DracFunSharedProgressionRegistry {
                 fill(largeChaos));
 
         if (!useDragonEgg) {
-            SlimefunItemStack customEgg = stack(
+            SlimefunItemStack customEgg = LegacyTheme.ADVANCED_CRAFTING.stack(
                     "DRACFUN_DRAGON_EGG",
                     Material.DRAGON_EGG,
-                    "&5Draconic Dragon Egg");
+                    "DracFun's Dragon Egg");
             registered += registerUnplaceable(
                     addon,
                     materials,
@@ -172,6 +179,14 @@ public final class DracFunSharedProgressionRegistry {
         }
 
         return registered;
+    }
+
+    private static ItemStack enderDragonGuideIcon() {
+        ItemStack icon = new ItemStack(Material.DRAGON_HEAD);
+        ItemMeta meta = icon.getItemMeta();
+        meta.setDisplayName("Ender Dragon");
+        icon.setItemMeta(meta);
+        return icon;
     }
 
     private static ItemStack required(String id) {
@@ -223,23 +238,13 @@ public final class DracFunSharedProgressionRegistry {
         return 1;
     }
 
-    private static SlimefunItemStack stack(
-            String id,
-            Material material,
-            String name) {
-        return new SlimefunItemStack(
-                id,
-                material,
-                name,
-                "&8DracFun Reborn clean-room item");
-    }
-
     private static SlimefunItemStack fusionOutput(
+            LegacyTheme theme,
             String id,
             Material material,
             String name,
             int fusionPower) {
-        SlimefunItemStack stack = stack(id, material, name);
+        SlimefunItemStack stack = theme.stack(id, material, name);
         ItemMeta meta = stack.getItemMeta();
         meta.getPersistentDataContainer().set(
                 LegacyDracFunKeys.FUSION_POWER,
