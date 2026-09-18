@@ -17,8 +17,6 @@ import org.bukkit.inventory.ItemStack;
  */
 public final class LegacyCompatibilityRegistry {
 
-    private static final String GUIDE_ID = "DRACFUN_GUIDE";
-
     private LegacyCompatibilityRegistry() {}
 
     public static int registerMissingIdentities(SFDracFun2 addon) {
@@ -31,12 +29,6 @@ public final class LegacyCompatibilityRegistry {
 
         int registered = 0;
         for (String id : identities) {
-            // DRACFUN_GUIDE is the legacy ItemGroup/category icon identity.
-            // It must remain guide metadata rather than becoming a normal item.
-            if (GUIDE_ID.equals(id)) {
-                continue;
-            }
-
             if (SlimefunItem.getById(id) != null) {
                 continue;
             }
@@ -68,10 +60,6 @@ public final class LegacyCompatibilityRegistry {
         int missingItems = 0;
 
         for (String id : LegacyIdentityCatalog.DRACFUN_2_0_10_IDS) {
-            if (GUIDE_ID.equals(id)) {
-                continue;
-            }
-
             SlimefunItem item = SlimefunItem.getById(id);
             if (item == null) {
                 missingItems++;
@@ -118,7 +106,7 @@ public final class LegacyCompatibilityRegistry {
             int migrationAliasPlaceholders) {
 
         public int accountedLegacyIds() {
-            return registeredItems + (guideCategoryPresent ? 1 : 0);
+            return registeredItems;
         }
 
         public int functionalItems() {
