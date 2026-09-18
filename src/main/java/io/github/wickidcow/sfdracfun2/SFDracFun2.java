@@ -5,6 +5,7 @@ import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
 import io.github.wickidcow.sfdracfun2.modular.CapacitorService;
 import io.github.wickidcow.sfdracfun2.modular.ModularArmorEffectService;
 import io.github.wickidcow.sfdracfun2.modular.ModularBowEffectService;
+import io.github.wickidcow.sfdracfun2.modular.ModularToolEffectService;
 import io.github.wickidcow.sfdracfun2.setup.DracFunChaosGuardianRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunEnergyCoreRegistry;
 import io.github.wickidcow.sfdracfun2.setup.DracFunFusionComponentRegistry;
@@ -59,10 +60,12 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
                     new CapacitorService(this);
                     new ModularArmorEffectService(this);
                     new ModularBowEffectService(this);
+                    new ModularToolEffectService(this);
                     getLogger().info("Registered " + registered + " clean-room modular gear/module identities.");
                     getLogger().info("Started player-owned modular capacitor charging service.");
                     getLogger().info("Started region-safe modular armor effect service.");
                     getLogger().info("Started modular bow effect service.");
+                    getLogger().info("Started region-safe modular AOE/HARVEST tool effect service.");
                 } catch (IllegalStateException exception) {
                     modularGear = false;
                     getLogger().severe(

@@ -48,6 +48,8 @@ These systems will be restored independently so a failure in one subsystem does 
 
 ## Identity audit details
 
+- `DRACFUN_GUIDE` is the legacy Slimefun guide/category icon identity, not a normal craftable item. SF_DracFun2 uses it as the icon for one shared `DracFun` ItemGroup and excludes it from inert placeholder registration.
+
 Not every Java field name in the old binary is the actual persisted Slimefun ID. Two generated families matter for migration:
 
 - Module field names such as `DRACFUN_BASIC_AOE_MODULE` generate the runtime ID `DRACFUN_AOE_BASIC_MODULE`.
@@ -89,6 +91,18 @@ Two implementation problems in 2.0.10 are intentionally corrected without changi
 - charge is clamped to the valid range `0..capacity`, including when capacity is reduced.
 
 Removing all modules also removes legacy shield/cooldown state and resets charge/capacity, matching the observable reset behavior while avoiding shared-state leakage.
+
+### Modular AOE and HARVEST behavior
+
+The supplied 2.0.10 binary shows that powered modular tool effects require positive capacity, positive charge, and a DracFun modular armor chestplate.
+
+- AOE activates while sneaking. The highest installed AOE tier selects a cube radius of 1 (Basic), 2 (Wyvern), 3 (Draconic), or 4 (Chaotic), and the activation consumes one charge.
+- Pickaxe/shovel AOE breaks valid blocks in that cube using the modular tool.
+- Hoe AOE converts valid dirt variants in the same cube to farmland.
+- Staff of Power right-click mining uses Netherite Pickaxe drops; sneaking with AOE extends that mining through the AOE cube.
+- HARVEST activates on a sneaking modular-axe log break. Its Wyvern/Draconic/Chaotic limits are 16/64/128 connected logs, using the ten legacy vein-adjacency directions (six cardinal/up/down plus four horizontal diagonals), and consumes one charge.
+
+Reborn keeps those limits while applying two safety corrections: the already-breaking AOE origin is skipped to prevent duplicate drops, and extra block mutations exclude Slimefun/custom/protected blocks. Block mutation is dispatched through the Paper/Folia region scheduler.
 
 ## Confirmed modern compatibility breakpoints
 

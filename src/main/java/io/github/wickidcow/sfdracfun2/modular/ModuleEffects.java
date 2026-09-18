@@ -10,7 +10,8 @@ public final class ModuleEffects {
     private ModuleEffects() {}
 
     public static int aoe(ItemStack stack) {
-        return weighted(stack, ModuleFamily.AOE, 3, 5, 7, 9);
+        ModuleTier tier = ModularData.highestTier(stack, ModuleFamily.AOE);
+        return tier == null ? 0 : tier.level() + 1;
     }
 
     public static int arrowDamage(ItemStack stack) {
