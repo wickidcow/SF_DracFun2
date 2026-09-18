@@ -9,7 +9,7 @@ public enum GearType {
     HOE("HOE", 16, 30, 48),
     PICKAXE("PICKAXE", 16, 30, 48),
     SHOVEL("SHOVEL", 16, 30, 48),
-    STAFF("STAFF_OF_POWER", 0, 48, 80),
+    STAFF("STAFF", 0, 48, 80),
     SWORD("SWORD", 16, 30, 48),
     TOOL("TOOL", 16, 30, 48),
     ALL("ALL_GEAR", 0, 0, 0);

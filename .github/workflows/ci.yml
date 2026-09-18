@@ -56,6 +56,18 @@ jobs:
             exit 1
           fi
 
+      - name: Verify exact DracFun 2.0.10 identity spelling
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -R -Fq 'DRACFUN_BASIC_AOE_MODULE' src/main
+          grep -R -Fq 'DRACFUN_WYVERN_ENERGY_MODULE' src/main
+          grep -R -Fq 'DRACFUN_DRACONIC_STAFF' src/main
+          if grep -R -nE 'DRACFUN_(AOE|ARROW_DAMAGE|ARROW_GRAVITY|ARROW_IMMUNITY|ARROW_PENETRATION|ARROW_SPEED|DAMAGE|POWER|FLIGHT|AUTO_FEED|HARVEST|JUMP|SHIELD_CAPACITY|SHIELD_CONTROL|SHIELD_RECOVERY|SPEED|UNDYING|VISION)_(BASIC|WYVERN|DRACONIC|CHAOTIC)_MODULE|DRACFUN_(DRACONIC|CHAOTIC)_STAFF_OF_POWER' src/main; then
+            echo 'Found an inferred identifier that does not match DracFun 2.0.10 runtime IDs.' >&2
+            exit 1
+          fi
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 

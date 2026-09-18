@@ -10,24 +10,24 @@ import java.util.Set;
  * module size: size 1 = 1 point, size 2 = 4 points, size 3 = 9 points.</p>
  */
 public enum ModuleFamily {
-    AOE("DRACFUN_AOE", 1, 3, GearType.TOOL, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    ARROW_DAMAGE("DRACFUN_ARROW_DAMAGE", -1, 1, GearType.BOW, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    ARROW_GRAVITY("DRACFUN_ARROW_GRAVITY", -1, 2, GearType.BOW, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    ARROW_IMMUNITY("DRACFUN_ARROW_IMMUNITY", 1, 2, GearType.ARMOR, tiers(ModuleTier.DRACONIC)),
-    ARROW_PENETRATION("DRACFUN_ARROW_PENETRATION", -1, 2, GearType.BOW, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    ARROW_SPEED("DRACFUN_ARROW_SPEED", 8, 1, GearType.BOW, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    DAMAGE("DRACFUN_DAMAGE", -1, 1, GearType.SWORD, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    POWER("DRACFUN_POWER", -1, 1, GearType.ALL, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    FLIGHT("DRACFUN_FLIGHT", 1, 3, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    AUTO_FEED("DRACFUN_AUTO_FEED", 1, 2, GearType.ARMOR, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    HARVEST("DRACFUN_HARVEST", 1, 2, GearType.AXE, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    JUMP("DRACFUN_JUMP", 3, 1, GearType.ARMOR, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    SHIELD_CAPACITY("DRACFUN_SHIELD_CAPACITY", -1, 1, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    SHIELD_CONTROL("DRACFUN_SHIELD_CONTROL", 1, 2, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    SHIELD_RECOVERY("DRACFUN_SHIELD_RECOVERY", -1, 1, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    SPEED("DRACFUN_SPEED", 8, 1, GearType.ARMOR, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    UNDYING("DRACFUN_UNDYING", 1, 2, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
-    VISION("DRACFUN_VISION", 1, 2, GearType.ARMOR, tiers(ModuleTier.WYVERN));
+    AOE("AOE", 1, 3, GearType.TOOL, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    ARROW_DAMAGE("ARROW_DAMAGE", -1, 1, GearType.BOW, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    ARROW_GRAVITY("ARROW_GRAVITY", -1, 2, GearType.BOW, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    ARROW_IMMUNITY("ARROW_IMMUNITY", 1, 2, GearType.ARMOR, tiers(ModuleTier.DRACONIC)),
+    ARROW_PENETRATION("ARROW_PENETRATION", -1, 2, GearType.BOW, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    ARROW_SPEED("ARROW_SPEED", 8, 1, GearType.BOW, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    DAMAGE("DAMAGE", -1, 1, GearType.SWORD, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    POWER("ENERGY", -1, 1, GearType.ALL, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    FLIGHT("FLIGHT", 1, 3, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    AUTO_FEED("AUTO_FEED", 1, 2, GearType.ARMOR, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    HARVEST("HARVEST", 1, 2, GearType.AXE, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    JUMP("JUMP", 3, 1, GearType.ARMOR, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    SHIELD_CAPACITY("SHIELD_CAPACITY", -1, 1, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    SHIELD_CONTROL("SHIELD_CONTROL", 1, 2, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    SHIELD_RECOVERY("SHIELD_RECOVERY", -1, 1, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    SPEED("SPEED", 8, 1, GearType.ARMOR, tiers(ModuleTier.BASIC, ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    UNDYING("UNDYING", 1, 2, GearType.ARMOR, tiers(ModuleTier.WYVERN, ModuleTier.DRACONIC, ModuleTier.CHAOTIC)),
+    VISION("VISION", 1, 2, GearType.ARMOR, tiers(ModuleTier.WYVERN));
 
     private final String legacyBaseId;
     private final int installLimit;
@@ -75,7 +75,7 @@ public enum ModuleFamily {
         if (!supports(tier)) {
             throw new IllegalArgumentException(name() + " does not exist at tier " + tier);
         }
-        return legacyBaseId + '_' + tier.legacyName() + "_MODULE";
+        return "DRACFUN_" + tier.legacyName() + '_' + legacyBaseId + "_MODULE";
     }
 
     private static Set<ModuleTier> tiers(ModuleTier first, ModuleTier... remaining) {
