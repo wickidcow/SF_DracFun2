@@ -26,7 +26,7 @@ public final class DracFunFusionComponentRegistry {
         ItemGroup materials = DracFunItemGroups.materials(addon);
         ItemGroup machines = DracFunItemGroups.machines(addon);
 
-        int registered = registerDraconicCore(addon, hardMode);
+        int registered = registerParticleGenerator(addon, hardMode);
 
         ItemStack draconiumIngot = required("DRACFUN_DRACONIUM_INGOT");
         ItemStack draconiumBlock = required("DRACFUN_DRACONIUM_BLOCK");
@@ -145,6 +145,43 @@ public final class DracFunFusionComponentRegistry {
                             diamond, gold, diamond));
         }
 
+        return registered;
+    }
+
+    /**
+     * Registers the Particle Generator and its Draconic Core prerequisite.
+     *
+     * <p>The Particle Generator is referenced by both the Energy Infuser and
+     * Shield Control module progression, so it must remain available even when
+     * Fusion Crafting itself is disabled.</p>
+     */
+    public static int registerParticleGenerator(SFDracFun2 addon, boolean hardMode) {
+        int registered = registerDraconicCore(addon, hardMode);
+
+        String id = "DRACFUN_PARTICLE_GENERATOR";
+        if (SlimefunItem.getById(id) != null) {
+            return registered;
+        }
+
+        ItemGroup materials = DracFunItemGroups.materials(addon);
+        ItemStack draconicCore = required("DRACFUN_DRACONIC_CORE");
+        ItemStack redstoneBlock = new ItemStack(Material.REDSTONE_BLOCK);
+        ItemStack blazeRod = new ItemStack(Material.BLAZE_ROD);
+
+        SlimefunItemStack particleGenerator = stack(
+                id,
+                Material.END_CRYSTAL,
+                "&dParticle Generator");
+
+        registered += registerUnplaceable(
+                addon,
+                materials,
+                particleGenerator,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                recipe(
+                        redstoneBlock, blazeRod, redstoneBlock,
+                        blazeRod, draconicCore, blazeRod,
+                        redstoneBlock, blazeRod, redstoneBlock));
         return registered;
     }
 
