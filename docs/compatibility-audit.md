@@ -79,6 +79,12 @@ A source-level coverage pass now accounts for every identity in `LegacyIdentityC
 
 Total accounted legacy 2.0.10 identity surface: **134 / 134**. Feature toggles can still intentionally leave disabled subsystems represented by hidden compatibility placeholders at runtime.
 
+### Item Converter migration fallback
+
+DracFun 2.0.10 accepted 18 legacy converter inputs, including the three pre-2.0.10 armor aliases `DRACFUN_WYVERN_CHESTPLATE`, `DRACFUN_DRACONIC_CHESTPLATE`, and `DRACFUN_CHAOTIC_CHESTPLATE`. The original converter first attempted normal Slimefun lookup and, if that failed, read the stored Slimefun item-data identity directly from the ItemStack.
+
+Reborn preserves the same fallback through Slimefun Legacy's maintained `CustomItemDataService`. This means an old convertible item can still be recognized when `compatibility.preserve-legacy-ids` is disabled and no placeholder has registered its legacy ID. The converted output is rebuilt from the current registered template and preserves only stack amount, preventing stale legacy metadata from carrying forward.
+
 ## Modular persistence contract
 
 The old modular system stores item state under the original Bukkit namespace `dracfun`. SF_DracFun2 therefore creates compatibility keys with an explicit `dracfun` namespace instead of using this plugin's own namespace.

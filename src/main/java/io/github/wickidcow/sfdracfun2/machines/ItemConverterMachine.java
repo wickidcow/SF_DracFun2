@@ -25,8 +25,9 @@ import org.bukkit.inventory.meta.ItemMeta;
  * Rebuilds the specific old DracFun items accepted by the 2.0.10 Item Converter.
  *
  * <p>Conversion intentionally uses a fresh registered template and preserves only stack
- * amount. This mirrors the old converter's requirement for plain/unmodified inputs and
- * prevents stale legacy metadata from leaking into the rebuilt item.</p>
+ * amount. DracFun 2.0.10 rebuilt the output from the stored Slimefun identity; Reborn
+ * preserves that migration behavior while preventing stale legacy metadata from leaking
+ * into the rebuilt item.</p>
  */
 public final class ItemConverterMachine extends SlimefunItem {
 
@@ -120,13 +121,13 @@ public final class ItemConverterMachine extends SlimefunItem {
             return;
         }
 
-        SlimefunItem source = SlimefunItem.getByItem(input);
-        if (source == null) {
+        String sourceId = sourceIdentity(input);
+        if (sourceId == null) {
             player.sendMessage(ChatColor.RED + "That item does not contain a recognized DracFun identity.");
             return;
         }
 
-        String targetId = TARGETS.get(source.getId());
+        String targetId = TARGETS.get(sourceId);
         if (targetId == null) {
             player.sendMessage(ChatColor.RED + "That item was not supported by DracFun 2.0.10's converter.");
             return;
@@ -143,6 +144,22 @@ public final class ItemConverterMachine extends SlimefunItem {
         menu.replaceExistingItem(INPUT, null);
         menu.replaceExistingItem(OUTPUT, converted);
         player.sendMessage(ChatColor.GREEN + "Converted legacy DracFun item to " + targetId + '.');
+    }
+
+    /**
+     * DracFun 2.0.10 fell back to the raw Slimefun item-data key when the item
+     * was not currently registered. Keep that migration path so old items can
+     * still be converted when compatibility placeholders are disabled.
+     */
+    private static String sourceIdentity(ItemStack input) {
+        SlimefunItem source = SlimefunItem.getByItem(input);
+        if (source != null) {
+            return source.getId();
+        }
+
+        return Slimefun.getItemDataService()
+                .getItemData(input)
+                .orElse(null);
     }
 
     private static ItemStack button() {
