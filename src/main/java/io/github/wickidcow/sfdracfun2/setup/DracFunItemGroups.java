@@ -2,51 +2,154 @@ package io.github.wickidcow.sfdracfun2.setup;
 
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.items.groups.NestedItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.groups.SubItemGroup;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
- * Legacy-compatible DracFun guide category.
+ * Restores DracFun 2.0.10's nested Slimefun Guide hierarchy.
  *
- * <p>DracFun 2.0.10 used {@code DRACFUN_GUIDE} as its guide/category icon
- * identity rather than as a normal craftable Slimefun item. Reborn keeps one
- * shared DracFun category so restored materials, modular gear and machines
- * appear together in the Slimefun guide.</p>
+ * <p>The original addon exposed a DracFun root with Materials, Energy Core,
+ * Wyvern Gear, Draconic Gear, Chaotic Gear, Modules, Electric and Reactor
+ * subgroups. Keeping those groups separate makes the progression discoverable
+ * and prevents the restored content from being flattened into one oversized
+ * page.</p>
  */
 public final class DracFunItemGroups {
 
-    private static ItemGroup dracFun;
+    private static NestedItemGroup root;
+    private static SubItemGroup materials;
+    private static SubItemGroup energyCore;
+    private static SubItemGroup wyvernGear;
+    private static SubItemGroup draconicGear;
+    private static SubItemGroup chaoticGear;
+    private static SubItemGroup modules;
+    private static SubItemGroup electric;
+    private static SubItemGroup reactor;
 
     private DracFunItemGroups() {}
 
     public static ItemGroup materials(SFDracFun2 addon) {
-        return dracFun(addon);
+        ensure(addon);
+        return materials;
     }
 
-    public static ItemGroup modular(SFDracFun2 addon) {
-        return dracFun(addon);
+    public static ItemGroup energyCore(SFDracFun2 addon) {
+        ensure(addon);
+        return energyCore;
     }
 
+    public static ItemGroup gear(SFDracFun2 addon, int tier) {
+        ensure(addon);
+        return switch (tier) {
+            case 1 -> wyvernGear;
+            case 2 -> draconicGear;
+            case 3 -> chaoticGear;
+            default -> throw new IllegalArgumentException("Gear tier must be 1-3, got " + tier);
+        };
+    }
+
+    public static ItemGroup modules(SFDracFun2 addon) {
+        ensure(addon);
+        return modules;
+    }
+
+    /**
+     * Machine progression in DracFun 2.0.10 lived under the Electric subgroup.
+     */
     public static ItemGroup machines(SFDracFun2 addon) {
-        return dracFun(addon);
+        ensure(addon);
+        return electric;
+    }
+
+    public static ItemGroup reactor(SFDracFun2 addon) {
+        ensure(addon);
+        return reactor;
+    }
+
+    /** Compatibility alias for code that has not yet selected a tier-specific gear group. */
+    public static ItemGroup modular(SFDracFun2 addon) {
+        return modules(addon);
     }
 
     public static boolean hasLegacyGuideCategory() {
-        return dracFun != null;
+        return root != null;
     }
 
-    private static ItemGroup dracFun(SFDracFun2 addon) {
-        if (dracFun == null) {
-            SlimefunItemStack guideIcon = new SlimefunItemStack(
-                    "DRACFUN_GUIDE",
-                    Material.DRAGON_HEAD,
-                    "&5DracFun",
-                    "&7DracFun Reborn progression, modular gear and machines.");
-            dracFun = new ItemGroup(
-                    new NamespacedKey(addon, "dracfun"),
-                    guideIcon);
+    private static void ensure(SFDracFun2 addon) {
+        if (root != null) {
+            return;
         }
-        return dracFun;
+
+        SlimefunItemStack guideIcon = new SlimefunItemStack(
+                "DRACFUN_GUIDE",
+                Material.DRAGON_HEAD,
+                "&5DracFun",
+                "&7DracFun 2.0.10 progression restored for Slimefun Legacy.");
+
+        root = new NestedItemGroup(
+                new NamespacedKey(addon, "dracfun_nested"),
+                guideIcon);
+
+        materials = subgroup(
+                addon,
+                "dracfun_material",
+                Material.NETHERITE_INGOT,
+                ChatColor.LIGHT_PURPLE + "DracFun Materials");
+        energyCore = subgroup(
+                addon,
+                "dracfun_energy_core",
+                Material.BEACON,
+                ChatColor.AQUA + "DracFun Energy Core");
+        wyvernGear = subgroup(
+                addon,
+                "dracfun_wyvern_gear",
+                Material.IRON_CHESTPLATE,
+                ChatColor.LIGHT_PURPLE + "Wyvern Gear");
+        draconicGear = subgroup(
+                addon,
+                "dracfun_draconic_gear",
+                Material.NETHERITE_CHESTPLATE,
+                ChatColor.GOLD + "Draconic Gear");
+        chaoticGear = subgroup(
+                addon,
+                "dracfun_chaotic_gear",
+                Material.NETHER_STAR,
+                ChatColor.DARK_PURPLE + "Chaotic Gear");
+        modules = subgroup(
+                addon,
+                "dracfun_module",
+                Material.AMETHYST_SHARD,
+                ChatColor.LIGHT_PURPLE + "DracFun Modules");
+        electric = subgroup(
+                addon,
+                "dracfun_electric",
+                Material.REDSTONE_TORCH,
+                ChatColor.RED + "DracFun Electric");
+        reactor = subgroup(
+                addon,
+                "dracfun_reactor",
+                Material.RESPAWN_ANCHOR,
+                ChatColor.DARK_PURPLE + "Draconic Reactor");
+    }
+
+    private static SubItemGroup subgroup(
+            SFDracFun2 addon,
+            String key,
+            Material material,
+            String displayName) {
+        ItemStack icon = new ItemStack(material);
+        ItemMeta meta = icon.getItemMeta();
+        meta.setDisplayName(displayName);
+        icon.setItemMeta(meta);
+        return new SubItemGroup(
+                new NamespacedKey(addon, key),
+                root,
+                icon);
     }
 }
