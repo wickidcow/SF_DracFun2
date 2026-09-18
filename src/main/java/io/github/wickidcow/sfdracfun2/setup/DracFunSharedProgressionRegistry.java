@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -219,7 +220,7 @@ public final class DracFunSharedProgressionRegistry {
         if (SlimefunItem.getById(item.getItemId()) != null) {
             return 0;
         }
-        new SlimefunItem(group, item, type, recipe).register(addon);
+        new EnergyCorePieceItem(group, item, type, recipe).register(addon);
         return 1;
     }
 
