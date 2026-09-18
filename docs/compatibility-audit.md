@@ -87,7 +87,7 @@ Reborn preserves the same fallback through Slimefun Legacy's maintained `CustomI
 
 ### Runtime identity self-audit
 
-After feature registration and optional placeholder registration, Reborn performs a startup audit of the complete legacy identity surface. The audit reports the number of registered non-placeholder items, hidden placeholders, whether the `DRACFUN_GUIDE` category identity is present, and how many of the three pre-2.0.10 armor migration aliases are registered. With `compatibility.preserve-legacy-ids: true`, anything short of 134/134 legacy identities or 3/3 migration aliases produces a warning.
+After feature registration and optional placeholder registration, Reborn performs a startup audit of the complete legacy identity surface. The audit reports the number of registered non-placeholder items, hidden placeholders, whether the `DRACFUN_GUIDE` category identity is present, and how many of the three pre-2.0.10 armor migration aliases are registered. With `compatibility.preserve-legacy-ids: true`, anything short of 134/134 legacy identities or 3/3 migration aliases produces a warning. When all restored feature flags are enabled, the audit also verifies that compatibility placeholders are not masking a subsystem registration failure. The only expected placeholder on the 134-ID main surface is `DRACFUN_DRAGON_EGG` when `options.use-dragon-egg: true` selects the vanilla Dragon Egg; the three older chestplate aliases are audited separately.
 
 The Module Integrator and Item Converter both use the shared fail-closed `ProtectionCompat` bridge rather than maintaining separate reflective protection implementations.
 

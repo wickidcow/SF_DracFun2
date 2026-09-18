@@ -213,10 +213,41 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
                 + "); migration aliases "
                 + audit.migrationAliasesRegistered() + "/3 registered.";
 
+        boolean fullFeatureSet = java.util.List.of(
+                        "features.materials",
+                        "features.end-resource",
+                        "features.energy-infuser",
+                        "features.item-converter",
+                        "features.fusion-crafting",
+                        "features.modular-gear",
+                        "features.energy-core",
+                        "features.reactor",
+                        "features.chaos-guardian")
+                .stream()
+                .allMatch(key -> getConfig().getBoolean(key, true));
+
+        // With the complete feature set enabled, every 2.0.10 item identity should
+        // be functional except DRACFUN_DRAGON_EGG when the vanilla Dragon Egg option
+        // is selected. The three pre-2.0.10 armor aliases remain placeholders by
+        // design and are tracked separately from the 134-ID main surface.
+        int expectedMainPlaceholders =
+                fullFeatureSet && useDragonEgg ? 1 : 0;
+        boolean incompleteCompleteRestore = fullFeatureSet
+                && audit.placeholders() != expectedMainPlaceholders;
+
         if (preserveLegacyIds
                 && (audit.accountedLegacyIds() != 134
-                        || audit.migrationAliasesRegistered() != 3)) {
+                        || audit.migrationAliasesRegistered() != 3
+                        || incompleteCompleteRestore)) {
             getLogger().warning(auditSummary);
+            if (incompleteCompleteRestore) {
+                getLogger().warning(
+                        "Complete-restoration audit expected "
+                                + expectedMainPlaceholders
+                                + " main placeholder(s), but found "
+                                + audit.placeholders()
+                                + ". A functional subsystem may have failed to register.");
+            }
         } else {
             getLogger().info(auditSummary);
         }
