@@ -58,7 +58,7 @@ public final class DracFunMachineRegistry {
             return 0;
         }
 
-        ItemGroup group = DracFunItemGroups.machines(addon);
+        ItemGroup group = DracFunItemGroups.materials(addon);
         SlimefunItemStack stack = new SlimefunItemStack(
                 id,
                 Material.SMITHING_TABLE,
