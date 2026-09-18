@@ -13,11 +13,16 @@ public final class ModuleItem extends SlimefunItem implements NotPlaceable {
     private final ModuleFamily family;
     private final ModuleTier tier;
 
-    public ModuleItem(ItemGroup group, SlimefunItemStack item, ModuleFamily family, ModuleTier tier) {
-        super(group, item, RecipeType.NULL, new ItemStack[9]);
+    public ModuleItem(
+            ItemGroup group,
+            SlimefunItemStack item,
+            ModuleFamily family,
+            ModuleTier tier,
+            RecipeType recipeType,
+            ItemStack[] recipe) {
+        super(group, item, recipeType, recipe);
         this.family = family;
         this.tier = tier;
-        setHidden(true);
     }
 
     public ModuleFamily getFamily() {
