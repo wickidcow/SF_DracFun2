@@ -1,0 +1,123 @@
+name: Publish DracFun Reborn Release
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/publish-release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  RELEASE_TAG: v2.0.1
+  SOURCE_REF: cb5b86ba09416b3d998816abced3b912f8b0cc0e
+  EXPECTED_SHA256: 5dded65271740c7b8f3b237dd01fd8a69befaecf31a57cf3a94890c5996016a8
+  JAR_NAME: SFL_DracFun-Reborn2.0.1.jar
+
+jobs:
+  release:
+    name: Build and publish raw JAR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact tested source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_REF }}
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Setup Gradle 9.4.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.4.1'
+
+      - name: Download Slimefun Legacy 4.1.51 API target
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p libs
+          curl -fL --retry 3 \
+            -o libs/Slimefun-Legacy.jar \
+            https://github.com/wickidcow/Slimefun-Legacy/releases/download/v4.1.51/Slimefun-Legacy4.1.51.jar
+          test -s libs/Slimefun-Legacy.jar
+
+      - name: Build exact universal release JAR
+        shell: bash
+        run: |
+          set -euo pipefail
+          gradle clean shadowJar \
+            -Pplatform=paper \
+            -PplatformVersion=1.21.11-R0.1-SNAPSHOT \
+            -PreleaseJvm=21 \
+            --stacktrace --no-daemon
+
+          JAR="build/libs/${JAR_NAME}"
+          test -s "$JAR"
+          jar tf "$JAR" >/dev/null
+          javap -verbose -classpath "$JAR" io.github.wickidcow.sfdracfun2.SFDracFun2 \
+            | grep -Fq 'major version: 65'
+          ACTUAL_SHA256="$(sha256sum "$JAR" | awk '{print $1}')"
+          echo "SHA-256: $ACTUAL_SHA256"
+          test "$ACTUAL_SHA256" = "$EXPECTED_SHA256"
+
+      - name: Verify packaged metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR="build/libs/${JAR_NAME}"
+          unzip -p "$JAR" plugin.yml > build/plugin.yml
+          unzip -p "$JAR" config.yml > build/config.yml
+          grep -Eq '^version:.*2\.0\.1' build/plugin.yml
+          grep -Eq '^api-version:.*1\.21\.11' build/plugin.yml
+          grep -Eq '^folia-supported:[[:space:]]*true' build/plugin.yml
+          for feature in materials end-resource energy-infuser item-converter fusion-crafting modular-gear energy-core reactor chaos-guardian; do
+            grep -Eq "^[[:space:]]{2}${feature}:[[:space:]]*true[[:space:]]*$" build/config.yml
+          done
+
+      - name: Upload raw JAR artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ env.JAR_NAME }}
+          path: build/libs/${{ env.JAR_NAME }}
+          archive: false
+          if-no-files-found: error
+
+      - name: Publish v2.0.1 GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAR="build/libs/${JAR_NAME}"
+          cat > release-notes.md <<'EOF'
+          DracFun Reborn 2.0.1
+
+          Clean-room Slimefun Legacy reimplementation of the discontinued DracFun 2.0.10 addon.
+
+          - Preserves the audited 134-ID legacy compatibility surface and migration data.
+          - Restores Draconium progression, Energy Infuser, Item Converter, Fusion Crafting,
+            modular equipment/modules, Energy Core multiblocks, Draconic Reactor, and Chaos Guardian.
+          - Validated on Paper 1.21.11, Paper/Purpur 26.2, Paper/Purpur 26.3, and Folia 26.2.
+          - Runtime-smoked on Paper 26.2 with Slimefun Legacy 4.1.51.
+          - Universal release artifact is Java 21 bytecode.
+          - Remove the original DracFun 2.0.10 JAR before installing Reborn.
+
+          Release artifact: SFL_DracFun-Reborn2.0.1.jar
+          EOF
+
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" "$JAR" \
+              --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$JAR" \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$SOURCE_REF" \
+              --title "DracFun Reborn 2.0.1" \
+              --notes-file release-notes.md
+          fi
