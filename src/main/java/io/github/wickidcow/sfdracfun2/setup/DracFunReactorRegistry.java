@@ -22,7 +22,7 @@ public final class DracFunReactorRegistry {
     private DracFunReactorRegistry() {}
 
     public static int register(SFDracFun2 addon, boolean hardMode) {
-        ItemGroup machines = DracFunItemGroups.machines(addon);
+        ItemGroup machines = DracFunItemGroups.reactor(addon);
 
         ItemStack draconium = required(hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
         ItemStack awakened =
