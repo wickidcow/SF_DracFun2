@@ -68,6 +68,19 @@ jobs:
             exit 1
           fi
 
+      - name: Verify original DracFun guide surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          GROUPS=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunItemGroups.java
+          MATERIALS=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
+          grep -Fq 'NestedItemGroup' "$GROUPS"
+          for group in Materials EnergyCore WyvernGear DraconicGear ChaoticGear Modules Electric Reactor; do
+            grep -Fq "$group" "$GROUPS"
+          done
+          grep -Fq '"DRACFUN_GUIDE"' "$MATERIALS"
+          grep -Fq 'Material.BOOK' "$MATERIALS"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
@@ -156,7 +169,7 @@ jobs:
           fi
 
           grep -Fq 'SF_DracFun2 clean-room compatibility layer starting.' "$SMOKE_DIR/server.log"
-          grep -Fq 'Legacy identity runtime audit: 134/134 accounted for (132 non-placeholder items, 1 placeholders, guide category present); migration aliases 3/3 registered.' "$SMOKE_DIR/server.log"
+          grep -Fq 'Legacy identity runtime audit: 134/134 accounted for (133 non-placeholder items, 1 placeholders, nested guide present); migration aliases 3/3 registered.' "$SMOKE_DIR/server.log"
           if grep -Fq 'Complete-restoration audit expected' "$SMOKE_DIR/server.log"; then
             echo 'DracFun complete-restoration runtime audit failed.' >&2
             cat "$SMOKE_DIR/server.log"
