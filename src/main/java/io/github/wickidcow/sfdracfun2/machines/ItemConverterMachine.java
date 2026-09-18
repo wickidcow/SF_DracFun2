@@ -54,9 +54,12 @@ public final class ItemConverterMachine extends SlimefunItem {
             Map.entry("DRACFUN_WYVERN_HOE", "DRACFUN_WYVERN_HOE"),
             Map.entry("DRACFUN_DRACONIC_HOE", "DRACFUN_DRACONIC_HOE"));
 
-    public ItemConverterMachine(ItemGroup group, SlimefunItemStack item) {
-        super(group, item, RecipeType.NULL, new ItemStack[9]);
-        setHidden(true);
+    public ItemConverterMachine(
+            ItemGroup group,
+            SlimefunItemStack item,
+            RecipeType recipeType,
+            ItemStack[] recipe) {
+        super(group, item, recipeType, recipe);
 
         new BlockMenuPreset(getId(), getItemName()) {
             @Override
