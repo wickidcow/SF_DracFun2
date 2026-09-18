@@ -150,7 +150,7 @@ Chaos Guardian crystal cages are terrain-safe in both directions. Reborn only pl
 
 The restoration-era configuration originally left Energy Infuser, Item Converter, Fusion Crafting, modular gear, Energy Core, Reactor and Chaos Guardian disabled while those systems were being implemented. DracFun Reborn 2.0.1 now enables the complete restored feature set on fresh configurations. All feature flags remain independent and existing explicit server configuration values are never overwritten.
 
-The release workflow verifies that the packaged `config.yml` has all nine restored feature flags enabled, in addition to the existing cross-platform compilation, clean-room boundary and raw-JAR checks.
+The release workflow verifies that the packaged `config.yml` has all nine restored feature flags enabled, in addition to the existing cross-platform compilation, clean-room boundary and raw-JAR checks. Main-branch/tag builds also boot a real Paper 26.2 server with Slimefun Legacy 4.1.51 and the built JAR; the smoke test requires a completed server startup plus the exact 134/134 main identity and 3/3 migration-alias audit.
 
 ## Confirmed modern compatibility breakpoints
 

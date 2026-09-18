@@ -35,6 +35,10 @@ Fresh 2.0.1 configurations enable the complete restoration by default. Every maj
 
 Remove the original **DracFun 2.0.10** JAR before installing Reborn. If both plugins are present, Reborn disables itself rather than risk duplicate `DRACFUN_*` registrations.
 
+## Verification
+
+The CI matrix compiles against Paper 1.21.11, Paper/Purpur 26.2, Paper/Purpur 26.3, and Folia 26.2. CI also performs a real Paper 26.2 boot smoke with Slimefun Legacy 4.1.51 and the built release JAR, requiring a successful 134/134 legacy-ID runtime audit before the artifact is accepted.
+
 ## Build output
 
 Release artifact naming is fixed to:

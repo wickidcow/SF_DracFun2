@@ -85,6 +85,83 @@ jobs:
       - name: Build universal release JAR
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
+      - name: Runtime smoke on Paper 26.2
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          SMOKE_DIR="$RUNNER_TEMP/dracfun-paper-smoke"
+          mkdir -p "$SMOKE_DIR/plugins"
+          cp build/libs/SFL_DracFun-Reborn2.0.1.jar "$SMOKE_DIR/plugins/"
+          cp libs/Slimefun-Legacy.jar "$SMOKE_DIR/plugins/Slimefun-Legacy4.1.51.jar"
+
+          PAPER_URL=$(curl -fsSL --retry 3 \
+            -H 'User-Agent: SF_DracFun2-CI/2.0.1 (https://github.com/wickidcow/SF_DracFun2)' \
+            https://fill.papermc.io/v3/projects/paper/versions/26.2/builds \
+            | jq -r 'first(.[] | select(.channel == "STABLE") | .downloads."server:default".url) // empty')
+          test -n "$PAPER_URL"
+          curl -fL --retry 3 \
+            -H 'User-Agent: SF_DracFun2-CI/2.0.1 (https://github.com/wickidcow/SF_DracFun2)' \
+            "$PAPER_URL" -o "$SMOKE_DIR/paper.jar"
+
+          printf 'eula=true\n' > "$SMOKE_DIR/eula.txt"
+          cat > "$SMOKE_DIR/server.properties" <<'EOF'
+          online-mode=false
+          view-distance=2
+          simulation-distance=2
+          spawn-protection=0
+          enable-query=false
+          enable-rcon=false
+          level-name=dracfun_smoke
+          EOF
+
+          (
+            cd "$SMOKE_DIR"
+            java -Xms512M -Xmx1024M -jar paper.jar --nogui > server.log 2>&1 &
+            echo $! > server.pid
+          )
+
+          PID=$(cat "$SMOKE_DIR/server.pid")
+          STARTED=false
+          for _ in $(seq 1 120); do
+            if grep -Fq 'Done (' "$SMOKE_DIR/server.log"; then
+              STARTED=true
+              break
+            fi
+            if ! kill -0 "$PID" 2>/dev/null; then
+              echo 'Paper exited before completing startup.' >&2
+              cat "$SMOKE_DIR/server.log"
+              exit 1
+            fi
+            sleep 1
+          done
+
+          if [ "$STARTED" != true ]; then
+            echo 'Paper did not finish startup within the smoke-test window.' >&2
+            cat "$SMOKE_DIR/server.log"
+            kill "$PID" 2>/dev/null || true
+            exit 1
+          fi
+
+          grep -Fq 'SF_DracFun2 clean-room compatibility layer starting.' "$SMOKE_DIR/server.log"
+          grep -Fq 'Legacy identity runtime audit: 134/134 accounted for (132 non-placeholder items, 1 placeholders, guide category present); migration aliases 3/3 registered.' "$SMOKE_DIR/server.log"
+          if grep -Fq 'Complete-restoration audit expected' "$SMOKE_DIR/server.log"; then
+            echo 'DracFun complete-restoration runtime audit failed.' >&2
+            cat "$SMOKE_DIR/server.log"
+            kill "$PID" 2>/dev/null || true
+            exit 1
+          fi
+          if grep -Eq 'Error occurred while enabling SF_DracFun2|Could not load .*SF_DracFun|\[SF_DracFun2\].*SEVERE' "$SMOKE_DIR/server.log"; then
+            echo 'DracFun emitted an enable-time error.' >&2
+            cat "$SMOKE_DIR/server.log"
+            kill "$PID" 2>/dev/null || true
+            exit 1
+          fi
+
+          kill "$PID" 2>/dev/null || true
+          wait "$PID" 2>/dev/null || true
+          tail -n 120 "$SMOKE_DIR/server.log"
+
       - name: Verify release artifact
         shell: bash
         run: |
