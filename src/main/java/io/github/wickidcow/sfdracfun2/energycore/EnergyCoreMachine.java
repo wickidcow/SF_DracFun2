@@ -7,15 +7,20 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.attributes.EnergyNetComponent;
+import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockPlaceHandler;
 import io.github.thebusybiscuit.slimefun4.core.networks.energy.EnergyNetComponentType;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
+import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -30,10 +35,10 @@ import org.bukkit.inventory.ItemStack;
 public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetComponent {
 
     private static final String DATA_COMPLETE = "reborn-energy-core-complete";
-    private static final String DATA_VALIDATED_TICK = "reborn-energy-core-validated-tick";
     private static final String ENERGY_CHARGE = "energy-charge";
 
     private final EnergyCoreTier tier;
+    private final Map<BlockKey, ValidationStamp> validationCache = new ConcurrentHashMap<>();
 
     public EnergyCoreMachine(
             ItemGroup group,
@@ -59,6 +64,16 @@ public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetCo
             }
         });
 
+        addItemHandler(new BlockBreakHandler(false, false) {
+            @Override
+            public void onPlayerBreak(
+                    @Nonnull BlockBreakEvent event,
+                    @Nonnull ItemStack item,
+                    @Nonnull java.util.List<ItemStack> drops) {
+                validationCache.remove(BlockKey.of(event.getBlock().getLocation()));
+            }
+        });
+
         addItemHandler(new BlockTicker() {
             @Override
             public boolean isSynchronized() {
@@ -76,14 +91,14 @@ public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetCo
             Location location,
             ASlimefunDataContainer data) {
         long gameTime = location.getWorld().getGameTime();
-        if (parseLong(data.getData(DATA_VALIDATED_TICK)) == gameTime) {
-            return "true".equals(data.getData(DATA_COMPLETE))
-                    ? EnergyCoreStructure.Validation.COMPLETE
-                    : EnergyCoreStructure.Validation.INCOMPLETE;
+        BlockKey key = BlockKey.of(location);
+        ValidationStamp cached = validationCache.get(key);
+        if (cached != null && cached.gameTime() == gameTime) {
+            return cached.validation();
         }
 
         EnergyCoreStructure.Validation validation = tier.structure().validate(location);
-        data.setData(DATA_VALIDATED_TICK, Long.toString(gameTime));
+        validationCache.put(key, new ValidationStamp(gameTime, validation));
 
         if (validation == EnergyCoreStructure.Validation.UNKNOWN) {
             // Never destroy charge solely because a neighboring chunk/data record is not loaded.
@@ -186,14 +201,17 @@ public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetCo
         return tier;
     }
 
-    private static long parseLong(String value) {
-        if (value == null || value.isBlank()) {
-            return Long.MIN_VALUE;
-        }
-        try {
-            return Long.parseLong(value);
-        } catch (NumberFormatException ignored) {
-            return Long.MIN_VALUE;
+    private record BlockKey(UUID worldId, int x, int y, int z) {
+        private static BlockKey of(Location location) {
+            return new BlockKey(
+                    location.getWorld().getUID(),
+                    location.getBlockX(),
+                    location.getBlockY(),
+                    location.getBlockZ());
         }
     }
+
+    private record ValidationStamp(
+            long gameTime,
+            EnergyCoreStructure.Validation validation) {}
 }
