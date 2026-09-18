@@ -40,7 +40,7 @@ public final class DracFunModularRegistry {
             SFDracFun2 addon,
             boolean hardMode,
             boolean useDragonEgg) {
-        ItemGroup group = DracFunItemGroups.modular(addon);
+        ItemGroup moduleGroup = DracFunItemGroups.modules(addon);
         int registered = 0;
 
         registered += DracFunSharedProgressionRegistry.register(
@@ -50,7 +50,7 @@ public final class DracFunModularRegistry {
         registered += DracFunEnergyCoreRegistry.registerEnergyMaterials(
                 addon,
                 hardMode);
-        registered += registerModuleCore(addon, group, hardMode);
+        registered += registerModuleCore(addon, moduleGroup, hardMode);
 
         for (GearType type : List.of(
                 GearType.ARMOR,
@@ -62,19 +62,19 @@ public final class DracFunModularRegistry {
                 GearType.SHOVEL,
                 GearType.SWORD)) {
             for (int tier = 1; tier <= 3; tier++) {
-                registered += registerGear(addon, group, type, tier);
+                registered += registerGear(addon, DracFunItemGroups.gear(addon, tier), type, tier);
             }
         }
 
-        registered += registerGear(addon, group, GearType.STAFF, 2);
-        registered += registerGear(addon, group, GearType.STAFF, 3);
+        registered += registerGear(addon, DracFunItemGroups.gear(addon, 2), GearType.STAFF, 2);
+        registered += registerGear(addon, DracFunItemGroups.gear(addon, 3), GearType.STAFF, 3);
 
         for (ModuleFamily family : ModuleFamily.values()) {
             for (ModuleTier tier : ModuleTier.values()) {
                 if (family.supports(tier)) {
                     registered += registerModule(
                             addon,
-                            group,
+                            moduleGroup,
                             family,
                             tier,
                             hardMode);
@@ -82,7 +82,7 @@ public final class DracFunModularRegistry {
             }
         }
 
-        registered += registerIntegrator(addon, group, hardMode);
+        registered += registerIntegrator(addon, moduleGroup, hardMode);
         return registered;
     }
 
@@ -400,7 +400,7 @@ public final class DracFunModularRegistry {
     }
 
     private static String moduleName(ModuleFamily family) {
-        String[] words = family.name().toLowerCase().split("_");
+        String[] words = family.legacyItemName().toLowerCase().split("_");
         StringBuilder out = new StringBuilder();
         for (String word : words) {
             if (!out.isEmpty()) {
