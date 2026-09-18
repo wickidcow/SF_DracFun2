@@ -3,6 +3,9 @@ package io.github.wickidcow.sfdracfun2.setup;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.modular.GearType;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
@@ -32,9 +35,12 @@ public final class DracFunModularRegistry {
 
     private DracFunModularRegistry() {}
 
-    public static int register(SFDracFun2 addon) {
+    public static int register(SFDracFun2 addon, boolean hardMode) {
         ItemGroup group = DracFunItemGroups.modular(addon);
         int registered = 0;
+
+        registered += DracFunFusionComponentRegistry.registerDraconicCore(addon, hardMode);
+        registered += registerModuleCore(addon, group, hardMode);
 
         for (GearType type : List.of(
                 GearType.ARMOR,
@@ -59,8 +65,41 @@ public final class DracFunModularRegistry {
             }
         }
 
-        registered += registerIntegrator(addon, group);
+        registered += registerIntegrator(addon, group, hardMode);
         return registered;
+    }
+
+    private static int registerModuleCore(
+            SFDracFun2 addon,
+            ItemGroup group,
+            boolean hardMode) {
+        String id = "DRACFUN_MODULE_CORE";
+        if (SlimefunItem.getById(id) != null) {
+            return 0;
+        }
+
+        ItemStack iron = new ItemStack(hardMode ? Material.IRON_BLOCK : Material.IRON_INGOT);
+        ItemStack redstone = new ItemStack(hardMode ? Material.REDSTONE_BLOCK : Material.REDSTONE);
+        ItemStack gold = hardMode ? SlimefunItems.GOLD_24K_BLOCK : SlimefunItems.GOLD_24K;
+        ItemStack draconium = requiredItem(
+                hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
+
+        SlimefunItemStack stack = new SlimefunItemStack(
+                id,
+                Material.HEART_OF_THE_SEA,
+                "&dModule Core",
+                "&7Foundation component for DracFun modular upgrades.");
+
+        new UnplaceableBlock(
+                        group,
+                        stack,
+                        RecipeType.ANCIENT_ALTAR,
+                        recipe(
+                                iron, redstone, iron,
+                                gold, draconium, gold,
+                                iron, redstone, iron))
+                .register(addon);
+        return 1;
     }
 
     private static int registerGear(SFDracFun2 addon, ItemGroup group, GearType type, int tier) {
@@ -204,11 +243,15 @@ public final class DracFunModularRegistry {
         return 1;
     }
 
-    private static int registerIntegrator(SFDracFun2 addon, ItemGroup group) {
+    private static int registerIntegrator(SFDracFun2 addon, ItemGroup group, boolean hardMode) {
         String id = "DRACFUN_MODULE_INTEGRATER";
         if (SlimefunItem.getById(id) != null) {
             return 0;
         }
+
+        ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
+        ItemStack moduleCore = requiredItem("DRACFUN_MODULE_CORE");
+        ItemStack draconicCore = requiredItem("DRACFUN_DRACONIC_CORE");
 
         SlimefunItemStack stack = new SlimefunItemStack(
                 id,
@@ -216,8 +259,31 @@ public final class DracFunModularRegistry {
                 "&dModule Integrator",
                 "&7Installs compatible modules into DracFun modular gear.",
                 "&7Can also remove all installed modules safely.");
-        new ModuleIntegratorMachine(group, stack).register(addon);
+        new ModuleIntegratorMachine(
+                        group,
+                        stack,
+                        RecipeType.ANCIENT_ALTAR,
+                        recipe(
+                                diamond, moduleCore, diamond,
+                                moduleCore, draconicCore, moduleCore,
+                                diamond, moduleCore, diamond))
+                .register(addon);
         return 1;
+    }
+
+    private static ItemStack requiredItem(String id) {
+        SlimefunItem item = SlimefunItem.getById(id);
+        if (item == null) {
+            throw new IllegalStateException("Required modular progression item is not registered: " + id);
+        }
+        return item.getItem().clone();
+    }
+
+    private static ItemStack[] recipe(
+            ItemStack a, ItemStack b, ItemStack c,
+            ItemStack d, ItemStack e, ItemStack f,
+            ItemStack g, ItemStack h, ItemStack i) {
+        return new ItemStack[] {a, b, c, d, e, f, g, h, i};
     }
 
     private static int fusionPowerForTier(int tier) {
