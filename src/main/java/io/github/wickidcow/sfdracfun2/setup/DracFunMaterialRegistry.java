@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.WitherProofBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.items.DragonHeartItem;
 import io.github.wickidcow.sfdracfun2.items.EnderDraconiumOre;
 import io.github.wickidcow.sfdracfun2.items.LegacyGuideItem;
 import org.bukkit.Material;
@@ -54,6 +55,13 @@ public final class DracFunMaterialRegistry {
                 Material.OBSIDIAN,
                 "&dDraconium Infused Obsidian");
 
+        SlimefunItemStack dragonHeart = stack(
+                "DRACFUN_DRAGON_HEART",
+                Material.DRAGON_BREATH,
+                "&5Dragon Heart",
+                "&7Guaranteed Ender Dragon drop by default.",
+                "&7Drop chance is configurable in Slimefun item settings.");
+
         if (enableEndResource && SlimefunItem.getById(ore.getItemId()) == null) {
             EnderDraconiumOre resource = new EnderDraconiumOre(
                     group,
@@ -101,6 +109,11 @@ public final class DracFunMaterialRegistry {
                                     obsidian, dust, obsidian,
                                     blazePowder, obsidian, blazePowder))
                     .register(addon);
+            registered++;
+        }
+
+        if (SlimefunItem.getById(dragonHeart.getItemId()) == null) {
+            new DragonHeartItem(group, dragonHeart).register(addon);
             registered++;
         }
 
