@@ -71,37 +71,11 @@ public enum ModuleFamily {
         return Set.copyOf(supportedTiers);
     }
 
-    /**
-     * Returns the word used by DracFun 2.0.10 in the Slimefun item ID.
-     *
-     * <p>The module family is called POWER internally and stores its value under
-     * DRACFUN_POWER, but the actual legacy item IDs were *_ENERGY_MODULE.</p>
-     */
-    public String legacyItemName() {
-        return this == POWER ? "ENERGY" : name();
-    }
-
-    /**
-     * Persistent module-count key used by DracFun 2.0.10.
-     *
-     * <p>This is deliberately different from the Slimefun item ID. The original
-     * data key was family-first and retained POWER rather than ENERGY.</p>
-     */
-    public String legacyDataId(ModuleTier tier) {
-        if (!supports(tier)) {
-            throw new IllegalArgumentException(name() + " does not exist at tier " + tier);
-        }
-        return legacyBaseId + '_' + tier.legacyName() + "_MODULE";
-    }
-
-    /**
-     * DracFun 2.0.10 Slimefun item ID: DRACFUN_<TIER>_<FAMILY>_MODULE.
-     */
     public String legacyItemId(ModuleTier tier) {
         if (!supports(tier)) {
             throw new IllegalArgumentException(name() + " does not exist at tier " + tier);
         }
-        return "DRACFUN_" + tier.legacyName() + '_' + legacyItemName() + "_MODULE";
+        return legacyBaseId + '_' + tier.legacyName() + "_MODULE";
     }
 
     private static Set<ModuleTier> tiers(ModuleTier first, ModuleTier... remaining) {
