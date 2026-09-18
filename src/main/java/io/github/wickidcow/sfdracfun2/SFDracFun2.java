@@ -50,7 +50,10 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
                 try {
                     boolean modularHardMode =
                             getConfig().getBoolean("options.hard-mode", true);
-                    int registered = DracFunModularRegistry.register(this, modularHardMode);
+                    int registered = DracFunModularRegistry.register(
+                            this,
+                            modularHardMode,
+                            getConfig().getBoolean("options.use-dragon-egg", true));
                     new CapacitorService(this);
                     getLogger().info("Registered " + registered + " clean-room modular gear/module identities.");
                     getLogger().info("Started player-owned modular capacitor charging service.");
