@@ -71,11 +71,24 @@ public enum ModuleFamily {
         return Set.copyOf(supportedTiers);
     }
 
+    /**
+     * Returns the word used by DracFun 2.0.10 in the Slimefun item ID.
+     *
+     * <p>The module family is called POWER internally and stores its value under
+     * DRACFUN_POWER, but the actual legacy item IDs were *_ENERGY_MODULE.</p>
+     */
+    public String legacyItemName() {
+        return this == POWER ? "ENERGY" : name();
+    }
+
+    /**
+     * DracFun 2.0.10 used DRACFUN_<TIER>_<FAMILY>_MODULE.
+     */
     public String legacyItemId(ModuleTier tier) {
         if (!supports(tier)) {
             throw new IllegalArgumentException(name() + " does not exist at tier " + tier);
         }
-        return legacyBaseId + '_' + tier.legacyName() + "_MODULE";
+        return "DRACFUN_" + tier.legacyName() + '_' + legacyItemName() + "_MODULE";
     }
 
     private static Set<ModuleTier> tiers(ModuleTier first, ModuleTier... remaining) {
