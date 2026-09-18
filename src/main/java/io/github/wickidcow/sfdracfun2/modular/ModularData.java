@@ -101,14 +101,6 @@ public final class ModularData {
         if (!family.supports(tier)) {
             return 0;
         }
-        int original = getInt(stack, LegacyDracFunKeys.key(family.legacyDataId(tier)));
-        if (original > 0) {
-            return original;
-        }
-
-        // DracFun Reborn 2.0.1 briefly wrote the tier-first item ID as the
-        // persistent key. Read it as a migration fallback so test items are
-        // not silently stripped when upgrading to the exact 2.0.10 format.
         return Math.max(0, getInt(stack, LegacyDracFunKeys.key(family.legacyItemId(tier))));
     }
 
@@ -164,7 +156,7 @@ public final class ModularData {
             return result;
         }
 
-        NamespacedKey key = LegacyDracFunKeys.key(family.legacyDataId(moduleTier));
+        NamespacedKey key = LegacyDracFunKeys.key(family.legacyItemId(moduleTier));
         setInt(stack, key, getModuleCount(stack, family, moduleTier) + 1);
         if (family == ModuleFamily.POWER) {
             recalculatePowerCapacity(stack);
@@ -191,7 +183,6 @@ public final class ModularData {
         PersistentDataContainer data = meta.getPersistentDataContainer();
         for (ModuleFamily family : ModuleFamily.values()) {
             for (ModuleTier tier : family.supportedTiers()) {
-                data.remove(LegacyDracFunKeys.key(family.legacyDataId(tier)));
                 data.remove(LegacyDracFunKeys.key(family.legacyItemId(tier)));
             }
         }
