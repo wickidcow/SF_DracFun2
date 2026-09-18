@@ -272,54 +272,31 @@ public final class ModularArmorEffectService implements Listener {
             return;
         }
 
-        int chargeCost;
-        int reviveHealth;
-        int cooldownSeconds;
-        int invincibleSeconds;
-
-        switch (tier) {
-            case WYVERN -> {
-                chargeCost = 12;
-                reviveHealth = 6;
-                cooldownSeconds = 120;
-                invincibleSeconds = 4;
-            }
-            case DRACONIC -> {
-                chargeCost = 15;
-                reviveHealth = 12;
-                cooldownSeconds = 60;
-                invincibleSeconds = 6;
-            }
-            case CHAOTIC -> {
-                chargeCost = 24;
-                reviveHealth = 20;
-                cooldownSeconds = 45;
-                invincibleSeconds = 8;
-            }
-            case BASIC -> {
-                return;
-            }
-        }
-
-        if (ModularData.getCharge(armor) < chargeCost) {
+        UndyingSpec spec = switch (tier) {
+            case WYVERN -> new UndyingSpec(12, 6, 120, 4);
+            case DRACONIC -> new UndyingSpec(15, 12, 60, 6);
+            case CHAOTIC -> new UndyingSpec(24, 20, 45, 8);
+            case BASIC -> null;
+        };
+        if (spec == null || ModularData.getCharge(armor) < spec.chargeCost()) {
             return;
         }
 
-        ModularData.removeCharge(armor, chargeCost);
+        ModularData.removeCharge(armor, spec.chargeCost());
         undyingCooldownUntil.put(
                 uuid,
-                now + cooldownSeconds * 1000L);
+                now + spec.cooldownSeconds() * 1000L);
         invincibleUntil.put(
                 uuid,
-                now + invincibleSeconds * 1000L);
+                now + spec.invincibleSeconds() * 1000L);
 
         event.setCancelled(true);
         event.setDamage(0D);
+        var maxHealth =
+                player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
         player.setHealth(Math.min(
-                player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH) == null
-                        ? reviveHealth
-                        : player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue(),
-                reviveHealth));
+                maxHealth == null ? spec.reviveHealth() : maxHealth.getValue(),
+                spec.reviveHealth()));
         player.playSound(
                 player.getLocation(),
                 Sound.ITEM_TOTEM_USE,
@@ -379,4 +356,10 @@ public final class ModularArmorEffectService implements Listener {
     private record FlightGrant(
             boolean previousAllowFlight,
             float previousFlySpeed) {}
+
+    private record UndyingSpec(
+            int chargeCost,
+            int reviveHealth,
+            int cooldownSeconds,
+            int invincibleSeconds) {}
 }
