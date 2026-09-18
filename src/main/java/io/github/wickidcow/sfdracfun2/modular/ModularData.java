@@ -44,6 +44,14 @@ public final class ModularData {
         setInt(stack, LegacyDracFunKeys.COOLDOWN, Math.max(0, cooldownSeconds));
     }
 
+    public static int getAutoFeedFood(ItemStack stack) {
+        return Math.max(0, getInt(stack, LegacyDracFunKeys.AUTO_FEED));
+    }
+
+    public static void setAutoFeedFood(ItemStack stack, int foodPoints) {
+        setInt(stack, LegacyDracFunKeys.AUTO_FEED, Math.max(0, foodPoints));
+    }
+
     public static ModuleTier highestTier(ItemStack stack, ModuleFamily family) {
         ModuleTier[] tiers = ModuleTier.values();
         for (int i = tiers.length - 1; i >= 0; i--) {

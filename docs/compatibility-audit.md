@@ -104,6 +104,17 @@ The supplied 2.0.10 binary shows that powered modular tool effects require posit
 
 Reborn keeps those limits while applying two safety corrections: the already-breaking AOE origin is skipped to prevent duplicate drops, and extra block mutations exclude Slimefun/custom/protected blocks. Block mutation is dispatched through the Paper/Folia region scheduler.
 
+### Modular AUTO_FEED behavior
+
+The legacy module count keys use the same generated runtime form as the module item IDs: `DRACFUN_<FAMILY>_<TIER>_MODULE`. The JVM concat recipe in 2.0.10 explicitly appends `_<TIER>_MODULE`, so Reborn's existing per-tier PDC keys are migration-compatible.
+
+AUTO_FEED also uses the separate family key `DRACFUN_AUTO_FEED` as a buffered-food counter on modular armor. Its highest installed tier sets a capacity of 40 (Basic), 150 (Wyvern), 400 (Draconic), or 1000 (Chaotic) hunger points.
+
+- Sneak-right-clicking modular armor in the main hand loads supported food from the offhand into that buffer.
+- When a food-level change would reach 12 or lower, the chestplate feeds the player from the buffer and plays the legacy burp sound.
+- On starvation damage, the chestplate feeds the player from the buffer but does not cancel the current starvation hit.
+- Reborn preserves offhand item metadata when consuming only part of a food stack; the old implementation rebuilt leftovers from material/amount and could discard metadata.
+
 ## Confirmed modern compatibility breakpoints
 
 ### Bukkit attribute names

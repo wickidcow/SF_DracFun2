@@ -31,7 +31,12 @@ public final class ModularLore {
         addValue(lore, "Arrow Speed", ModuleEffects.arrowSpeed(stack));
         addValue(lore, "Damage", ModuleEffects.damage(stack));
         addValue(lore, "Flight", ModuleEffects.flight(stack));
-        addValue(lore, "Auto Feed", ModuleEffects.autoFeed(stack));
+        int autoFeedCapacity = ModuleEffects.autoFeed(stack);
+        if (autoFeedCapacity > 0) {
+            lore.add(ChatColor.DARK_GRAY + "Auto Feed: " + ChatColor.GREEN
+                    + ModularData.getAutoFeedFood(stack)
+                    + ChatColor.DARK_GRAY + " / " + ChatColor.GREEN + autoFeedCapacity);
+        }
         addValue(lore, "Harvest", ModuleEffects.harvest(stack));
         addValue(lore, "Jump", ModuleEffects.jump(stack));
         addValue(lore, "Shield Capacity", ModuleEffects.shieldCapacity(stack));

@@ -43,7 +43,17 @@ public final class ModuleEffects {
     }
 
     public static int autoFeed(ItemStack stack) {
-        return weighted(stack, ModuleFamily.AUTO_FEED, 40, 150, 400, 1_000);
+        ModuleTier tier = ModularData.highestTier(stack, ModuleFamily.AUTO_FEED);
+        if (tier == null) {
+            return 0;
+        }
+
+        return switch (tier) {
+            case BASIC -> 40;
+            case WYVERN -> 150;
+            case DRACONIC -> 400;
+            case CHAOTIC -> 1_000;
+        };
     }
 
     public static int harvest(ItemStack stack) {
