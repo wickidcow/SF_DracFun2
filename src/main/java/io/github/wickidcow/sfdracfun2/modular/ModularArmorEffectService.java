@@ -8,7 +8,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
-import org.bukkit.entity.Arrow;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -177,7 +177,7 @@ public final class ModularArmorEffectService implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onArrowDamage(EntityDamageByEntityEvent event) {
         if (!(event.getEntity() instanceof Player player)
-                || !(event.getDamager() instanceof Arrow)) {
+                || !(event.getDamager() instanceof AbstractArrow)) {
             return;
         }
 
