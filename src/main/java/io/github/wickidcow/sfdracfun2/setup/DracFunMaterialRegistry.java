@@ -20,18 +20,6 @@ public final class DracFunMaterialRegistry {
         ItemGroup group = DracFunItemGroups.materials(addon);
         int registered = 0;
 
-        SlimefunItemStack guide = stack(
-                "DRACFUN_GUIDE",
-                Material.BOOK,
-                "&dDracFun Reborn Guide",
-                "&7Compatibility guide identity for migrated DracFun worlds.",
-                "&7Use the Slimefun guide categories for recipes and progression.");
-
-        if (SlimefunItem.getById(guide.getItemId()) == null) {
-            new SlimefunItem(group, guide, RecipeType.NULL, new ItemStack[9]).register(addon);
-            registered++;
-        }
-
         SlimefunItemStack ore = stack(
                 "DRACFUN_DRACONIUM_ORE",
                 Material.END_STONE,
