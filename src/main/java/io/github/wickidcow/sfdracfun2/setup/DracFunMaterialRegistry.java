@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.WitherProofBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
 import io.github.wickidcow.sfdracfun2.items.DragonHeartItem;
 import io.github.wickidcow.sfdracfun2.items.EnderDraconiumOre;
 import io.github.wickidcow.sfdracfun2.items.LegacyGuideItem;
@@ -93,7 +94,7 @@ public final class DracFunMaterialRegistry {
         }
 
         if (SlimefunItem.getById(block.getItemId()) == null) {
-            new SlimefunItem(group, block, RecipeType.ENHANCED_CRAFTING_TABLE, fill(ingot)).register(addon);
+            new EnergyCorePieceItem(group, block, RecipeType.ENHANCED_CRAFTING_TABLE, fill(ingot)).register(addon);
             registered++;
         }
 
