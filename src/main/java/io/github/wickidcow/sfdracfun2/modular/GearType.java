@@ -59,11 +59,6 @@ public enum GearType {
             case 3 -> "CHAOTIC";
             default -> throw new IllegalArgumentException("Gear tier must be 1-3, got " + gearTier);
         };
-
-        // The type is named STAFF_OF_POWER internally, but DracFun 2.0.10's
-        // registered Slimefun IDs were DRACFUN_DRACONIC_STAFF and
-        // DRACFUN_CHAOTIC_STAFF.
-        String itemSuffix = this == STAFF ? "STAFF" : legacyName;
-        return "DRACFUN_" + prefix + '_' + itemSuffix;
+        return "DRACFUN_" + prefix + '_' + legacyName;
     }
 }
