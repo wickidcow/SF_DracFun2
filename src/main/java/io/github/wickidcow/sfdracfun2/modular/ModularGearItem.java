@@ -18,7 +18,6 @@ public class ModularGearItem extends SlimefunItem implements NotPlaceable, Soulb
         super(group, item, RecipeType.NULL, new ItemStack[9]);
         this.gearType = gearType;
         this.gearTier = gearTier;
-        setHidden(true);
     }
 
     public GearType getGearType() {
