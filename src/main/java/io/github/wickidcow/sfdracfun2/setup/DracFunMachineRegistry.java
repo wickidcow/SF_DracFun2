@@ -19,21 +19,37 @@ public final class DracFunMachineRegistry {
 
     private DracFunMachineRegistry() {}
 
-    public static int registerEnergyInfuser(SFDracFun2 addon) {
+    public static int registerEnergyInfuser(SFDracFun2 addon, boolean hardMode) {
+        int registered = DracFunFusionComponentRegistry.registerParticleGenerator(addon, hardMode);
+
         String id = "DRACFUN_ENERGY_INFUSER";
         if (SlimefunItem.getById(id) != null) {
-            return 0;
+            return registered;
         }
 
         ItemGroup group = DracFunItemGroups.machines(addon);
+        ItemStack draconium = requiredItem(
+                hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
+        ItemStack particleGenerator = requiredItem("DRACFUN_PARTICLE_GENERATOR");
+        ItemStack draconicCore = requiredItem("DRACFUN_DRACONIC_CORE");
+
         SlimefunItemStack stack = new SlimefunItemStack(
                 id,
                 Material.RESPAWN_ANCHOR,
                 "&dEnergy Infuser",
                 "&7Charges powered DracFun modular equipment.",
                 "&71000 J = 1 item charge unit.");
-        new EnergyInfuserMachine(group, stack).register(addon);
-        return 1;
+        new EnergyInfuserMachine(
+                        group,
+                        stack,
+                        io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType.ENHANCED_CRAFTING_TABLE,
+                        new ItemStack[] {
+                            draconium, particleGenerator, draconium,
+                            draconicCore, new ItemStack(Material.ENCHANTING_TABLE), draconicCore,
+                            draconium, draconicCore, draconium
+                        })
+                .register(addon);
+        return registered + 1;
     }
 
     public static int registerItemConverter(SFDracFun2 addon) {
@@ -49,7 +65,16 @@ public final class DracFunMachineRegistry {
                 "&dItem Converter",
                 "&7Rebuilds supported legacy DracFun items",
                 "&7using the current clean-room item templates.");
-        new ItemConverterMachine(group, stack).register(addon);
+        new ItemConverterMachine(
+                        group,
+                        stack,
+                        io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType.MAGIC_WORKBENCH,
+                        new ItemStack[] {
+                            null, null, null,
+                            null, new ItemStack(Material.CRAFTING_TABLE), null,
+                            null, null, null
+                        })
+                .register(addon);
         return 1;
     }
 
