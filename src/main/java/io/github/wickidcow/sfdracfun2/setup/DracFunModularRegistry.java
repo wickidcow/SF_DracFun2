@@ -9,6 +9,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.Unplaceabl
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.modular.GearType;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
+import io.github.wickidcow.sfdracfun2.modular.LegacyModuleRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.modular.ModularArmorItem;
 import io.github.wickidcow.sfdracfun2.modular.ModularGearItem;
 import io.github.wickidcow.sfdracfun2.modular.ModularWeaponItem;
@@ -35,11 +36,17 @@ public final class DracFunModularRegistry {
 
     private DracFunModularRegistry() {}
 
-    public static int register(SFDracFun2 addon, boolean hardMode) {
+    public static int register(
+            SFDracFun2 addon,
+            boolean hardMode,
+            boolean useDragonEgg) {
         ItemGroup group = DracFunItemGroups.modular(addon);
         int registered = 0;
 
-        registered += DracFunFusionComponentRegistry.registerParticleGenerator(addon, hardMode);
+        registered += DracFunSharedProgressionRegistry.register(
+                addon,
+                hardMode,
+                useDragonEgg);
         registered += registerModuleCore(addon, group, hardMode);
 
         for (GearType type : List.of(
@@ -60,8 +67,15 @@ public final class DracFunModularRegistry {
         registered += registerGear(addon, group, GearType.STAFF, 3);
 
         for (ModuleFamily family : ModuleFamily.values()) {
-            for (ModuleTier tier : family.supportedTiers()) {
-                registered += registerModule(addon, group, family, tier);
+            for (ModuleTier tier : ModuleTier.values()) {
+                if (family.supports(tier)) {
+                    registered += registerModule(
+                            addon,
+                            group,
+                            family,
+                            tier,
+                            hardMode);
+                }
             }
         }
 
@@ -226,7 +240,8 @@ public final class DracFunModularRegistry {
             SFDracFun2 addon,
             ItemGroup group,
             ModuleFamily family,
-            ModuleTier tier) {
+            ModuleTier tier,
+            boolean hardMode) {
         String id = family.legacyItemId(tier);
         if (SlimefunItem.getById(id) != null) {
             return 0;
@@ -239,7 +254,17 @@ public final class DracFunModularRegistry {
                 "&7Module cost: &f" + family.pointCost(),
                 "&7Target: &f" + family.targetType().legacyName(),
                 "&8DracFun Reborn compatibility module");
-        new ModuleItem(group, stack, family, tier).register(addon);
+        new ModuleItem(
+                        group,
+                        stack,
+                        family,
+                        tier,
+                        RecipeType.ANCIENT_ALTAR,
+                        LegacyModuleRecipeCatalog.recipe(
+                                family,
+                                tier,
+                                hardMode))
+                .register(addon);
         return 1;
     }
 
