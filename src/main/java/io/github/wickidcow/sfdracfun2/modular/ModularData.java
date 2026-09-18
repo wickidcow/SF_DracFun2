@@ -28,6 +28,34 @@ public final class ModularData {
         return Math.max(0, getInt(stack, LegacyDracFunKeys.FUSION_POWER));
     }
 
+    public static int getShield(ItemStack stack) {
+        return Math.max(0, getInt(stack, LegacyDracFunKeys.SHIELD));
+    }
+
+    public static void setShield(ItemStack stack, int shield) {
+        setInt(stack, LegacyDracFunKeys.SHIELD, Math.max(0, shield));
+    }
+
+    public static int getShieldCooldown(ItemStack stack) {
+        return Math.max(0, getInt(stack, LegacyDracFunKeys.COOLDOWN));
+    }
+
+    public static void setShieldCooldown(ItemStack stack, int cooldownSeconds) {
+        setInt(stack, LegacyDracFunKeys.COOLDOWN, Math.max(0, cooldownSeconds));
+    }
+
+    public static ModuleTier highestTier(ItemStack stack, ModuleFamily family) {
+        ModuleTier[] tiers = ModuleTier.values();
+        for (int i = tiers.length - 1; i >= 0; i--) {
+            ModuleTier tier = tiers[i];
+            if (family.supports(tier) && getModuleCount(stack, family, tier) > 0) {
+                return tier;
+            }
+        }
+        return null;
+    }
+
+
     public static void setCharge(ItemStack stack, int charge) {
         int capacity = getCapacity(stack);
         setInt(stack, LegacyDracFunKeys.ENERGY, clamp(charge, 0, capacity));
