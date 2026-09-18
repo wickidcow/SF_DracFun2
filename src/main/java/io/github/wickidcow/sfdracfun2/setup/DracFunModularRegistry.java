@@ -47,6 +47,9 @@ public final class DracFunModularRegistry {
                 addon,
                 hardMode,
                 useDragonEgg);
+        registered += DracFunEnergyCoreRegistry.registerEnergyMaterials(
+                addon,
+                hardMode);
         registered += registerModuleCore(addon, group, hardMode);
 
         for (GearType type : List.of(
