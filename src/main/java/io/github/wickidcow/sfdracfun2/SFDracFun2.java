@@ -42,10 +42,25 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
 
         boolean modularGear = getConfig().getBoolean("features.modular-gear", false);
         if (modularGear) {
-            int registered = DracFunModularRegistry.register(this);
-            new CapacitorService(this);
-            getLogger().info("Registered " + registered + " clean-room modular gear/module identities.");
-            getLogger().info("Started player-owned modular capacitor charging service.");
+            if (!materialsEnabled) {
+                modularGear = false;
+                getLogger().warning(
+                        "Modular gear requires features.materials=true; modular registration was skipped.");
+            } else {
+                try {
+                    boolean modularHardMode =
+                            getConfig().getBoolean("options.hard-mode", true);
+                    int registered = DracFunModularRegistry.register(this, modularHardMode);
+                    new CapacitorService(this);
+                    getLogger().info("Registered " + registered + " clean-room modular gear/module identities.");
+                    getLogger().info("Started player-owned modular capacitor charging service.");
+                } catch (IllegalStateException exception) {
+                    modularGear = false;
+                    getLogger().severe(
+                            "Modular gear prerequisites were unavailable; modular registration was skipped: "
+                                    + exception.getMessage());
+                }
+            }
         }
 
         if (getConfig().getBoolean("features.energy-infuser", false)) {
