@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,6 +71,8 @@ public final class ChaosGuardianService implements Listener {
             LegacyDracFunKeys.key("REBORN_CHAOS_MINION");
     private static final NamespacedKey CRYSTAL_COUNT =
             LegacyDracFunKeys.key("REBORN_CHAOS_CRYSTAL_COUNT");
+    private static final NamespacedKey CAGE_MASK =
+            LegacyDracFunKeys.key("REBORN_CHAOS_CAGE_MASK");
 
     private static final long ATTACK_PERIOD_TICKS = 600L;
     private static final double PARTICIPANT_RANGE_SQUARED = 256D * 256D;
@@ -80,6 +83,7 @@ public final class ChaosGuardianService implements Listener {
     private final int witherLifetimeTicks;
     private final double laserDamageCap;
     private final Set<UUID> pendingWorlds = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, Map<CageBlock, Material>> cageBlocks = new ConcurrentHashMap<>();
 
     public ChaosGuardianService(SFDracFun2 plugin) {
         this.plugin = plugin;
@@ -115,6 +119,13 @@ public final class ChaosGuardianService implements Listener {
                                 CRYSTAL_COUNT,
                                 PersistentDataType.INTEGER,
                                 battle.getHealingCrystals().size());
+                        for (EnderCrystal crystal : battle.getHealingCrystals()) {
+                            Slimefun.runSyncFor(crystal, () -> {
+                                if (hasTag(crystal, CRYSTAL)) {
+                                    restoreCageTracking(crystal);
+                                }
+                            });
+                        }
                         schedulePulse(dragon);
                     });
                 }
@@ -246,7 +257,7 @@ public final class ChaosGuardianService implements Listener {
             Slimefun.runSyncFor(crystal, () -> {
                 tag(crystal, CRYSTAL);
                 if (crystalCages) {
-                    buildCage(crystal.getLocation());
+                    buildCage(crystal);
                 }
             });
         }
@@ -442,8 +453,9 @@ public final class ChaosGuardianService implements Listener {
             return;
         }
 
-        Location cage = crystal.getLocation().clone();
-        DragonBattle battle = crystal.getWorld().getEnderDragonBattle();
+        UUID crystalId = crystal.getUniqueId();
+        World crystalWorld = crystal.getWorld();
+        DragonBattle battle = crystalWorld.getEnderDragonBattle();
         EnderDragon guardian = battle == null ? null : battle.getEnderDragon();
 
         Slimefun.runSyncFor(
@@ -451,7 +463,7 @@ public final class ChaosGuardianService implements Listener {
                 () -> {
                     // A surviving crystal keeps its shield contribution.
                 },
-                () -> onChaosCrystalRetired(cage, guardian),
+                () -> onChaosCrystalRetired(crystalId, crystalWorld, guardian),
                 1L);
     }
 
@@ -599,14 +611,21 @@ public final class ChaosGuardianService implements Listener {
         for (EnderCrystal crystal : battle.getHealingCrystals()) {
             Slimefun.runSyncFor(crystal, () -> {
                 if (hasTag(crystal, CRYSTAL)) {
-                    cleanupCage(crystal.getLocation());
+                    cleanupCage(crystal.getUniqueId(), crystal.getWorld());
                 }
             });
         }
     }
 
-    private void buildCage(Location crystalLocation) {
-        Location base = crystalLocation.getBlock().getLocation();
+    private void buildCage(EnderCrystal crystal) {
+        if (!crystalCages) {
+            return;
+        }
+
+        UUID crystalId = crystal.getUniqueId();
+        Location base = crystal.getLocation().getBlock().getLocation();
+        Map<CageBlock, Material> tracked = new ConcurrentHashMap<>();
+        cageBlocks.put(crystalId, tracked);
 
         for (int x = -2; x <= 2; x++) {
             for (int y = -1; y <= 3; y++) {
@@ -618,6 +637,11 @@ public final class ChaosGuardianService implements Listener {
                     }
 
                     Location target = base.clone().add(x, y, z);
+                    CageBlock key = new CageBlock(
+                            target.getBlockX(),
+                            target.getBlockY(),
+                            target.getBlockZ());
+
                     Slimefun.runSyncAt(target, () -> {
                         if (!plugin.isEnabled()) {
                             return;
@@ -628,48 +652,141 @@ public final class ChaosGuardianService implements Listener {
                             return;
                         }
 
-                        if (top) {
-                            block.setType(ThreadLocalRandom.current().nextBoolean()
-                                    ? Material.CRYING_OBSIDIAN
-                                    : Material.OBSIDIAN);
-                        } else {
-                            block.setType(Material.IRON_BARS);
-                        }
+                        Material placed = top
+                                ? (ThreadLocalRandom.current().nextBoolean()
+                                        ? Material.CRYING_OBSIDIAN
+                                        : Material.OBSIDIAN)
+                                : Material.IRON_BARS;
+                        block.setType(placed);
+                        tracked.put(key, placed);
                     });
                 }
             }
         }
+
+        // Persist the exact blocks we created. A restart can then clean up the cage
+        // without guessing which nearby obsidian/iron bars belonged to the player.
+        Slimefun.runSyncFor(
+                crystal,
+                () -> persistCageTracking(crystal, base, tracked),
+                () -> {},
+                40L);
     }
 
-    private void cleanupCage(Location crystalLocation) {
+    private void persistCageTracking(
+            EnderCrystal crystal,
+            Location base,
+            Map<CageBlock, Material> tracked) {
+        if (!crystal.isValid()) {
+            return;
+        }
+
+        byte[] mask = new byte[125];
+        for (Map.Entry<CageBlock, Material> entry : tracked.entrySet()) {
+            CageBlock block = entry.getKey();
+            int dx = block.x() - base.getBlockX();
+            int dy = block.y() - base.getBlockY();
+            int dz = block.z() - base.getBlockZ();
+            int index = cageIndex(dx, dy, dz);
+            if (index >= 0) {
+                mask[index] = cageMaterialCode(entry.getValue());
+            }
+        }
+
+        crystal.getPersistentDataContainer().set(
+                CAGE_MASK,
+                PersistentDataType.BYTE_ARRAY,
+                mask);
+    }
+
+    private void restoreCageTracking(EnderCrystal crystal) {
+        byte[] mask = crystal.getPersistentDataContainer().get(
+                CAGE_MASK,
+                PersistentDataType.BYTE_ARRAY);
+        if (mask == null || mask.length != 125) {
+            return;
+        }
+
+        Location base = crystal.getLocation().getBlock().getLocation();
+        Map<CageBlock, Material> tracked = new ConcurrentHashMap<>();
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dy = -1; dy <= 3; dy++) {
+                for (int dz = -2; dz <= 2; dz++) {
+                    int index = cageIndex(dx, dy, dz);
+                    Material material = cageMaterial(mask[index]);
+                    if (material != null) {
+                        tracked.put(
+                                new CageBlock(
+                                        base.getBlockX() + dx,
+                                        base.getBlockY() + dy,
+                                        base.getBlockZ() + dz),
+                                material);
+                    }
+                }
+            }
+        }
+
+        if (!tracked.isEmpty()) {
+            cageBlocks.put(crystal.getUniqueId(), tracked);
+        }
+    }
+
+    private void cleanupCage(UUID crystalId, World world) {
         if (!crystalCages) {
             return;
         }
 
-        Location base = crystalLocation.getBlock().getLocation();
-        for (int x = -2; x <= 2; x++) {
-            for (int y = -1; y <= 3; y++) {
-                for (int z = -2; z <= 2; z++) {
-                    boolean top = y == 3;
-                    boolean shell = top || y == -1 || Math.abs(x) == 2 || Math.abs(z) == 2;
-                    if (!shell) {
-                        continue;
-                    }
+        Map<CageBlock, Material> tracked = cageBlocks.remove(crystalId);
+        if (tracked == null || tracked.isEmpty()) {
+            return;
+        }
 
-                    Location target = base.clone().add(x, y, z);
-                    Slimefun.runSyncAt(target, () -> {
-                        var block = target.getBlock();
-                        Material type = block.getType();
-                        if (type == Material.IRON_BARS
-                                || type == Material.OBSIDIAN
-                                || type == Material.CRYING_OBSIDIAN) {
-                            block.setType(Material.AIR);
-                        }
-                    });
+        for (Map.Entry<CageBlock, Material> entry : tracked.entrySet()) {
+            CageBlock key = entry.getKey();
+            Material expected = entry.getValue();
+            Location target = new Location(world, key.x(), key.y(), key.z());
+
+            Slimefun.runSyncAt(target, () -> {
+                var block = target.getBlock();
+                // If somebody changed a cage block during the fight, leave the new
+                // block alone instead of deleting player work during cleanup.
+                if (block.getType() == expected) {
+                    block.setType(Material.AIR);
                 }
-            }
+            });
         }
     }
+
+    private static int cageIndex(int dx, int dy, int dz) {
+        if (dx < -2 || dx > 2 || dy < -1 || dy > 3 || dz < -2 || dz > 2) {
+            return -1;
+        }
+        return ((dx + 2) * 25) + ((dy + 1) * 5) + (dz + 2);
+    }
+
+    private static byte cageMaterialCode(Material material) {
+        if (material == Material.IRON_BARS) {
+            return 1;
+        }
+        if (material == Material.OBSIDIAN) {
+            return 2;
+        }
+        if (material == Material.CRYING_OBSIDIAN) {
+            return 3;
+        }
+        return 0;
+    }
+
+    private static Material cageMaterial(byte code) {
+        return switch (code) {
+            case 1 -> Material.IRON_BARS;
+            case 2 -> Material.OBSIDIAN;
+            case 3 -> Material.CRYING_OBSIDIAN;
+            default -> null;
+        };
+    }
+
+    private record CageBlock(int x, int y, int z) {}
 
     private static boolean canBreakCrystal(Player player) {
         SlimefunItem item = SlimefunItem.getByItem(player.getInventory().getItemInMainHand());
@@ -701,8 +818,8 @@ public final class ChaosGuardianService implements Listener {
         return count == null ? 0 : Math.max(0, count);
     }
 
-    private void onChaosCrystalRetired(Location cage, EnderDragon guardian) {
-        Slimefun.runSyncAt(cage, () -> cleanupCage(cage));
+    private void onChaosCrystalRetired(UUID crystalId, World world, EnderDragon guardian) {
+        cleanupCage(crystalId, world);
 
         if (guardian == null) {
             return;

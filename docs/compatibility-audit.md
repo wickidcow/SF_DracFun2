@@ -140,6 +140,12 @@ AUTO_FEED also uses the separate family key `DRACFUN_AUTO_FEED` as a buffered-fo
 - On starvation damage, the chestplate feeds the player from the buffer but does not cancel the current starvation hit.
 - Reborn preserves offhand item metadata when consuming only part of a food stack; the old implementation rebuilt leftovers from material/amount and could discard metadata.
 
+### Energy Core and Guardian safety corrections
+
+The Energy Core keeps 2.0.10's multiblock layouts and capacities, but replaces the old global `notComplete` flag with per-activator state. EnergyNet activity now also re-validates the local structure before exposing stored charge, so a known broken structure stops supplying power immediately rather than waiting for the next core ticker. An `UNKNOWN` validation caused only by unloaded neighboring data retains the last-known state and never destroys charge.
+
+Chaos Guardian crystal cages are terrain-safe in both directions. Reborn only places cage blocks into air, records the exact coordinates and materials it created, persists that record on the crystal for restart recovery, and removes only those exact unchanged blocks during cleanup. Pre-existing/player blocks in the cage shell are never deleted by the cleanup pass.
+
 ## Confirmed modern compatibility breakpoints
 
 ### Bukkit attribute names

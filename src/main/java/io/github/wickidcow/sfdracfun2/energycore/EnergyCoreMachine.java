@@ -96,7 +96,15 @@ public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetCo
 
     @Override
     public boolean isEnergyNetActive(@Nonnull Location location, @Nonnull ASlimefunDataContainer data) {
-        return "true".equals(data.getData(DATA_COMPLETE));
+        if (!"true".equals(data.getData(DATA_COMPLETE))) {
+            return false;
+        }
+
+        EnergyCoreStructure.Validation validation = tier.structure().validate(location);
+        // A known broken structure must stop participating in EnergyNet immediately,
+        // even before its synchronized validation ticker has a chance to clear charge.
+        // UNKNOWN keeps the last-known state so chunk unloads do not destroy availability.
+        return validation != EnergyCoreStructure.Validation.INCOMPLETE;
     }
 
     @Override
