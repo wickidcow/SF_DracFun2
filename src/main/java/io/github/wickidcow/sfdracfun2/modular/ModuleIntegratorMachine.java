@@ -8,7 +8,6 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.wickidcow.sfdracfun2.compat.ProtectionCompat;
-import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -29,10 +28,24 @@ import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 public final class ModuleIntegratorMachine extends SlimefunItem {
 
     private static final int GEAR_INPUT = 10;
+    private static final int GUIDE_SLOT = 11;
     private static final int MODULE_INPUT = 12;
     private static final int INSTALL_BUTTON = 14;
     private static final int OUTPUT = 16;
-    private static final int REMOVE_BUTTON = 22;
+    private static final int REMOVE_BUTTON = 26;
+
+    private static final int[] INPUT_BORDER = {
+        0, 1, 2, 3, 4, 9, 11, 13, 18, 19, 20, 21, 22
+    };
+    private static final int[] OUTPUT_BORDER = {
+        6, 7, 8, 15, 17, 24, 25, 26
+    };
+    private static final int[] MODULE_OUTPUT_BORDER = {
+        27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 44, 45, 53
+    };
+    private static final int[] MODULE_OUTPUTS = {
+        37, 38, 39, 40, 41, 42, 43, 46, 47, 48, 49, 50, 51, 52
+    };
 
     public ModuleIntegratorMachine(
             ItemGroup group,
@@ -44,7 +57,7 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
         new BlockMenuPreset(getId(), getItemName()) {
             @Override
             public void init() {
-                setSize(27);
+                setSize(54);
                 constructMenu(this);
             }
 
@@ -80,26 +93,39 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
                 if (data != null && data.getBlockMenu() != null) {
                     BlockMenu menu = data.getBlockMenu();
                     menu.dropItems(menu.getLocation(), new int[] {GEAR_INPUT, MODULE_INPUT, OUTPUT});
+                    menu.dropItems(menu.getLocation(), MODULE_OUTPUTS);
                 }
             }
         });
     }
 
     private void constructMenu(BlockMenuPreset preset) {
-        int[] background = new int[] {
-            0, 1, 2, 3, 4, 5, 6, 7, 8,
-            9, 11, 13, 15, 17,
-            18, 19, 20, 21, 23, 24, 25, 26
-        };
-        preset.drawBackground(background);
-        preset.addItem(INSTALL_BUTTON, button(Material.LIME_DYE, "&aInstall Module", "&7Gear in slot 10", "&7Module in slot 12"), ChestMenuUtils.getEmptyClickHandler());
-        preset.addItem(REMOVE_BUTTON, button(Material.BARRIER, "&cRemove All Modules", "&7Returns installed modules", "&7and resets stored energy"), ChestMenuUtils.getEmptyClickHandler());
-        preset.addMenuClickHandler(OUTPUT, (player, slot, clicked, action) -> !isEmpty(clicked));
+        preset.drawBackground(ChestMenuUtils.getInputSlotTexture(), INPUT_BORDER);
+        preset.drawBackground(ChestMenuUtils.getOutputSlotTexture(), OUTPUT_BORDER);
+        preset.drawBackground(new ItemStack(Material.LIME_STAINED_GLASS_PANE), MODULE_OUTPUT_BORDER);
+
+        preset.addItem(5, new ItemStack(Material.BLACK_STAINED_GLASS_PANE), ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(23, new ItemStack(Material.BLACK_STAINED_GLASS_PANE), ChestMenuUtils.getEmptyClickHandler());
+
+        preset.addItem(
+                GUIDE_SLOT,
+                button(
+                        Material.BOOK,
+                        ChatColor.GREEN + "Place your item on the left and modifier on the right!"),
+                ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(
+                INSTALL_BUTTON,
+                button(Material.GREEN_STAINED_GLASS_PANE, ChatColor.GREEN + "Click to Integrate!"),
+                ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(
+                REMOVE_BUTTON,
+                button(Material.BARRIER, ChatColor.RED + "Removes all modules from your item!"),
+                ChestMenuUtils.getEmptyClickHandler());
     }
 
     private void install(BlockMenu menu, Player player) {
         if (!isEmpty(menu.getItemInSlot(OUTPUT))) {
-            error(player, "Take the existing output before installing another module.");
+            error(player, "Unable to integrate module due to occupied output slot!");
             return;
         }
 
@@ -113,11 +139,11 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
         SlimefunItem gearSf = SlimefunItem.getByItem(gearInput);
         SlimefunItem moduleSf = SlimefunItem.getByItem(moduleInput);
         if (!(gearSf instanceof ModularGearItem gear)) {
-            error(player, "The gear slot only accepts DracFun modular equipment.");
+            error(player, "Module integration is restricted to modular items exclusively!");
             return;
         }
         if (!(moduleSf instanceof ModuleItem module)) {
-            error(player, "The module slot only accepts DracFun modules.");
+            error(player, "Invalid Module!");
             return;
         }
 
@@ -138,72 +164,59 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
         menu.replaceExistingItem(GEAR_INPUT, null);
         consumeOne(menu, MODULE_INPUT, moduleInput);
         menu.replaceExistingItem(OUTPUT, resultStack);
-        player.sendMessage(ChatColor.GREEN + "Module installed.");
     }
 
     private void removeAll(BlockMenu menu, Player player) {
         if (!isEmpty(menu.getItemInSlot(OUTPUT))) {
-            error(player, "Take the existing output before removing modules.");
+            error(player, "Unable to remove modules due to occupied output slot!");
             return;
+        }
+
+        for (int slot : MODULE_OUTPUTS) {
+            if (!isEmpty(menu.getItemInSlot(slot))) {
+                error(player, "Unable to remove modules. Ensure all output slots are empty before proceeding!");
+                return;
+            }
         }
 
         ItemStack gearInput = menu.getItemInSlot(GEAR_INPUT);
         if (isEmpty(gearInput)) {
-            error(player, "Insert modular gear in the gear slot first.");
             return;
         }
 
         SlimefunItem gearSf = SlimefunItem.getByItem(gearInput);
         if (!(gearSf instanceof ModularGearItem gear)) {
-            error(player, "The gear slot only accepts DracFun modular equipment.");
+            error(player, "Module removal is restricted to modular items exclusively!");
             return;
         }
 
         ItemStack resultStack = gearInput.clone();
         resultStack.setAmount(1);
-        int returned = returnModules(player, resultStack);
-        ModularData.removeAllModules(resultStack);
-        ModularLore.refresh(resultStack, gear);
 
-        menu.replaceExistingItem(GEAR_INPUT, null);
-        menu.replaceExistingItem(OUTPUT, resultStack);
-        player.sendMessage(ChatColor.GREEN + "Removed and returned " + returned + " module(s).");
-    }
-
-    private int returnModules(Player player, ItemStack gear) {
-        int total = 0;
+        int outputIndex = 0;
         for (ModuleFamily family : ModuleFamily.values()) {
             for (ModuleTier tier : family.supportedTiers()) {
-                int count = ModularData.getModuleCount(gear, family, tier);
+                int count = ModularData.getModuleCount(resultStack, family, tier);
                 if (count <= 0) {
                     continue;
                 }
 
                 SlimefunItem registered = SlimefunItem.getById(family.legacyItemId(tier));
-                if (!(registered instanceof ModuleItem)) {
+                if (!(registered instanceof ModuleItem) || outputIndex >= MODULE_OUTPUTS.length) {
                     continue;
                 }
 
-                total += count;
-                ItemStack template = registered.getItem().clone();
-                int remaining = count;
-                while (remaining > 0) {
-                    ItemStack stack = template.clone();
-                    int amount = Math.min(remaining, stack.getMaxStackSize());
-                    stack.setAmount(amount);
-                    giveOrDrop(player, stack);
-                    remaining -= amount;
-                }
+                ItemStack returned = registered.getItem().clone();
+                returned.setAmount(count);
+                menu.replaceExistingItem(MODULE_OUTPUTS[outputIndex++], returned);
             }
         }
-        return total;
-    }
 
-    private void giveOrDrop(Player player, ItemStack stack) {
-        Map<Integer, ItemStack> leftovers = player.getInventory().addItem(stack);
-        for (ItemStack leftover : leftovers.values()) {
-            player.getWorld().dropItemNaturally(player.getLocation(), leftover);
-        }
+        ModularData.removeAllModules(resultStack);
+        ModularLore.refresh(resultStack, gear);
+
+        menu.replaceExistingItem(GEAR_INPUT, null);
+        menu.pushItem(resultStack, OUTPUT);
     }
 
     private void consumeOne(BlockMenu menu, int slot, ItemStack input) {
@@ -216,15 +229,10 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
         }
     }
 
-    private static ItemStack button(Material material, String name, String... lore) {
+    private static ItemStack button(Material material, String name) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-        java.util.List<String> lines = new java.util.ArrayList<>();
-        for (String line : lore) {
-            lines.add(ChatColor.translateAlternateColorCodes('&', line));
-        }
-        meta.setLore(lines);
+        meta.setDisplayName(name);
         item.setItemMeta(meta);
         return item;
     }
@@ -236,10 +244,10 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
     private static String explain(ModuleInstallResult result) {
         return switch (result) {
             case UNSUPPORTED_TIER -> "That module tier did not exist for this module family in DracFun 2.0.10.";
-            case MODULE_TIER_TOO_HIGH -> "The module tier is higher than the gear tier.";
-            case INCOMPATIBLE_GEAR -> "That module type cannot be installed in this kind of gear.";
-            case FAMILY_LIMIT_REACHED -> "This gear has reached the installation limit for that module type.";
-            case MODULE_POINTS_EXCEEDED -> "Installing that module would exceed the gear's module-point capacity.";
+            case MODULE_TIER_TOO_HIGH -> "The module surpasses the capabilities of the designated item!";
+            case INCOMPATIBLE_GEAR -> "This module is incompatible with the specified item type!";
+            case FAMILY_LIMIT_REACHED -> "The application of additional modules to this type is restricted due to the existing limit!";
+            case MODULE_POINTS_EXCEEDED -> "The application of additional modules to this item is restricted due to the existing limit!";
             case VALID -> "Module can be installed.";
         };
     }
