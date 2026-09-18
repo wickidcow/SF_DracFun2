@@ -220,7 +220,7 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
                 + audit.accountedLegacyIds() + "/134 accounted for ("
                 + audit.functionalItems() + " non-placeholder items, "
                 + audit.placeholders() + " placeholders, "
-                + (audit.guideCategoryPresent() ? "guide category present" : "guide category missing")
+                + (audit.guideCategoryPresent() ? "nested guide present" : "nested guide missing")
                 + "); migration aliases "
                 + audit.migrationAliasesRegistered() + "/3 registered.";
 
