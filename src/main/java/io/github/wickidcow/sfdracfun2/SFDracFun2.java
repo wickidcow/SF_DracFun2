@@ -67,7 +67,9 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
             if (!modularGear) {
                 getLogger().warning("Energy Infuser is enabled while modular gear is disabled; unsupported items will pass through unchanged.");
             }
-            int registered = DracFunMachineRegistry.registerEnergyInfuser(this);
+            int registered = DracFunMachineRegistry.registerEnergyInfuser(
+                    this,
+                    getConfig().getBoolean("options.hard-mode", true));
             getLogger().info("Registered " + registered + " clean-room Energy Infuser identity.");
         }
 
