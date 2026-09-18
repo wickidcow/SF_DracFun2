@@ -207,12 +207,26 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         menu.replaceExistingItem(STATUS, statusItem());
     }
 
-    private static ItemStack createOutputById(String outputId) {
+    private ItemStack createOutputById(String outputId) {
+        FusionRecipeSpec matched = null;
+        for (FusionRecipeSpec recipe : recipes) {
+            if (tier.accepts(recipe.tier()) && recipe.outputId().equals(outputId)) {
+                matched = recipe;
+                break;
+            }
+        }
+        if (matched == null) {
+            return null;
+        }
+
         SlimefunItem target = SlimefunItem.getById(outputId);
         if (target == null || LegacyCompatibilityRegistry.isPlaceholder(target)) {
             return null;
         }
-        return target.getItem().clone();
+
+        ItemStack output = target.getItem().clone();
+        output.setAmount(matched.outputAmount());
+        return output;
     }
 
     private FusionRecipeSpec findRecipe(ItemStack[] input) {
