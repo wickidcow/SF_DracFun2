@@ -1,5 +1,6 @@
 package io.github.wickidcow.sfdracfun2.fusion;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Material;
 
@@ -21,7 +22,7 @@ public final class FusionRecipeCatalog {
         FusionIngredient awakened = sf(hardMode ? "DRACFUN_AWAKENED_DRACONIUM_BLOCK" : "DRACFUN_AWAKENED_DRACONIUM_INGOT");
         FusionIngredient dragonEgg = useDragonEgg ? vanilla(Material.DRAGON_EGG) : sf("DRACFUN_DRAGON_EGG");
 
-        return List.of(
+        List<FusionRecipeSpec> recipes = new ArrayList<>(List.of(
                 recipe(
                         FusionTier.BASIC,
                         "DRACFUN_WYVERN_FUSION_CRAFTING_INJECTOR",
@@ -185,7 +186,10 @@ public final class FusionRecipeCatalog {
                         awakened,
                         draconium,
                         awakened,
-                        draconium));
+                        draconium)));
+
+        recipes.addAll(LegacyModularFusionRecipeCatalog.create(hardMode));
+        return List.copyOf(recipes);
     }
 
     private static FusionRecipeSpec recipe(
