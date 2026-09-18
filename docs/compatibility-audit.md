@@ -146,6 +146,12 @@ The Energy Core keeps 2.0.10's multiblock layouts and capacities, but replaces t
 
 Chaos Guardian crystal cages are terrain-safe in both directions. Reborn only places cage blocks into air, records the exact coordinates and materials it created, persists that record on the crystal for restart recovery, and removes only those exact unchanged blocks during cleanup. Pre-existing/player blocks in the cage shell are never deleted by the cleanup pass.
 
+### 2.0.1 default feature set
+
+The restoration-era configuration originally left Energy Infuser, Item Converter, Fusion Crafting, modular gear, Energy Core, Reactor and Chaos Guardian disabled while those systems were being implemented. DracFun Reborn 2.0.1 now enables the complete restored feature set on fresh configurations. All feature flags remain independent and existing explicit server configuration values are never overwritten.
+
+The release workflow verifies that the packaged `config.yml` has all nine restored feature flags enabled, in addition to the existing cross-platform compilation, clean-room boundary and raw-JAR checks.
+
 ## Confirmed modern compatibility breakpoints
 
 ### Bukkit attribute names

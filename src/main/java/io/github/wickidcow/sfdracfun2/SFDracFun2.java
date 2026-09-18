@@ -44,7 +44,7 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
             getLogger().info("Registered " + registered + " functional Draconium material identities.");
         }
 
-        boolean modularGear = getConfig().getBoolean("features.modular-gear", false);
+        boolean modularGear = getConfig().getBoolean("features.modular-gear", true);
         if (modularGear) {
             if (!materialsEnabled) {
                 modularGear = false;
@@ -78,7 +78,7 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
             }
         }
 
-        if (getConfig().getBoolean("features.energy-infuser", false)) {
+        if (getConfig().getBoolean("features.energy-infuser", true)) {
             if (!modularGear) {
                 getLogger().warning("Energy Infuser is enabled while modular gear is disabled; unsupported items will pass through unchanged.");
             }
@@ -88,15 +88,15 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
             getLogger().info("Registered " + registered + " clean-room Energy Infuser identity.");
         }
 
-        if (getConfig().getBoolean("features.item-converter", false)) {
+        if (getConfig().getBoolean("features.item-converter", true)) {
             int registered = DracFunMachineRegistry.registerItemConverter(this);
             getLogger().info("Registered " + registered + " clean-room Item Converter identity.");
         }
 
-        boolean fusionCrafting = getConfig().getBoolean("features.fusion-crafting", false);
-        boolean energyCore = getConfig().getBoolean("features.energy-core", false);
-        boolean reactor = getConfig().getBoolean("features.reactor", false);
-        boolean chaosGuardian = getConfig().getBoolean("features.chaos-guardian", false);
+        boolean fusionCrafting = getConfig().getBoolean("features.fusion-crafting", true);
+        boolean energyCore = getConfig().getBoolean("features.energy-core", true);
+        boolean reactor = getConfig().getBoolean("features.reactor", true);
+        boolean chaosGuardian = getConfig().getBoolean("features.chaos-guardian", true);
         boolean hardMode = getConfig().getBoolean("options.hard-mode", true);
         boolean useDragonEgg = getConfig().getBoolean("options.use-dragon-egg", true);
 

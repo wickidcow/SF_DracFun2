@@ -95,6 +95,10 @@ jobs:
           grep -Eq '^api-version:.*1\.21\.11' build/plugin.yml
           grep -Eq '^folia-supported:[[:space:]]*true' build/plugin.yml
           grep -Eq '^version:.*2\.0\.1' build/plugin.yml
+          unzip -p "$JAR" config.yml > build/config.yml
+          for feature in materials end-resource energy-infuser item-converter fusion-crafting modular-gear energy-core reactor chaos-guardian; do
+            grep -Eq "^[[:space:]]{2}${feature}:[[:space:]]*true[[:space:]]*$" build/config.yml
+          done
           if unzip -l "$JAR" | grep -Eq 'me/phoenix/(dracfun|metrics)/'; then
             echo 'Original DracFun implementation classes leaked into the clean-room artifact.' >&2
             exit 1

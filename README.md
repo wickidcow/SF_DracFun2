@@ -27,18 +27,11 @@ The project may preserve documented/observable legacy identifiers such as `DRACF
 
 The implementation will not copy original method bodies, decompiled Java, textures, models, or other protected assets from the discontinued binary.
 
-## Planned restoration order
+## Restored systems
 
-1. Boot/runtime compatibility foundation and legacy ID catalog
-2. Base Draconium materials and End resource generation
-3. Energy Infuser and item conversion
-4. Fusion Crafting
-5. Modular tools, armor, capacitors, shields, and modules
-6. Energy Core multiblock
-7. Draconic Reactor
-8. Chaos Guardian encounter/invocation
+DracFun Reborn 2.0.1 includes the completed clean-room restoration of the legacy ID/data surface, Draconium progression and End resource generation, Energy Infuser, Item Converter, Fusion Crafting, modular equipment and modules, Energy Core multiblocks, Draconic Reactor, and Chaos Guardian encounter.
 
-Each major system is kept isolated so an unavailable or incompatible subsystem cannot prevent the rest of the addon from loading.
+Fresh 2.0.1 configurations enable the complete restoration by default. Every major system remains independently toggleable under `features:` so server owners can stage or disable individual systems without preventing the rest of the addon from loading. Existing explicit configuration values are respected.
 
 ## Build output
 

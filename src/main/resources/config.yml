@@ -39,15 +39,14 @@ guardian:
   wither-minion-lifetime-ticks: 200
 
 features:
-  # Completed clean-room systems are enabled by default.
+  # DracFun Reborn 2.0.1 ships the completed restoration enabled on fresh installs.
+  # Every subsystem remains independently toggleable for staged rollouts or testing.
   materials: true
   end-resource: true
-
-  # Remaining systems stay disabled until their independent implementations are complete.
-  energy-infuser: false
-  item-converter: false
-  fusion-crafting: false
-  modular-gear: false
-  energy-core: false
-  reactor: false
-  chaos-guardian: false
+  energy-infuser: true
+  item-converter: true
+  fusion-crafting: true
+  modular-gear: true
+  energy-core: true
+  reactor: true
+  chaos-guardian: true
