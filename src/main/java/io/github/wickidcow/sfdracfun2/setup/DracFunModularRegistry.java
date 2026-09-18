@@ -39,7 +39,7 @@ public final class DracFunModularRegistry {
         ItemGroup group = DracFunItemGroups.modular(addon);
         int registered = 0;
 
-        registered += DracFunFusionComponentRegistry.registerDraconicCore(addon, hardMode);
+        registered += DracFunFusionComponentRegistry.registerParticleGenerator(addon, hardMode);
         registered += registerModuleCore(addon, group, hardMode);
 
         for (GearType type : List.of(
