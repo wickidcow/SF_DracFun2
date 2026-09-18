@@ -6,6 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.WitherProofBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.items.EnderDraconiumOre;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -20,27 +21,28 @@ public final class DracFunMaterialRegistry {
         ItemGroup group = DracFunItemGroups.materials(addon);
         int registered = 0;
 
-        SlimefunItemStack ore = stack(
+        // Exact observable 2.0.10 display names/theme lore. The old custom-head
+        // artwork is intentionally not bundled by the clean-room implementation.
+        SlimefunItemStack ore = LegacyTheme.ORE.stack(
                 "DRACFUN_DRACONIUM_ORE",
                 Material.END_STONE,
-                "&dEnder Draconium Ore",
-                "&7A virtual ore resource found by GEO Miner in The End.");
-        SlimefunItemStack dust = stack(
+                "Ender Draconium Ore");
+        SlimefunItemStack dust = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_DUST",
                 Material.NETHERITE_SCRAP,
-                "&dDraconium Dust");
-        SlimefunItemStack ingot = stack(
+                "Draconium Dust");
+        SlimefunItemStack ingot = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_INGOT",
                 Material.NETHERITE_INGOT,
-                "&dDraconium Ingot");
-        SlimefunItemStack block = stack(
+                "Draconium Ingot");
+        SlimefunItemStack block = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_BLOCK",
                 Material.NETHERITE_BLOCK,
-                "&dDraconium Block");
-        SlimefunItemStack infusedObsidian = stack(
+                "Draconium Block");
+        SlimefunItemStack infusedObsidian = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_INFUSED_OBSIDIAN",
                 Material.OBSIDIAN,
-                "&dDraconium Infused Obsidian");
+                "Draconium Infused Obsidian");
 
         if (enableEndResource && SlimefunItem.getById(ore.getItemId()) == null) {
             EnderDraconiumOre resource = new EnderDraconiumOre(
@@ -93,10 +95,6 @@ public final class DracFunMaterialRegistry {
         }
 
         return registered;
-    }
-
-    private static SlimefunItemStack stack(String id, Material material, String name, String... lore) {
-        return new SlimefunItemStack(id, material, name, lore);
     }
 
     private static ItemStack[] fill(ItemStack item) {
