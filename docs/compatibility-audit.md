@@ -142,7 +142,7 @@ AUTO_FEED also uses the separate family key `DRACFUN_AUTO_FEED` as a buffered-fo
 
 ### Energy Core and Guardian safety corrections
 
-The Energy Core keeps 2.0.10's multiblock layouts and capacities, but replaces the old global `notComplete` flag with per-activator state. EnergyNet activity now also re-validates the local structure before exposing stored charge, so a known broken structure stops supplying power immediately rather than waiting for the next core ticker. An `UNKNOWN` validation caused only by unloaded neighboring data retains the last-known state and never destroys charge.
+The Energy Core keeps 2.0.10's multiblock layouts and capacities, but replaces the old global `notComplete` flag with per-activator state. Because Slimefun Legacy's capacitor path does not consult `isEnergyNetActive()`, Reborn validates at the actual charge read/write boundary as well as from its synchronized ticker. The result is cached for the current game tick: a known broken structure returns zero supply, rejects new charge, and clears stored charge, while an `UNKNOWN` validation caused only by unloaded neighboring data retains the last-known state and never destroys charge.
 
 Chaos Guardian crystal cages are terrain-safe in both directions. Reborn only places cage blocks into air, records the exact coordinates and materials it created, persists that record on the crystal for restart recovery, and removes only those exact unchanged blocks during cleanup. Pre-existing/player blocks in the cage shell are never deleted by the cleanup pass.
 
@@ -199,6 +199,10 @@ Existing-world compatibility may require preservation of observable identifiers 
 - the two legacy config options above
 
 Identifier preservation does **not** require using Phoenix's Java package namespace. New source code remains under `io.github.wickidcow.sfdracfun2`.
+
+### Legacy-plugin conflict guard
+
+The original DracFun 2.0.10 plugin and Reborn must not be loaded together because both claim the same `DRACFUN_*` Slimefun identities. Reborn checks Bukkit for the legacy plugin name `DracFun` during enable and disables itself with a clear error if the old plugin is still installed, preventing duplicate registration and mixed runtime handlers.
 
 ## Clean-room boundary
 

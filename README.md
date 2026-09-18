@@ -33,6 +33,8 @@ DracFun Reborn 2.0.1 includes the completed clean-room restoration of the legacy
 
 Fresh 2.0.1 configurations enable the complete restoration by default. Every major system remains independently toggleable under `features:` so server owners can stage or disable individual systems without preventing the rest of the addon from loading. Existing explicit configuration values are respected.
 
+Remove the original **DracFun 2.0.10** JAR before installing Reborn. If both plugins are present, Reborn disables itself rather than risk duplicate `DRACFUN_*` registrations.
+
 ## Build output
 
 Release artifact naming is fixed to:
