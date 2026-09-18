@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCoreMachine;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCoreTier;
 import org.bukkit.Material;
@@ -33,8 +34,8 @@ public final class DracFunEnergyCoreRegistry {
         ItemStack draconicCore = required("DRACFUN_DRACONIC_CORE");
         ItemStack wyvernCore = required("DRACFUN_WYVERN_CORE");
 
-        SlimefunItemStack wyvernEnergyCore = stack(
-                "DRACFUN_WYVERN_ENERGY_CORE", Material.HEART_OF_THE_SEA, "&dWyvern Energy Core");
+        SlimefunItemStack wyvernEnergyCore = LegacyTheme.BASIC_CRAFTING.stack(
+                "DRACFUN_WYVERN_ENERGY_CORE", Material.HEART_OF_THE_SEA, "Wyvern Energy Core");
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -49,10 +50,10 @@ public final class DracFunEnergyCoreRegistry {
         SlimefunItem awakenedItem = SlimefunItem.getById(awakenedId);
         if (awakenedItem != null) {
             ItemStack awakened = awakenedItem.getItem().clone();
-            SlimefunItemStack draconicEnergyCore = stack(
-                    "DRACFUN_DRACONIC_ENERGY_CORE", Material.ECHO_SHARD, "&5Draconic Energy Core");
-            SlimefunItemStack chaoticEnergyCore = stack(
-                    "DRACFUN_CHAOTIC_ENERGY_CORE", Material.NETHER_STAR, "&5Chaotic Energy Core");
+            SlimefunItemStack draconicEnergyCore = LegacyTheme.ADVANCED_CRAFTING.stack(
+                    "DRACFUN_DRACONIC_ENERGY_CORE", Material.ECHO_SHARD, "Draconic Energy Core");
+            SlimefunItemStack chaoticEnergyCore = LegacyTheme.END_GAME_CRAFTING.stack(
+                    "DRACFUN_CHAOTIC_ENERGY_CORE", Material.NETHER_STAR, "Chaotic Energy Core");
 
             registered += registerUnplaceable(
                     addon,
@@ -85,16 +86,16 @@ public final class DracFunEnergyCoreRegistry {
         ItemStack wyvernCore = required("DRACFUN_WYVERN_CORE");
         ItemStack wyvernEnergyCore = required("DRACFUN_WYVERN_ENERGY_CORE");
 
-        SlimefunItemStack particleGenerator = stack(
-                "DRACFUN_PARTICLE_GENERATOR", Material.END_ROD, "&dParticle Generator");
-        SlimefunItemStack stabilizer = stack(
-                "DRACFUN_ENERGY_CORE_STABILIZER", Material.AMETHYST_BLOCK, "&dEnergy Core Stabilizer");
-        SlimefunItemStack coreBlock1 = stack(
-                "DRACFUN_ENERGY_CORE_BLOCK", Material.PURPUR_BLOCK, "&dEnergy Core Block");
-        SlimefunItemStack coreBlock2 = stack(
-                "DRACFUN_ENERGY_CORE_BLOCK_2", Material.OBSIDIAN, "&5Energy Core Block II");
-        SlimefunItemStack coreBlock3 = stack(
-                "DRACFUN_ENERGY_CORE_BLOCK_3", Material.CRYING_OBSIDIAN, "&5Energy Core Block III");
+        SlimefunItemStack particleGenerator = LegacyTheme.BASIC_CRAFTING.stack(
+                "DRACFUN_PARTICLE_GENERATOR", Material.RED_STAINED_GLASS, "Particle Generator");
+        SlimefunItemStack stabilizer = LegacyTheme.ENERGY_CORE.stack(
+                "DRACFUN_ENERGY_CORE_STABILIZER", Material.BLUE_STAINED_GLASS, "Energy Core Stabilizer");
+        SlimefunItemStack coreBlock1 = LegacyTheme.ENERGY_CORE.stack(
+                "DRACFUN_ENERGY_CORE_BLOCK", Material.RED_GLAZED_TERRACOTTA, "Energy Core");
+        SlimefunItemStack coreBlock2 = LegacyTheme.ENERGY_CORE.stack(
+                "DRACFUN_ENERGY_CORE_BLOCK_2", Material.RED_GLAZED_TERRACOTTA, "Energy Core (II)");
+        SlimefunItemStack coreBlock3 = LegacyTheme.ENERGY_CORE.stack(
+                "DRACFUN_ENERGY_CORE_BLOCK_3", Material.RED_GLAZED_TERRACOTTA, "Energy Core (III)");
 
         int registered = 0;
         registered += registerUnplaceable(
@@ -137,12 +138,12 @@ public final class DracFunEnergyCoreRegistry {
                 coreBlock3,
                 surround(new ItemStack(Material.REDSTONE_BLOCK), coreBlock2));
 
-        SlimefunItemStack activator1 = stack(
-                EnergyCoreTier.TIER_1.activatorId(), Material.REDSTONE_LAMP, "&dEnergy Core Activator I");
-        SlimefunItemStack activator2 = stack(
-                EnergyCoreTier.TIER_2.activatorId(), Material.RESPAWN_ANCHOR, "&5Energy Core Activator II");
-        SlimefunItemStack activator3 = stack(
-                EnergyCoreTier.TIER_3.activatorId(), Material.BEACON, "&5Energy Core Activator III");
+        SlimefunItemStack activator1 = LegacyTheme.ENERGY_CORE.stack(
+                EnergyCoreTier.TIER_1.activatorId(), Material.BLACK_STAINED_GLASS, "Energy Core Activator");
+        SlimefunItemStack activator2 = LegacyTheme.ENERGY_CORE.stack(
+                EnergyCoreTier.TIER_2.activatorId(), Material.BLACK_STAINED_GLASS, "Energy Core Activator (II)");
+        SlimefunItemStack activator3 = LegacyTheme.ENERGY_CORE.stack(
+                EnergyCoreTier.TIER_3.activatorId(), Material.BLACK_STAINED_GLASS, "Energy Core Activator (III)");
 
         registered += registerActivator(
                 addon,
@@ -171,10 +172,10 @@ public final class DracFunEnergyCoreRegistry {
         ItemStack gold = hardMode ? SlimefunItems.GOLD_24K_BLOCK : SlimefunItems.GOLD_24K;
         ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
 
-        SlimefunItemStack draconicCore = stack(
-                "DRACFUN_DRACONIC_CORE", Material.ECHO_SHARD, "&5Draconic Core");
-        SlimefunItemStack wyvernCore = stack(
-                "DRACFUN_WYVERN_CORE", Material.AMETHYST_SHARD, "&dWyvern Core");
+        SlimefunItemStack draconicCore = LegacyTheme.BASIC_CRAFTING.stack(
+                "DRACFUN_DRACONIC_CORE", Material.ECHO_SHARD, "Draconic Core");
+        SlimefunItemStack wyvernCore = LegacyTheme.BASIC_CRAFTING.stack(
+                "DRACFUN_WYVERN_CORE", Material.AMETHYST_SHARD, "Wyvern Core");
 
         int registered = 0;
         registered += registerUnplaceable(
@@ -244,9 +245,6 @@ public final class DracFunEnergyCoreRegistry {
         return item.getItem().clone();
     }
 
-    private static SlimefunItemStack stack(String id, Material material, String name) {
-        return new SlimefunItemStack(id, material, name, "&8DracFun Reborn clean-room item");
-    }
 
     private static ItemStack[] surround(ItemStack outside, ItemStack center) {
         return recipe(
