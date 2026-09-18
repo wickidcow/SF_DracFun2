@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.WitherProofBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.items.EnderDraconiumOre;
+import io.github.wickidcow.sfdracfun2.items.LegacyGuideItem;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -27,7 +28,7 @@ public final class DracFunMaterialRegistry {
                 "&7Legacy DracFun guide placeholder.",
                 "&7Browse the DracFun category for the restored progression.");
         if (SlimefunItem.getById(guide.getItemId()) == null) {
-            new SlimefunItem(group, guide, RecipeType.NULL, new ItemStack[9]).register(addon);
+            new LegacyGuideItem(group, guide).register(addon);
             registered++;
         }
 
