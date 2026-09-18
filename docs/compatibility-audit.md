@@ -66,6 +66,19 @@ DracFun 2.0.10's Item Converter also recognizes three older armor IDs from pre-2
 
 Those are tracked separately as migration aliases. The 2.0.10 registered armor identities are `DRACFUN_WYVERN_ARMOR`, `DRACFUN_DRACONIC_ARMOR`, and `DRACFUN_CHAOTIC_ARMOR`.
 
+### 134-ID implementation coverage
+
+A source-level coverage pass now accounts for every identity in `LegacyIdentityCatalog.DRACFUN_2_0_10_IDS`:
+
+- 44 fixed IDs are claimed directly by the material, shared-progression, machine, reactor, guardian, energy-core and modular registries.
+- 26 modular gear IDs are generated from the registered `GearType`/tier combinations (24 three-tier gear IDs plus Draconic and Chaotic Staff of Power).
+- 56 module IDs are generated from every supported `ModuleFamily` / `ModuleTier` combination.
+- 3 Energy Core activator IDs are supplied by `EnergyCoreTier`.
+- 4 Fusion Crafter IDs are supplied by `FusionTier`.
+- `DRACFUN_GUIDE` is intentionally the shared guide-category icon identity rather than a normal Slimefun item.
+
+Total accounted legacy 2.0.10 identity surface: **134 / 134**. Feature toggles can still intentionally leave disabled subsystems represented by hidden compatibility placeholders at runtime.
+
 ## Modular persistence contract
 
 The old modular system stores item state under the original Bukkit namespace `dracfun`. SF_DracFun2 therefore creates compatibility keys with an explicit `dracfun` namespace instead of using this plugin's own namespace.
