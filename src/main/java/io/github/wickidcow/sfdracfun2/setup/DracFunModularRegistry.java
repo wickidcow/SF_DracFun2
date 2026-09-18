@@ -62,12 +62,12 @@ public final class DracFunModularRegistry {
                 GearType.SHOVEL,
                 GearType.SWORD)) {
             for (int tier = 1; tier <= 3; tier++) {
-                registered += registerGear(addon, group, type, tier);
+                registered += registerGear(addon, type, tier);
             }
         }
 
-        registered += registerGear(addon, group, GearType.STAFF, 2);
-        registered += registerGear(addon, group, GearType.STAFF, 3);
+        registered += registerGear(addon, GearType.STAFF, 2);
+        registered += registerGear(addon, GearType.STAFF, 3);
 
         for (ModuleFamily family : ModuleFamily.values()) {
             for (ModuleTier tier : ModuleTier.values()) {
@@ -119,7 +119,8 @@ public final class DracFunModularRegistry {
         return 1;
     }
 
-    private static int registerGear(SFDracFun2 addon, ItemGroup group, GearType type, int tier) {
+    private static int registerGear(SFDracFun2 addon, GearType type, int tier) {
+        ItemGroup group = DracFunItemGroups.gear(addon, tier);
         String id = type.legacyItemId(tier);
         if (SlimefunItem.getById(id) != null) {
             return 0;
