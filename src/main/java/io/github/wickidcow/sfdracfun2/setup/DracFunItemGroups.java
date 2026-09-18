@@ -32,6 +32,10 @@ public final class DracFunItemGroups {
         return dracFun(addon);
     }
 
+    public static boolean hasLegacyGuideCategory() {
+        return dracFun != null;
+    }
+
     private static ItemGroup dracFun(SFDracFun2 addon) {
         if (dracFun == null) {
             SlimefunItemStack guideIcon = new SlimefunItemStack(

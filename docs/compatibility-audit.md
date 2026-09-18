@@ -85,6 +85,12 @@ DracFun 2.0.10 accepted 18 legacy converter inputs, including the three pre-2.0.
 
 Reborn preserves the same fallback through Slimefun Legacy's maintained `CustomItemDataService`. This means an old convertible item can still be recognized when `compatibility.preserve-legacy-ids` is disabled and no placeholder has registered its legacy ID. The converted output is rebuilt from the current registered template and preserves only stack amount, preventing stale legacy metadata from carrying forward.
 
+### Runtime identity self-audit
+
+After feature registration and optional placeholder registration, Reborn performs a startup audit of the complete legacy identity surface. The audit reports the number of registered non-placeholder items, hidden placeholders, whether the `DRACFUN_GUIDE` category identity is present, and how many of the three pre-2.0.10 armor migration aliases are registered. With `compatibility.preserve-legacy-ids: true`, anything short of 134/134 legacy identities or 3/3 migration aliases produces a warning.
+
+The Module Integrator and Item Converter both use the shared fail-closed `ProtectionCompat` bridge rather than maintaining separate reflective protection implementations.
+
 ## Modular persistence contract
 
 The old modular system stores item state under the original Bukkit namespace `dracfun`. SF_DracFun2 therefore creates compatibility keys with an explicit `dracfun` namespace instead of using this plugin's own namespace.

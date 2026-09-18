@@ -196,9 +196,29 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
             }
         }
 
-        if (getConfig().getBoolean("compatibility.preserve-legacy-ids", true)) {
+        boolean preserveLegacyIds =
+                getConfig().getBoolean("compatibility.preserve-legacy-ids", true);
+        if (preserveLegacyIds) {
             int registered = LegacyCompatibilityRegistry.registerMissingIdentities(this);
             getLogger().info("Registered " + registered + " hidden legacy compatibility identities.");
+        }
+
+        LegacyCompatibilityRegistry.IdentityAudit audit =
+                LegacyCompatibilityRegistry.auditRegisteredIdentities();
+        String auditSummary = "Legacy identity runtime audit: "
+                + audit.accountedLegacyIds() + "/134 accounted for ("
+                + audit.functionalItems() + " non-placeholder items, "
+                + audit.placeholders() + " placeholders, "
+                + (audit.guideCategoryPresent() ? "guide category present" : "guide category missing")
+                + "); migration aliases "
+                + audit.migrationAliasesRegistered() + "/3 registered.";
+
+        if (preserveLegacyIds
+                && (audit.accountedLegacyIds() != 134
+                        || audit.migrationAliasesRegistered() != 3)) {
+            getLogger().warning(auditSummary);
+        } else {
+            getLogger().info(auditSummary);
         }
     }
 

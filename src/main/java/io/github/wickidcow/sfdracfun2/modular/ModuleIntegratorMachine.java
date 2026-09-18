@@ -7,10 +7,9 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
-import java.lang.reflect.Method;
+import io.github.wickidcow.sfdracfun2.compat.ProtectionCompat;
 import java.util.Map;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -63,7 +62,7 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
 
             @Override
             public boolean canOpen(Block block, Player player) {
-                return player.hasPermission("slimefun.inventory.bypass") || canInteract(player, block.getLocation());
+                return ProtectionCompat.canInteract(player, block.getLocation());
             }
 
             @Override
@@ -214,31 +213,6 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
             ItemStack reduced = input.clone();
             reduced.setAmount(input.getAmount() - 1);
             menu.replaceExistingItem(slot, reduced);
-        }
-    }
-
-    /**
-     * Slimefun's released API JAR intentionally does not expose Dough's Interaction enum to addons.
-     * Resolve that optional protection bridge at runtime and fail closed if it is unavailable.
-     */
-    private static boolean canInteract(Player player, Location location) {
-        try {
-            Method getter = Slimefun.class.getMethod("getProtectionManager");
-            Object manager = getter.invoke(null);
-            if (manager == null) {
-                return false;
-            }
-
-            ClassLoader loader = manager.getClass().getClassLoader();
-            Class<?> interactionClass = Class.forName(
-                    "io.github.bakedlibs.dough.protection.Interaction", false, loader);
-            @SuppressWarnings({"rawtypes", "unchecked"})
-            Object interaction = Enum.valueOf((Class<? extends Enum>) interactionClass.asSubclass(Enum.class), "INTERACT_BLOCK");
-            Method hasPermission = manager.getClass().getMethod(
-                    "hasPermission", Player.class, Location.class, interactionClass);
-            return Boolean.TRUE.equals(hasPermission.invoke(manager, player, location, interaction));
-        } catch (ReflectiveOperationException | LinkageError ignored) {
-            return false;
         }
     }
 
