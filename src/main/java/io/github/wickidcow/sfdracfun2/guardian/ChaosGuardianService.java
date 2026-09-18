@@ -29,7 +29,7 @@ import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BossBar;
 import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.DragonFireball;
-import org.bukkit.entity.EndCrystal;
+import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -242,7 +242,7 @@ public final class ChaosGuardianService implements Listener {
                 PersistentDataType.INTEGER,
                 crystals.size());
 
-        for (EndCrystal crystal : crystals) {
+        for (EnderCrystal crystal : crystals) {
             Slimefun.runSyncFor(crystal, () -> {
                 tag(crystal, CRYSTAL);
                 if (crystalCages) {
@@ -433,7 +433,7 @@ public final class ChaosGuardianService implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     public void onCrystalDamage(EntityDamageByEntityEvent event) {
-        if (!(event.getEntity() instanceof EndCrystal crystal) || !hasTag(crystal, CRYSTAL)) {
+        if (!(event.getEntity() instanceof EnderCrystal crystal) || !hasTag(crystal, CRYSTAL)) {
             return;
         }
 
@@ -596,7 +596,7 @@ public final class ChaosGuardianService implements Listener {
             return;
         }
 
-        for (EndCrystal crystal : battle.getHealingCrystals()) {
+        for (EnderCrystal crystal : battle.getHealingCrystals()) {
             Slimefun.runSyncFor(crystal, () -> {
                 if (hasTag(crystal, CRYSTAL)) {
                     cleanupCage(crystal.getLocation());
