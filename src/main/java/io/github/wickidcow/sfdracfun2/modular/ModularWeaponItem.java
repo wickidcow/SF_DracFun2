@@ -21,6 +21,8 @@ public final class ModularWeaponItem extends ModularGearItem {
             int bonusDamage = ModuleEffects.damage(stack);
             if (bonusDamage > 0) {
                 event.setDamage(event.getDamage() + bonusDamage);
+                ModularData.removeCharge(stack, 1);
+                ModularLore.refresh(stack, this);
             }
         });
     }
