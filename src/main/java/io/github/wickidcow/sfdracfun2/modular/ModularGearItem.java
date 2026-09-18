@@ -14,8 +14,14 @@ public class ModularGearItem extends SlimefunItem implements NotPlaceable, Soulb
     private final GearType gearType;
     private final int gearTier;
 
-    public ModularGearItem(ItemGroup group, SlimefunItemStack item, GearType gearType, int gearTier) {
-        super(group, item, RecipeType.NULL, new ItemStack[9]);
+    public ModularGearItem(
+            ItemGroup group,
+            SlimefunItemStack item,
+            GearType gearType,
+            int gearTier,
+            RecipeType recipeType,
+            ItemStack[] recipe) {
+        super(group, item, recipeType, recipe);
         this.gearType = gearType;
         this.gearTier = gearTier;
     }
