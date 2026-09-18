@@ -35,9 +35,12 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
     private static final int OUTPUT = 16;
     private static final int REMOVE_BUTTON = 22;
 
-    public ModuleIntegratorMachine(ItemGroup group, SlimefunItemStack item) {
-        super(group, item, RecipeType.NULL, new ItemStack[9]);
-        setHidden(true);
+    public ModuleIntegratorMachine(
+            ItemGroup group,
+            SlimefunItemStack item,
+            RecipeType recipeType,
+            ItemStack[] recipe) {
+        super(group, item, recipeType, recipe);
 
         new BlockMenuPreset(getId(), getItemName()) {
             @Override
