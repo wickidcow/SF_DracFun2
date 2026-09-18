@@ -44,6 +44,10 @@ public final class ModularAutoFeedService implements Listener {
         }
 
         ItemStack armor = event.getItem();
+        if (armor == null || armor.getType().isAir()) {
+            return;
+        }
+
         SlimefunItem slimefunItem = SlimefunItem.getByItem(armor);
         if (!(slimefunItem instanceof ModularArmorItem gear)) {
             return;
@@ -128,7 +132,9 @@ public final class ModularAutoFeedService implements Listener {
 
     private static int feed(Player player) {
         ItemStack armor = player.getInventory().getChestplate();
-        if (!(SlimefunItem.getByItem(armor) instanceof ModularArmorItem gear)) {
+        if (armor == null
+                || armor.getType().isAir()
+                || !(SlimefunItem.getByItem(armor) instanceof ModularArmorItem gear)) {
             return -1;
         }
 
