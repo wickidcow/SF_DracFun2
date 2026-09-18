@@ -1,35 +1,48 @@
 package io.github.wickidcow.sfdracfun2.setup;
 
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
-/** Item-group definitions owned by the clean-room implementation. */
+/**
+ * Legacy-compatible DracFun guide category.
+ *
+ * <p>DracFun 2.0.10 used {@code DRACFUN_GUIDE} as its guide/category icon
+ * identity rather than as a normal craftable Slimefun item. Reborn keeps one
+ * shared DracFun category so restored materials, modular gear and machines
+ * appear together in the Slimefun guide.</p>
+ */
 public final class DracFunItemGroups {
+
+    private static ItemGroup dracFun;
 
     private DracFunItemGroups() {}
 
     public static ItemGroup materials(SFDracFun2 addon) {
-        return group(addon, "materials", Material.NETHERITE_INGOT, "DracFun Materials");
+        return dracFun(addon);
     }
 
     public static ItemGroup modular(SFDracFun2 addon) {
-        return group(addon, "modular", Material.SMITHING_TABLE, "DracFun Modular Gear");
+        return dracFun(addon);
     }
 
     public static ItemGroup machines(SFDracFun2 addon) {
-        return group(addon, "machines", Material.RESPAWN_ANCHOR, "DracFun Machines");
+        return dracFun(addon);
     }
 
-    private static ItemGroup group(SFDracFun2 addon, String key, Material material, String name) {
-        ItemStack icon = new ItemStack(material);
-        ItemMeta meta = icon.getItemMeta();
-        meta.setDisplayName(ChatColor.LIGHT_PURPLE + name);
-        icon.setItemMeta(meta);
-        return new ItemGroup(new NamespacedKey(addon, key), icon);
+    private static ItemGroup dracFun(SFDracFun2 addon) {
+        if (dracFun == null) {
+            SlimefunItemStack guideIcon = new SlimefunItemStack(
+                    "DRACFUN_GUIDE",
+                    Material.DRAGON_HEAD,
+                    "&5DracFun",
+                    "&7DracFun Reborn progression, modular gear and machines.");
+            dracFun = new ItemGroup(
+                    new NamespacedKey(addon, "dracfun"),
+                    guideIcon);
+        }
+        return dracFun;
     }
 }
