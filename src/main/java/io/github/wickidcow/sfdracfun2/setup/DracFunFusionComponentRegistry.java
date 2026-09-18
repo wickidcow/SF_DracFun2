@@ -26,14 +26,15 @@ public final class DracFunFusionComponentRegistry {
         ItemGroup materials = DracFunItemGroups.materials(addon);
         ItemGroup machines = DracFunItemGroups.machines(addon);
 
+        int registered = registerDraconicCore(addon, hardMode);
+
         ItemStack draconiumIngot = required("DRACFUN_DRACONIUM_INGOT");
         ItemStack draconiumBlock = required("DRACFUN_DRACONIUM_BLOCK");
         ItemStack draconium = hardMode ? draconiumBlock : draconiumIngot;
         ItemStack gold = hardMode ? SlimefunItems.GOLD_24K_BLOCK : SlimefunItems.GOLD_24K;
         ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
+        ItemStack draconicCore = required("DRACFUN_DRACONIC_CORE");
 
-        SlimefunItemStack draconicCore = stack(
-                "DRACFUN_DRACONIC_CORE", Material.ECHO_SHARD, "&5Draconic Core");
         SlimefunItemStack wyvernCore = stack(
                 "DRACFUN_WYVERN_CORE", Material.AMETHYST_SHARD, "&dWyvern Core");
         SlimefunItemStack fusionCore = stack(
@@ -66,17 +67,6 @@ public final class DracFunFusionComponentRegistry {
                 "DRACFUN_LARGE_CHAOS_FRAGMENT", Material.ECHO_SHARD, "&5Large Chaos Fragment");
         SlimefunItemStack chaosShard = stack(
                 "DRACFUN_CHAOS_SHARD", Material.NETHER_STAR, "&5Chaos Shard");
-
-        int registered = 0;
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                draconicCore,
-                RecipeType.ENHANCED_CRAFTING_TABLE,
-                recipe(
-                        gold, draconium, gold,
-                        draconium, diamond, draconium,
-                        gold, draconium, gold));
 
         registered += registerUnplaceable(
                 addon,
@@ -156,6 +146,36 @@ public final class DracFunFusionComponentRegistry {
         }
 
         return registered;
+    }
+
+    /**
+     * Registers the Draconic Core as a shared progression component.
+     *
+     * <p>Modular gear, Fusion, Reactor and Energy Core progression all reference
+     * this identity, so it must not be owned exclusively by the Fusion feature.</p>
+     */
+    public static int registerDraconicCore(SFDracFun2 addon, boolean hardMode) {
+        ItemGroup materials = DracFunItemGroups.materials(addon);
+
+        ItemStack draconium = required(
+                hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
+        ItemStack gold = hardMode ? SlimefunItems.GOLD_24K_BLOCK : SlimefunItems.GOLD_24K;
+        ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
+
+        SlimefunItemStack draconicCore = stack(
+                "DRACFUN_DRACONIC_CORE",
+                Material.ECHO_SHARD,
+                "&5Draconic Core");
+
+        return registerUnplaceable(
+                addon,
+                materials,
+                draconicCore,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                recipe(
+                        gold, draconium, gold,
+                        draconium, diamond, draconium,
+                        gold, draconium, gold));
     }
 
     private static ItemStack required(String id) {
