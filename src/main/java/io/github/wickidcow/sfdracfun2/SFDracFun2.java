@@ -31,6 +31,17 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
     @Override
     public void onEnable() {
         instance = this;
+
+        org.bukkit.plugin.Plugin legacy =
+                getServer().getPluginManager().getPlugin("DracFun");
+        if (legacy != null && legacy != this) {
+            getLogger().severe(
+                    "The legacy DracFun plugin is also installed. Remove DracFun 2.0.10 before using "
+                            + "DracFun Reborn to prevent duplicate DRACFUN_* registrations.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
         saveDefaultConfig();
 
         getLogger().info("SF_DracFun2 clean-room compatibility layer starting.");

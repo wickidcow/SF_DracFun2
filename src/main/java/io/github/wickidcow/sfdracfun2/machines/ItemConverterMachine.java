@@ -135,7 +135,7 @@ public final class ItemConverterMachine extends SlimefunItem {
 
         SlimefunItem target = SlimefunItem.getById(targetId);
         if (target == null || LegacyCompatibilityRegistry.isPlaceholder(target)) {
-            player.sendMessage(ChatColor.RED + "The clean-room replacement for " + targetId + " is not implemented yet.");
+            player.sendMessage(ChatColor.RED + "The replacement for " + targetId + " is not enabled or available on this server.");
             return;
         }
 

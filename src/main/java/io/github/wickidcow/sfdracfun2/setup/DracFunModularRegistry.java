@@ -31,7 +31,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-/** Registers clean-room modular item identities without exposing unfinished recipes. */
+/** Registers clean-room modular items while preserving Fusion as their acquisition path. */
 public final class DracFunModularRegistry {
 
     private DracFunModularRegistry() {}

@@ -140,7 +140,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
 
         ItemStack output = createOutput(recipe);
         if (output == null) {
-            error(player, "The clean-room implementation for " + recipe.outputId() + " is not ready yet.");
+            error(player, "The output " + recipe.outputId() + " is not enabled or available on this server.");
             return;
         }
         if (!menu.fits(output, OUTPUT)) {

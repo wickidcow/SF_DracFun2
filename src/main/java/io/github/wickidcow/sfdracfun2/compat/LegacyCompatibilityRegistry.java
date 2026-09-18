@@ -46,7 +46,7 @@ public final class LegacyCompatibilityRegistry {
                     Material.BARRIER,
                     "&8Legacy DracFun Compatibility",
                     "&7Identity: &f" + id,
-                    "&7Functional implementation is still being restored.",
+                    "&7Compatibility identity for a disabled or migration-only feature.",
                     "&7This placeholder is intentionally uncraftable and hidden.");
 
             LegacyPlaceholderItem item = new LegacyPlaceholderItem(group, stack);

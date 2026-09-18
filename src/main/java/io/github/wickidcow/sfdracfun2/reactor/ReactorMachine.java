@@ -580,7 +580,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
     private void chargeReactor(BlockMenu menu, Location location, Player player) {
         SlimefunBlockData data = blockData(location);
         if (!usable(data)) {
-            error(player, "Reactor data is not ready yet.");
+            error(player, "Reactor data is still loading; try again.");
             return;
         }
 
@@ -612,7 +612,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
     private void activateReactor(Location location, Player player) {
         SlimefunBlockData data = blockData(location);
         if (!usable(data)) {
-            error(player, "Reactor data is not ready yet.");
+            error(player, "Reactor data is still loading; try again.");
             return;
         }
 
@@ -629,7 +629,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
     private void shutdownReactor(Location location, Player player) {
         SlimefunBlockData data = blockData(location);
         if (!usable(data)) {
-            error(player, "Reactor data is not ready yet.");
+            error(player, "Reactor data is still loading; try again.");
             return;
         }
 
@@ -681,7 +681,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
     private void toggleFailsafe(Location location, Player player) {
         SlimefunBlockData data = blockData(location);
         if (!usable(data)) {
-            error(player, "Reactor data is not ready yet.");
+            error(player, "Reactor data is still loading; try again.");
             return;
         }
 
