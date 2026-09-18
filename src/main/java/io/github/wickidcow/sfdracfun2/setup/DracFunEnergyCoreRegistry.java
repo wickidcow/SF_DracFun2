@@ -78,6 +78,7 @@ public final class DracFunEnergyCoreRegistry {
 
     /** Registers the placeable multiblock pieces and all three Energy Core activators. */
     public static int registerMultiblocks(SFDracFun2 addon, boolean hardMode) {
+        ItemGroup materials = DracFunItemGroups.materials(addon);
         ItemGroup machines = DracFunItemGroups.energyCore(addon);
         ItemStack draconium = required(hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
         ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
@@ -99,7 +100,7 @@ public final class DracFunEnergyCoreRegistry {
         int registered = 0;
         registered += registerUnplaceable(
                 addon,
-                machines,
+                materials,
                 particleGenerator,
                 RecipeType.ENHANCED_CRAFTING_TABLE,
                 recipe(
