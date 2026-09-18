@@ -82,7 +82,20 @@ public enum ModuleFamily {
     }
 
     /**
-     * DracFun 2.0.10 used DRACFUN_<TIER>_<FAMILY>_MODULE.
+     * Persistent module-count key used by DracFun 2.0.10.
+     *
+     * <p>This is deliberately different from the Slimefun item ID. The original
+     * data key was family-first and retained POWER rather than ENERGY.</p>
+     */
+    public String legacyDataId(ModuleTier tier) {
+        if (!supports(tier)) {
+            throw new IllegalArgumentException(name() + " does not exist at tier " + tier);
+        }
+        return legacyBaseId + '_' + tier.legacyName() + "_MODULE";
+    }
+
+    /**
+     * DracFun 2.0.10 Slimefun item ID: DRACFUN_<TIER>_<FAMILY>_MODULE.
      */
     public String legacyItemId(ModuleTier tier) {
         if (!supports(tier)) {
