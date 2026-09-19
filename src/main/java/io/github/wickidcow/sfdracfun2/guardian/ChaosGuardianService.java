@@ -1,5 +1,6 @@
 package io.github.wickidcow.sfdracfun2.guardian;
 
+import com.destroystokyo.paper.event.entity.EnderDragonFireballHitEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
@@ -29,6 +30,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BossBar;
 import org.bukkit.boss.DragonBattle;
+import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.DragonFireball;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.EnderDragon;
@@ -42,7 +44,6 @@ import org.bukkit.event.entity.EnderDragonChangePhaseEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -304,7 +305,7 @@ public final class ChaosGuardianService implements Listener {
     }
 
     private void basicAttack(EnderDragon dragon, Player player) {
-        int shots = 12 + ThreadLocalRandom.current().nextInt(6);
+        int shots = ThreadLocalRandom.current().nextInt(6, 12);
         for (int i = 0; i < shots; i++) {
             long delay = (long) i * 4L;
             Slimefun.runSyncFor(player, () -> {
@@ -337,7 +338,7 @@ public final class ChaosGuardianService implements Listener {
         if (ThreadLocalRandom.current().nextBoolean()) {
             gravityAttack(player);
         } else {
-            witherAttack(player);
+            witherAttack(dragon, player);
         }
     }
 
@@ -371,6 +372,7 @@ public final class ChaosGuardianService implements Listener {
 
                 double damage = Math.min(laserDamageCap, pulse * 250D);
                 player.damage(damage);
+                player.getWorld().createExplosion(player.getLocation(), 5.0F, false, false);
                 player.getWorld().spawnParticle(Particle.FLAME, player.getLocation(), 24);
                 player.playSound(
                         player.getLocation(),
@@ -399,6 +401,8 @@ public final class ChaosGuardianService implements Listener {
         applyEffect(player, "CONFUSION", 100, 2);
         applyEffect(player, "NAUSEA", 100, 2);
         applyEffect(player, "DARKNESS", 100, 2);
+        applyEffect(player, "HARM", 100, 2);
+        applyEffect(player, "INSTANT_DAMAGE", 100, 2);
         applyEffect(player, "HUNGER", 100, 2);
         applyEffect(player, "LEVITATION", 100, 2);
         applyEffect(player, "POISON", 100, 2);
@@ -413,7 +417,7 @@ public final class ChaosGuardianService implements Listener {
         player.teleportAsync(player.getWorld().getSpawnLocation());
     }
 
-    private void witherAttack(Player player) {
+    private void witherAttack(EnderDragon dragon, Player player) {
         int count = ThreadLocalRandom.current().nextInt(3, 6);
         for (int i = 0; i < count; i++) {
             Location spawn = player.getLocation().clone().add(
@@ -440,6 +444,14 @@ public final class ChaosGuardianService implements Listener {
                     () -> {},
                     witherLifetimeTicks);
         }
+
+        // DracFun 2.0.10 followed the Wither phase with another basic
+        // 6-11-shot Guardian volley after 100 ticks.
+        Slimefun.runSyncFor(player, () -> {
+            if (validCombatant(player, dragon)) {
+                basicAttack(dragon, player);
+            }
+        }, 100L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
@@ -513,29 +525,28 @@ public final class ChaosGuardianService implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onFireballHit(ProjectileHitEvent event) {
-        if (!(event.getEntity() instanceof DragonFireball fireball)) {
-            return;
-        }
-
+    public void onFireballHit(EnderDragonFireballHitEvent event) {
+        DragonFireball fireball = event.getEntity();
         ProjectileSource shooter = fireball.getShooter();
         if (!(shooter instanceof EnderDragon dragon) || !isGuardian(dragon)) {
             return;
         }
 
-        Set<Player> targets = new HashSet<>();
-        if (event.getHitEntity() instanceof Player player) {
-            targets.add(player);
+        AreaEffectCloud cloud = event.getAreaEffectCloud();
+        cloud.setDuration(cloud.getDuration() * 3);
+
+        PotionEffectType harm = PotionEffectType.getByName("HARM");
+        if (harm == null) {
+            harm = PotionEffectType.getByName("INSTANT_DAMAGE");
+        }
+        if (harm != null) {
+            cloud.addCustomEffect(new PotionEffect(harm, 600, 2), true);
         }
 
-        for (Entity entity : fireball.getNearbyEntities(4D, 4D, 4D)) {
-            if (entity instanceof Player player) {
-                targets.add(player);
+        for (var target : event.getTargets()) {
+            if (target instanceof Player player) {
+                Slimefun.runSyncFor(player, () -> punishFireballHit(player));
             }
-        }
-
-        for (Player player : targets) {
-            Slimefun.runSyncFor(player, () -> punishFireballHit(player));
         }
     }
 
@@ -550,6 +561,7 @@ public final class ChaosGuardianService implements Listener {
         }
 
         player.damage(500D);
+        player.getWorld().createExplosion(player.getLocation(), 5.0F, false, false);
         player.getWorld().spawnParticle(Particle.FLAME, player.getLocation(), 32);
         player.playSound(
                 player.getLocation(),
