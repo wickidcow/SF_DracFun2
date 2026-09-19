@@ -11,10 +11,10 @@ permissions:
   contents: write
 
 env:
-  RELEASE_TAG: v2.0.1
-  SOURCE_REF: cb5b86ba09416b3d998816abced3b912f8b0cc0e
-  EXPECTED_SHA256: 5dded65271740c7b8f3b237dd01fd8a69befaecf31a57cf3a94890c5996016a8
-  JAR_NAME: SFL_DracFun-Reborn2.0.1.jar
+  RELEASE_TAG: v2.0.2
+  SOURCE_REF: 0f30b399dca75300622d214554900c0f96c8b2e0
+  EXPECTED_SHA256: e1cfa160c40d1ea0fcc3dcf4e1337ff01d18929d6024e61b83b99910d29199c8
+  JAR_NAME: SFL_DracFun-Reborn2.0.2.jar
 
 jobs:
   release:
@@ -88,7 +88,7 @@ jobs:
           archive: false
           if-no-files-found: error
 
-      - name: Publish v2.0.1 GitHub Release
+      - name: Publish v2.0.2 GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -96,19 +96,22 @@ jobs:
           set -euo pipefail
           JAR="build/libs/${JAR_NAME}"
           cat > release-notes.md <<'EOF'
-          DracFun Reborn 2.0.1
+          DracFun Reborn 2.0.2
 
-          Clean-room Slimefun Legacy reimplementation of the discontinued DracFun 2.0.10 addon.
+          Clean-room Slimefun Legacy reimplementation of the discontinued DracFun 2.0.20 addon.
 
-          - Preserves the audited 134-ID legacy compatibility surface and migration data.
-          - Restores Draconium progression, Energy Infuser, Item Converter, Fusion Crafting,
+          - Preserves the complete audited 134-ID DracFun 2.0.10 compatibility surface plus 3 migration aliases.
+          - Restores Draconium progression, exact recipes/Fusion costs, Energy Infuser, Item Converter,
             modular equipment/modules, Energy Core multiblocks, Draconic Reactor, and Chaos Guardian.
+          - Final parity pass restores guide hierarchy/presentation, machine GUIs, Module Integrater behavior,
+            modular gear attributes, Auto-Feed, bow behavior, Reactor controls, Energy Core geometry/capacities,
+            Guardian targeting/timing/attacks, legacy sounds/messages, and persisted modular keys.
           - Validated on Paper 1.21.11, Paper/Purpur 26.2, Paper/Purpur 26.3, and Folia 26.2.
-          - Runtime-smoked on Paper 26.2 with Slimefun Legacy 4.1.51.
+          - Runtime-smoked on Paper 26.2 with Slimefun Legacy 4.1.51: 134/134 IDs and 3/3 aliases accounted for.
           - Universal release artifact is Java 21 bytecode.
-          - Remove the original DracFun 2.0.10 JAR before installing Reborn.
+          - Remove the original DracFun 2.0.20 JAR before installing Reborn.
 
-          Release artifact: SFL_DracFun-Reborn2.0.1.jar
+          Release artifact: SFL_DracFun-Reborn2.0.2.jar
           EOF
 
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
@@ -118,6 +121,6 @@ jobs:
             gh release create "$RELEASE_TAG" "$JAR" \
               --repo "$GITHUB_REPOSITORY" \
               --target "$SOURCE_REF" \
-              --title "DracFun Reborn 2.0.1" \
+              --title "DracFun Reborn 2.0.2" \
               --notes-file release-notes.md
           fi
