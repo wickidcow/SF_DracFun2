@@ -810,7 +810,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
             message(
                     player,
                     ChatColor.GREEN
-                            + value
+                            + String.valueOf(value)
                             + " J per tick will be used for the generation of a containment field.");
         }));
     }
@@ -832,7 +832,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
             message(
                     player,
                     ChatColor.GREEN
-                            + value
+                            + String.valueOf(value)
                             + "% of the max saturation level must be filled prior to the generation of energy.");
         }));
     }
