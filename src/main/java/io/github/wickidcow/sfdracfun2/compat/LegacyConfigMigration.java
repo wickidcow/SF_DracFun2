@@ -36,7 +36,11 @@ public final class LegacyConfigMigration {
     public static boolean migrateStagedDefaults(SFDracFun2 addon) {
         FileConfiguration config = addon.getConfig();
 
-        if (config.getInt("config-version", 0) >= CURRENT_CONFIG_VERSION) {
+        // JavaPlugin loads the packaged config as YAML defaults. isSet() is intentional
+        // here: contains()/getInt() would see the new packaged config-version even when
+        // an upgraded server's on-disk config never had that key.
+        if (config.isSet("config-version")
+                && config.getInt("config-version", 0) >= CURRENT_CONFIG_VERSION) {
             return false;
         }
 
@@ -48,10 +52,10 @@ public final class LegacyConfigMigration {
         // These keys/defaults identify the development-era config that existed before
         // the complete restoration was enabled by default. Requiring them prevents a
         // modern server owner's intentional all-off feature selection from being changed.
-        boolean oldStagedSafetyDefaults = config.contains("reactor.explosion-multiplier")
-                && config.contains("reactor.break-explosion-power")
-                && !config.contains("compatibility.fix-broken-arrow-penetration")
-                && !config.contains("guardian.cleanup-crystal-cages")
+        boolean oldStagedSafetyDefaults = config.isSet("reactor.explosion-multiplier")
+                && config.isSet("reactor.break-explosion-power")
+                && !config.isSet("compatibility.fix-broken-arrow-penetration")
+                && !config.isSet("guardian.cleanup-crystal-cages")
                 && config.getInt("guardian.wither-minion-lifetime-ticks", 200) == 200;
 
         if (!oldStagedFeatureSet || !oldStagedSafetyDefaults) {
