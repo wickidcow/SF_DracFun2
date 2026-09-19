@@ -71,11 +71,31 @@ public enum ModuleFamily {
         return Set.copyOf(supportedTiers);
     }
 
+    /**
+     * Original Slimefun item identity. DracFun 2.0.10 used tier-first item IDs,
+     * e.g. DRACFUN_BASIC_AOE_MODULE and DRACFUN_BASIC_ENERGY_MODULE.
+     */
     public String legacyItemId(ModuleTier tier) {
+        requireSupported(tier);
+        return "DRACFUN_" + tier.legacyName() + '_' + legacyBaseId + "_MODULE";
+    }
+
+    /**
+     * Original per-gear persistent-data identity.
+     *
+     * <p>These deliberately do not match the item IDs: the old addon stored
+     * family-first keys such as DRACFUN_AOE_BASIC_MODULE. The POWER family also
+     * stored DRACFUN_POWER_* even though its visible module item was named ENERGY.</p>
+     */
+    public String legacyDataKeyId(ModuleTier tier) {
+        requireSupported(tier);
+        return "DRACFUN_" + name() + '_' + tier.legacyName() + "_MODULE";
+    }
+
+    private void requireSupported(ModuleTier tier) {
         if (!supports(tier)) {
             throw new IllegalArgumentException(name() + " does not exist at tier " + tier);
         }
-        return "DRACFUN_" + tier.legacyName() + '_' + legacyBaseId + "_MODULE";
     }
 
     private static Set<ModuleTier> tiers(ModuleTier first, ModuleTier... remaining) {
