@@ -448,6 +448,45 @@ jobs:
           grep -Fq '"Fuel Conversion Rate"' "$REACTOR"
           grep -Fq 'statsMenu.open(player)' "$REACTOR"
 
+      - name: Verify exact Energy Core structure and behavior parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          MACHINE=src/main/java/io/github/wickidcow/sfdracfun2/energycore/EnergyCoreMachine.java
+          TIER=src/main/java/io/github/wickidcow/sfdracfun2/energycore/EnergyCoreTier.java
+          STRUCT=src/main/java/io/github/wickidcow/sfdracfun2/energycore/EnergyCoreStructure.java
+
+          grep -Fq 'TIER_1("DRACFUN_ENERGY_CORE_ACTIVATOR", 48_000_000, EnergyCoreStructure.tier1())' "$TIER"
+          grep -Fq 'TIER_2("DRACFUN_ENERGY_CORE_ACTIVATOR_2", 256_000_000, EnergyCoreStructure.tier2())' "$TIER"
+          grep -Fq 'TIER_3("DRACFUN_ENERGY_CORE_ACTIVATOR_3", 1_600_000_000, EnergyCoreStructure.tier3())' "$TIER"
+
+          grep -Fq 'layer3x3(blocks, STABILIZER, CORE_BLOCK_1, 1);' "$STRUCT"
+          grep -Fq 'layer3x3(blocks, DRACONIUM_BLOCK, DRACONIUM_BLOCK, 1);' "$STRUCT"
+          grep -Fq 'layer3x3(blocks, STABILIZER, CORE_BLOCK_2, 2);' "$STRUCT"
+          grep -Fq 'layer3x3(blocks, DRACONIUM_BLOCK, DRACONIUM_BLOCK, 3);' "$STRUCT"
+
+          grep -Fq 'layer3x3(blocks, STABILIZER, STABILIZER, 2);' "$STRUCT"
+          grep -Fq 'sides(blocks, DRACONIUM_BLOCK, 2);' "$STRUCT"
+          grep -Fq 'corners(blocks, DRACONIUM_BLOCK, 3);' "$STRUCT"
+          grep -Fq 'layer3x3(blocks, STABILIZER, STABILIZER, 3);' "$STRUCT"
+          grep -Fq 'sides(blocks, STABILIZER, 3);' "$STRUCT"
+          grep -Fq 'edges(blocks, DRACONIUM_BLOCK, 3);' "$STRUCT"
+          grep -Fq 'corners(blocks, DRACONIUM_BLOCK, 4);' "$STRUCT"
+          grep -Fq 'layer3x3(blocks, STABILIZER, CORE_BLOCK_3, 4);' "$STRUCT"
+          grep -Fq 'sides(blocks, STABILIZER, 4);' "$STRUCT"
+          grep -Fq 'edges(blocks, DRACONIUM_BLOCK, 4);' "$STRUCT"
+          grep -Fq 'corners(blocks, DRACONIUM_BLOCK, 5);' "$STRUCT"
+          grep -Fq 'layer3x3(blocks, STABILIZER, STABILIZER, 5);' "$STRUCT"
+          grep -Fq 'sides(blocks, STABILIZER, 5);' "$STRUCT"
+          grep -Fq 'edges(blocks, DRACONIUM_BLOCK, 5);' "$STRUCT"
+          grep -Fq 'layer3x3(blocks, STABILIZER, STABILIZER, 6);' "$STRUCT"
+          grep -Fq 'sides(blocks, DRACONIUM_BLOCK, 6);' "$STRUCT"
+          grep -Fq 'layer3x3(blocks, DRACONIUM_BLOCK, DRACONIUM_BLOCK, 7);' "$STRUCT"
+
+          grep -Fq 'You have successfully built the Energy Core ' "$MACHINE"
+          grep -Fq 'The core is not completed yet!' "$MACHINE"
+          grep -Fq 'You broke a part of the core! All stored energy has been expelled!' "$MACHINE"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
