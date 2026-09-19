@@ -30,6 +30,7 @@ public final class ReactorState {
     public static final String EXPLOSION_COUNTDOWN = "DRACFUN_EXPLOSION_COUNTDOWN";
 
     public static final String REBORN_PROGRESS = "reborn-reactor-progress";
+    public static final String REBORN_PROGRESS_MIGRATED = "reborn-reactor-progress-migrated";
 
     private ReactorState() {}
 
@@ -54,6 +55,7 @@ public final class ReactorState {
                 EXPLOSION_COUNTDOWN,
                 Integer.toString(120 + ThreadLocalRandom.current().nextInt(120)));
         putIfMissing(data, REBORN_PROGRESS, "-1");
+        putIfMissing(data, REBORN_PROGRESS_MIGRATED, "false");
     }
 
     public static ReactorPhase phase(SlimefunBlockData data) {
