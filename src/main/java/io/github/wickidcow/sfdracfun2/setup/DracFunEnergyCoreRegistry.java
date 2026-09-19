@@ -8,6 +8,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCoreMachine;
+import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCoreTier;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -219,7 +220,7 @@ public final class DracFunEnergyCoreRegistry {
         if (SlimefunItem.getById(stack.getItemId()) != null) {
             return 0;
         }
-        new SlimefunItem(group, stack, RecipeType.ENHANCED_CRAFTING_TABLE, recipe).register(addon);
+        new EnergyCorePieceItem(group, stack, RecipeType.ENHANCED_CRAFTING_TABLE, recipe).register(addon);
         return 1;
     }
 
