@@ -371,6 +371,7 @@ public final class ChaosGuardianService implements Listener {
 
                 double damage = Math.min(laserDamageCap, pulse * 250D);
                 player.damage(damage);
+                player.getWorld().createExplosion(player.getLocation(), 5.0F, false, false);
                 player.getWorld().spawnParticle(Particle.FLAME, player.getLocation(), 24);
                 player.playSound(
                         player.getLocation(),
@@ -440,6 +441,14 @@ public final class ChaosGuardianService implements Listener {
                     () -> {},
                     witherLifetimeTicks);
         }
+
+        // DracFun 2.0.10 followed the Wither phase with another basic
+        // 6-11-shot Guardian volley after 100 ticks.
+        Slimefun.runSyncFor(player, () -> {
+            if (validCombatant(player, dragon)) {
+                basicAttack(dragon, player);
+            }
+        }, 100L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
