@@ -10,8 +10,10 @@ import io.github.wickidcow.sfdracfun2.modular.ModularArmorItem;
 import io.github.wickidcow.sfdracfun2.modular.ModularGearItem;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -82,15 +84,18 @@ public final class ChaosGuardianService implements Listener {
 
     private final SFDracFun2 plugin;
     private final boolean crystalCages;
+    private final boolean cleanupCrystalCages;
     private final boolean punishUnarmored;
     private final int witherLifetimeTicks;
     private final double laserDamageCap;
     private final Set<UUID> pendingWorlds = ConcurrentHashMap.newKeySet();
+    private final Map<UUID, List<UUID>> participantSnapshots = new ConcurrentHashMap<>();
     private final Map<UUID, Map<CageBlock, Material>> cageBlocks = new ConcurrentHashMap<>();
 
     public ChaosGuardianService(SFDracFun2 plugin) {
         this.plugin = plugin;
         crystalCages = plugin.getConfig().getBoolean("guardian.crystal-cages-enabled", true);
+        cleanupCrystalCages = plugin.getConfig().getBoolean("guardian.cleanup-crystal-cages", false);
         punishUnarmored = plugin.getConfig().getBoolean("guardian.punish-unarmored", true);
         witherLifetimeTicks = Math.max(
                 0,
@@ -118,6 +123,7 @@ public final class ChaosGuardianService implements Listener {
                 if (dragon != null && isGuardian(dragon)) {
                     Slimefun.runSyncFor(dragon, () -> {
                         initializeBossBar(dragon.getBossBar());
+                        snapshotParticipants(dragon, dragon.getLocation());
                         dragon.getPersistentDataContainer().set(
                                 CRYSTAL_COUNT,
                                 PersistentDataType.INTEGER,
@@ -242,7 +248,6 @@ public final class ChaosGuardianService implements Listener {
         double targetHealth = maxHealth == null ? dragon.getHealth() : Math.min(2000D, maxHealth.getValue());
         dragon.setHealth(Math.max(1D, targetHealth));
         dragon.setCustomName(ChatColor.DARK_RED + "Chaos Guardian");
-        dragon.setCustomNameVisible(true);
         tag(dragon, GUARDIAN);
 
         initializeBossBar(dragon.getBossBar());
@@ -252,6 +257,8 @@ public final class ChaosGuardianService implements Listener {
                 CRYSTAL_COUNT,
                 PersistentDataType.INTEGER,
                 crystals.size());
+
+        snapshotParticipants(dragon, dragon.getLocation());
 
         for (EnderCrystal crystal : crystals) {
             Slimefun.runSyncFor(crystal, () -> {
@@ -281,14 +288,17 @@ public final class ChaosGuardianService implements Listener {
         double health = dragon.getHealth();
         World world = dragon.getWorld();
         Location origin = new Location(world, 0D, 0D, 0D);
+        Collection<Player> participants = world.getNearbyPlayers(origin, 256D);
+        participantSnapshots.put(
+                dragon.getUniqueId(),
+                participants.stream().map(Player::getUniqueId).toList());
 
-        for (Player player : world.getPlayers()) {
+        for (Player player : participants) {
             Slimefun.runSyncFor(player, () -> {
                 if (!plugin.isEnabled()
                         || !player.isOnline()
                         || player.isDead()
-                        || player.getWorld() != world
-                        || player.getLocation().distanceSquared(origin) > PARTICIPANT_RANGE_SQUARED) {
+                        || player.getWorld() != world) {
                     return;
                 }
 
@@ -446,6 +456,7 @@ public final class ChaosGuardianService implements Listener {
             Wither wither = player.getWorld().spawn(spawn, Wither.class);
             tag(wither, MINION);
             wither.setCustomName(ChatColor.DARK_RED + "Guardian Wither");
+            initializeBossBar(wither.getBossBar());
             wither.setTarget(player);
             applyMultiplier(wither, new String[] {"GENERIC_FOLLOW_RANGE", "FOLLOW_RANGE"}, 200D);
             applyMultiplier(wither, new String[] {"GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED"}, 2D);
@@ -591,6 +602,18 @@ public final class ChaosGuardianService implements Listener {
             return;
         }
 
+        List<UUID> snapshot = participantSnapshots.remove(dragon.getUniqueId());
+        pendingWorlds.remove(dragon.getWorld().getUID());
+
+        // DracFun 2.0.10 returned immediately when its PLAYERS snapshot was empty,
+        // before replacing the vanilla dragon rewards.
+        if (snapshot == null || snapshot.isEmpty()) {
+            if (cleanupCrystalCages) {
+                cleanupTaggedCrystals(dragon.getWorld());
+            }
+            return;
+        }
+
         event.setDroppedExp(20_000);
         event.getDrops().clear();
 
@@ -603,21 +626,25 @@ public final class ChaosGuardianService implements Listener {
             event.getDrops().add(shard);
         }
 
-        pendingWorlds.remove(dragon.getWorld().getUID());
-        cleanupTaggedCrystals(dragon.getWorld());
+        if (cleanupCrystalCages) {
+            cleanupTaggedCrystals(dragon.getWorld());
+        }
 
         if (!punishUnarmored) {
             return;
         }
 
+        Set<UUID> participantIds = Set.copyOf(snapshot);
         World world = dragon.getWorld();
-        Location origin = new Location(world, 0D, 0D, 0D);
         for (Player player : world.getPlayers()) {
+            if (!participantIds.contains(player.getUniqueId())) {
+                continue;
+            }
+
             Slimefun.runSyncFor(player, () -> {
                 if (!player.isOnline()
                         || player.isDead()
                         || player.getWorld() != world
-                        || player.getLocation().distanceSquared(origin) > PARTICIPANT_RANGE_SQUARED
                         || isWearingModularArmor(player)) {
                     return;
                 }
@@ -856,6 +883,13 @@ public final class ChaosGuardianService implements Listener {
         return chestplate instanceof ModularArmorItem;
     }
 
+    private void snapshotParticipants(EnderDragon dragon, Location center) {
+        Collection<Player> nearby = dragon.getWorld().getNearbyPlayers(center, 256D);
+        participantSnapshots.put(
+                dragon.getUniqueId(),
+                nearby.stream().map(Player::getUniqueId).toList());
+    }
+
     private static boolean validCombatant(Player player, EnderDragon dragon) {
         return player.isOnline()
                 && !player.isDead()
@@ -872,7 +906,11 @@ public final class ChaosGuardianService implements Listener {
     }
 
     private void onChaosCrystalRetired(UUID crystalId, World world, EnderDragon guardian) {
-        cleanupCage(crystalId, world);
+        if (cleanupCrystalCages) {
+            cleanupCage(crystalId, world);
+        } else {
+            cageBlocks.remove(crystalId);
+        }
 
         if (guardian == null) {
             return;
