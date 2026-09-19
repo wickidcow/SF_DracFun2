@@ -30,7 +30,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlotGroup;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -272,7 +271,6 @@ public final class DracFunModularRegistry {
         }
 
         ItemStack moduleIcon = new ItemStack(materialFor(tier));
-        moduleIcon.addItemFlags(ItemFlag.HIDE_ITEM_SPECIFICS);
         List<String> originalLore = LegacyModularLore.moduleLore(family, tier);
         SlimefunItemStack stack = moduleTheme(tier).stack(
                 id,
