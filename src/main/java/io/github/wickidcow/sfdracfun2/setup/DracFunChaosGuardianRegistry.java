@@ -3,7 +3,7 @@ package io.github.wickidcow.sfdracfun2.setup;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
-import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.SFDracFun2;\nimport io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.guardian.ChaosGuardianService;
 import io.github.wickidcow.sfdracfun2.guardian.ChaosOrbItem;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
@@ -25,10 +25,10 @@ public final class DracFunChaosGuardianRegistry {
         }
 
         ItemGroup group = DracFunItemGroups.materials(addon);
-        SlimefunItemStack orb = new SlimefunItemStack(
+        SlimefunItemStack orb = LegacyTheme.END_GAME_CRAFTING.stack(
                 id,
                 Material.ENDER_EYE,
-                "&5Chaos Orb of Invocation",
+                "Chaos Orb of Invocation",
                 "&7Invokes the Chaos Guardian in The End.",
                 "&7Requires a DracFun modular armor chestplate.",
                 "&cThe battle is intentionally dangerous.");
