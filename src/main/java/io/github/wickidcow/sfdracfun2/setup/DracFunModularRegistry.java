@@ -126,7 +126,7 @@ public final class DracFunModularRegistry {
             return 0;
         }
 
-        ItemStack base = new ItemStack(materialFor(type));
+        ItemStack base = new ItemStack(materialFor(type, tier));
         ItemMeta meta = base.getItemMeta();
         meta.setDisplayName(colorForTier(tier) + tierName(tier) + ' ' + displayName(type));
         meta.setUnbreakable(true);
@@ -324,17 +324,26 @@ public final class DracFunModularRegistry {
         };
     }
 
-    private static Material materialFor(GearType type) {
+    /**
+     * Preserves the observable vanilla bases used by DracFun 2.0.10.
+     *
+     * <p>Wyvern/Draconic tools were diamond, Chaotic tools were netherite,
+     * and both Staff of Power tiers were backed by a trident. Capacitors used
+     * custom heads in the original; Reborn intentionally keeps its clean-room
+     * vanilla icon because the original texture asset is not required for mechanics.</p>
+     */
+    private static Material materialFor(GearType type, int tier) {
+        boolean chaotic = tier == 3;
         return switch (type) {
             case ARMOR -> Material.LEATHER_CHESTPLATE;
-            case AXE -> Material.NETHERITE_AXE;
+            case AXE -> chaotic ? Material.NETHERITE_AXE : Material.DIAMOND_AXE;
             case BOW -> Material.BOW;
             case CAPACITOR -> Material.REDSTONE_TORCH;
-            case HOE -> Material.NETHERITE_HOE;
-            case PICKAXE, TOOL -> Material.NETHERITE_PICKAXE;
-            case SHOVEL -> Material.NETHERITE_SHOVEL;
-            case STAFF -> Material.BLAZE_ROD;
-            case SWORD -> Material.NETHERITE_SWORD;
+            case HOE -> chaotic ? Material.NETHERITE_HOE : Material.DIAMOND_HOE;
+            case PICKAXE, TOOL -> chaotic ? Material.NETHERITE_PICKAXE : Material.DIAMOND_PICKAXE;
+            case SHOVEL -> chaotic ? Material.NETHERITE_SHOVEL : Material.DIAMOND_SHOVEL;
+            case STAFF -> Material.TRIDENT;
+            case SWORD -> chaotic ? Material.NETHERITE_SWORD : Material.DIAMOND_SWORD;
             case ALL -> Material.NETHER_STAR;
         };
     }
