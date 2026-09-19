@@ -73,9 +73,7 @@ public final class DracFunReactorRegistry {
         SlimefunItemStack reactor = LegacyTheme.REACTOR.stack(
                 "DRACFUN_DRACONIC_REACTOR",
                 Material.ORANGE_GLAZED_TERRACOTTA,
-                "Draconic Reactor",
-                "&7Dangerous high-output reactor.",
-                "&7Uses Awakened Draconium Blocks as fuel.");
+                "Draconic Reactor");
 
         int registered = 0;
 
