@@ -605,6 +605,32 @@ jobs:
           grep -Fq '16_000_000' "$CAT"
           grep -Fq '64_000_000' "$CAT"
 
+      - name: Verify final Chaos Guardian 2.0.10 parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          GUARD=src/main/java/io/github/wickidcow/sfdracfun2/guardian/ChaosGuardianService.java
+
+          grep -Fq 'private static final long ATTACK_PERIOD_TICKS = 600L;' "$GUARD"
+          grep -Fq 'new Location(world, 0D, 0D, 0D)' "$GUARD"
+          grep -Fq 'snapshotParticipants(dragon, dragon.getLocation());' "$GUARD"
+          grep -Fq 'world.getNearbyPlayers(origin, 256D)' "$GUARD"
+
+          grep -Fq 'ThreadLocalRandom.current().nextInt(6, 12) + 6' "$GUARD"
+          grep -Fq 'Location target = player.getLocation().clone();' "$GUARD"
+          grep -Fq '.subtract(dragon.getLocation().toVector())' "$GUARD"
+
+          grep -Fq 'DragonBattle battle = event.getEntity().getWorld().getEnderDragonBattle();' "$GUARD"
+          grep -Fq 'event.getTargets().removeIf(target -> !(target instanceof Player));' "$GUARD"
+
+          grep -Fq 'getNearbyEntitiesByType(Wither.class, 64D)' "$GUARD"
+          grep -Fq 'applyMultiplier(wither, new String[] {"GENERIC_FOLLOW_RANGE", "FOLLOW_RANGE"}, 200D);' "$GUARD"
+          grep -Fq 'applyMultiplier(wither, new String[] {"GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED"}, 2D);' "$GUARD"
+          grep -Fq 'applyMultiplier(wither, new String[] {"GENERIC_FLYING_SPEED", "FLYING_SPEED"}, 2D);' "$GUARD"
+          grep -Fq 'applyMultiplier(wither, new String[] {"GENERIC_ARMOR", "ARMOR"}, 8D);' "$GUARD"
+          grep -Fq 'wither.lookAt(player);' "$GUARD"
+          grep -Fq 'wither.setTarget(player);' "$GUARD"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 

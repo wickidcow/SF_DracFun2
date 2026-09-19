@@ -52,7 +52,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
 /**
@@ -124,7 +123,9 @@ public final class ChaosGuardianService implements Listener {
                 if (dragon != null && isGuardian(dragon)) {
                     Slimefun.runSyncFor(dragon, () -> {
                         initializeBossBar(dragon.getBossBar());
-                        snapshotParticipants(dragon, dragon.getLocation());
+                        snapshotParticipants(
+                        dragon,
+                        new Location(dragon.getWorld(), 0D, 0D, 0D));
                         dragon.getPersistentDataContainer().set(
                                 CRYSTAL_COUNT,
                                 PersistentDataType.INTEGER,
@@ -342,14 +343,14 @@ public final class ChaosGuardianService implements Listener {
                     return;
                 }
 
-                Location target = player.getEyeLocation().clone();
+                Location target = player.getLocation().clone();
                 Slimefun.runSyncFor(dragon, () -> {
                     if (!dragon.isValid() || dragon.isDead()) {
                         return;
                     }
 
                     Vector direction = target.toVector()
-                            .subtract(dragon.getEyeLocation().toVector())
+                            .subtract(dragon.getLocation().toVector())
                             .normalize();
                     dragon.launchProjectile(DragonFireball.class, direction);
                 });
@@ -467,6 +468,7 @@ public final class ChaosGuardianService implements Listener {
     }
 
     private void witherAttack(EnderDragon dragon, Player player) {
+        Set<UUID> spawned = new HashSet<>();
         for (int i = 0; i <= ThreadLocalRandom.current().nextInt(3, 6); i++) {
             Location spawn = player.getLocation().clone().add(
                     ThreadLocalRandom.current().nextInt(-4, 4),
@@ -475,29 +477,43 @@ public final class ChaosGuardianService implements Listener {
 
             Wither wither = player.getWorld().spawn(spawn, Wither.class);
             tag(wither, MINION);
-            wither.setCustomName(ChatColor.DARK_RED + "Guardian Wither");
-            initializeBossBar(wither.getBossBar());
-            wither.setTarget(player);
-            applyMultiplier(wither, new String[] {"GENERIC_FOLLOW_RANGE", "FOLLOW_RANGE"}, 200D);
-            applyMultiplier(wither, new String[] {"GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED"}, 2D);
-            applyMultiplier(wither, new String[] {"GENERIC_FLYING_SPEED", "FLYING_SPEED"}, 2D);
-            applyMultiplier(wither, new String[] {"GENERIC_ARMOR", "ARMOR"}, 8D);
-
-            if (witherLifetimeTicks > 0) {
-                Slimefun.runSyncFor(
-                        wither,
-                        () -> {
-                            if (wither.isValid()) {
-                                wither.remove();
-                            }
-                        },
-                        () -> {},
-                        witherLifetimeTicks);
-            }
+            spawned.add(wither.getUniqueId());
         }
 
-        // DracFun 2.0.10 followed the Wither phase with another basic
-        // 6-11-shot Guardian volley after 100 ticks.
+        // DracFun 2.0.10 then scanned every Wither within 64 blocks of the
+        // target player and reconfigured any it encountered, including Withers
+        // not spawned by DracFun. Preserve that legacy encounter quirk.
+        for (Wither wither : player.getLocation().getNearbyEntitiesByType(Wither.class, 64D)) {
+            Slimefun.runSyncFor(wither, () -> {
+                if (!wither.isValid() || wither.isDead()) {
+                    return;
+                }
+
+                applyMultiplier(wither, new String[] {"GENERIC_FOLLOW_RANGE", "FOLLOW_RANGE"}, 200D);
+                applyMultiplier(wither, new String[] {"GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED"}, 2D);
+                applyMultiplier(wither, new String[] {"GENERIC_FLYING_SPEED", "FLYING_SPEED"}, 2D);
+                applyMultiplier(wither, new String[] {"GENERIC_ARMOR", "ARMOR"}, 8D);
+                wither.setCustomName(ChatColor.DARK_RED + "Guardian Wither");
+                initializeBossBar(wither.getBossBar());
+                wither.lookAt(player);
+                wither.setTarget(player);
+
+                if (spawned.contains(wither.getUniqueId()) && witherLifetimeTicks > 0) {
+                    Slimefun.runSyncFor(
+                            wither,
+                            () -> {
+                                if (wither.isValid()) {
+                                    wither.remove();
+                                }
+                            },
+                            () -> {},
+                            witherLifetimeTicks);
+                }
+            });
+        }
+
+        // The legacy Wither phase followed with another 12-17-shot basic
+        // Guardian volley after 100 ticks.
         Slimefun.runSyncFor(player, () -> {
             if (validCombatant(player, dragon)) {
                 basicAttack(dragon, player);
@@ -588,9 +604,9 @@ public final class ChaosGuardianService implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onFireballHit(EnderDragonFireballHitEvent event) {
-        DragonFireball fireball = event.getEntity();
-        ProjectileSource shooter = fireball.getShooter();
-        if (!(shooter instanceof EnderDragon dragon) || !isGuardian(dragon)) {
+        DragonBattle battle = event.getEntity().getWorld().getEnderDragonBattle();
+        EnderDragon guardian = battle == null ? null : battle.getEnderDragon();
+        if (guardian == null || !isGuardian(guardian)) {
             return;
         }
 
@@ -605,10 +621,10 @@ public final class ChaosGuardianService implements Listener {
             cloud.addCustomEffect(new PotionEffect(harm, 600, 2), true);
         }
 
+        event.getTargets().removeIf(target -> !(target instanceof Player));
         for (var target : event.getTargets()) {
-            if (target instanceof Player player) {
-                Slimefun.runSyncFor(player, () -> punishFireballHit(player));
-            }
+            Player player = (Player) target;
+            Slimefun.runSyncFor(player, () -> punishFireballHit(player));
         }
     }
 
