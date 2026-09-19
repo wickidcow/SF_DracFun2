@@ -10,6 +10,11 @@ compatibility:
   # Keep observable DRACFUN_* identities when restored systems register items/data.
   preserve-legacy-ids: true
 
+  # DracFun 2.0.10 accidentally stored Arrow Penetration as 25/100, 50/100,
+  # or 75/100 using integer division, so the value was always zero.
+  # false = exact legacy behavior; true = Reborn's corrected Bukkit pierce behavior.
+  fix-broken-arrow-penetration: false
+
 reactor:
   # DracFun 2.0.10 used 0.25 by default for meltdown scaling.
 
