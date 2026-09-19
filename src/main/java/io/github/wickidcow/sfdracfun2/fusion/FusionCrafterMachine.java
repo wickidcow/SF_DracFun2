@@ -13,13 +13,16 @@ import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
 import io.github.wickidcow.sfdracfun2.compat.ProtectionCompat;
 import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -41,6 +44,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
 
     private static final String DATA_OUTPUT = "reborn-fusion-output";
     private static final String DATA_COMPLETE_AT = "reborn-fusion-complete-at";
+    private static final String DATA_PLAYER = "reborn-fusion-player";
 
     private static final int[] INPUTS = {10, 13, 16, 19, 25, 28, 34, 37, 43};
     private static final int STATUS = 31;
@@ -157,6 +161,13 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
             return;
         }
 
+        player.playSound(
+                block.getLocation(),
+                "dracfun:dracfun.fusion_rotation",
+                SoundCategory.BLOCKS,
+                1F,
+                1F);
+
         // DracFun 2.0.10 committed the transaction at button-click time:
         // energy was removed and one item from every occupied input slot was
         // consumed before the 100-tick completion task was scheduled.
@@ -170,6 +181,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         long completeAt = System.currentTimeMillis() + FUSION_DELAY_MILLIS;
         data.setData(DATA_OUTPUT, recipe.outputId());
         data.setData(DATA_COMPLETE_AT, Long.toString(completeAt));
+        data.setData(DATA_PLAYER, player.getUniqueId().toString());
         menu.replaceExistingItem(STATUS, statusItem());
     }
 
@@ -216,6 +228,23 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
             // cannot currently be delivered.
             menu.replaceExistingItem(STATUS, statusItem());
             return;
+        }
+
+        String playerId = data.getData(DATA_PLAYER);
+        if (playerId != null && !playerId.isBlank()) {
+            try {
+                Player player = Bukkit.getPlayer(UUID.fromString(playerId));
+                if (player != null && player.isOnline()) {
+                    player.playSound(
+                            block.getLocation(),
+                            "dracfun:dracfun.fusion_complete",
+                            SoundCategory.BLOCKS,
+                            1F,
+                            1F);
+                }
+            } catch (IllegalArgumentException ignored) {
+                // Corrupt/missing legacy initiator metadata must not block the committed output.
+            }
         }
 
         menu.pushItem(output, OUTPUT);
@@ -267,6 +296,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
     private static void clearPending(SlimefunBlockData data) {
         data.removeData(DATA_OUTPUT);
         data.removeData(DATA_COMPLETE_AT);
+        data.removeData(DATA_PLAYER);
     }
 
     private static long parseLong(String value) {

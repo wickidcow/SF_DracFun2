@@ -20,6 +20,7 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -158,6 +159,12 @@ public final class EnergyInfuserMachine extends SlimefunItem implements EnergyNe
 
         ModularLore.refresh(input, gear);
         menu.replaceExistingItem(INPUT, input);
+        block.getWorld().playSound(
+                block.getLocation(),
+                "dracfun:dracfun.electric_buzz",
+                SoundCategory.BLOCKS,
+                1F,
+                1F);
         // The original moved a now-full item on the following ticker pass.
     }
 

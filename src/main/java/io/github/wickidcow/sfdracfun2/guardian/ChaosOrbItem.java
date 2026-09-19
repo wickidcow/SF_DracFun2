@@ -12,9 +12,8 @@ import org.bukkit.inventory.ItemStack;
 /**
  * Clean-room Chaos Orb of Invocation.
  *
- * <p>The old addon consumed the orb before validating armor. Reborn deliberately
- * validates the End battle and modular chestplate first, then consumes one orb
- * only when an invocation was actually accepted.</p>
+ * <p>Preserves DracFun 2.0.10's invocation ordering: once an eligible End
+ * battle is found, one orb is consumed before the modular-armor check.</p>
  */
 public final class ChaosOrbItem extends SlimefunItem implements NotPlaceable, ItemUseHandler {
 
