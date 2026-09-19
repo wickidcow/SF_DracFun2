@@ -337,7 +337,7 @@ public final class ChaosGuardianService implements Listener {
         if (ThreadLocalRandom.current().nextBoolean()) {
             gravityAttack(player);
         } else {
-            witherAttack(player);
+            witherAttack(dragon, player);
         }
     }
 
@@ -416,7 +416,7 @@ public final class ChaosGuardianService implements Listener {
         player.teleportAsync(player.getWorld().getSpawnLocation());
     }
 
-    private void witherAttack(Player player) {
+    private void witherAttack(EnderDragon dragon, Player player) {
         int count = ThreadLocalRandom.current().nextInt(3, 6);
         for (int i = 0; i < count; i++) {
             Location spawn = player.getLocation().clone().add(
