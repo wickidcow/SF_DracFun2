@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.WitherProofBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.items.EnderDraconiumOre;
 import io.github.wickidcow.sfdracfun2.items.LegacyGuideItem;
 import org.bukkit.Material;
@@ -23,37 +24,39 @@ public final class DracFunMaterialRegistry {
         int registered = 0;
 
         if (SlimefunItem.getById("DRACFUN_GUIDE") == null) {
-            SlimefunItemStack guide = new SlimefunItemStack(
+            SlimefunItemStack guide = LegacyTheme.BASIC_CRAFTING.stack(
                     "DRACFUN_GUIDE",
                     Material.BOOK,
-                    "&5DracFun Guide",
-                    "&7Currently just a placeholder item for future guide.",
-                    "&7Good Luck and Have fun!");
+                    "DracFun Guide",
+                    "Currently just a placeholder item for future guide.",
+                    "I intend it to be a whole in game guide in later versions.",
+                    "For help just contact p_yt on discord.",
+                    "Alternatively you can join discord.gg/xFtghGVCVD and create ticket.",
+                    "Good Luck and Have fun!");
             new LegacyGuideItem(group, guide).register(addon);
             registered++;
         }
 
-        SlimefunItemStack ore = stack(
+        SlimefunItemStack ore = LegacyTheme.ORE.stack(
                 "DRACFUN_DRACONIUM_ORE",
                 Material.END_STONE,
-                "&dEnder Draconium Ore",
-                "&7A virtual ore resource found by GEO Miner in The End.");
-        SlimefunItemStack dust = stack(
+                "Ender Draconium Ore");
+        SlimefunItemStack dust = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_DUST",
                 Material.NETHERITE_SCRAP,
-                "&dDraconium Dust");
-        SlimefunItemStack ingot = stack(
+                "Draconium Dust");
+        SlimefunItemStack ingot = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_INGOT",
                 Material.NETHERITE_INGOT,
-                "&dDraconium Ingot");
-        SlimefunItemStack block = stack(
+                "Draconium Ingot");
+        SlimefunItemStack block = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_BLOCK",
                 Material.NETHERITE_BLOCK,
-                "&dDraconium Block");
-        SlimefunItemStack infusedObsidian = stack(
+                "Draconium Block");
+        SlimefunItemStack infusedObsidian = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_INFUSED_OBSIDIAN",
                 Material.OBSIDIAN,
-                "&dDraconium Infused Obsidian");
+                "Draconium Infused Obsidian");
 
         if (enableEndResource && SlimefunItem.getById(ore.getItemId()) == null) {
             EnderDraconiumOre resource = new EnderDraconiumOre(

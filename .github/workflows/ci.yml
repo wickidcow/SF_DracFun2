@@ -219,6 +219,136 @@ jobs:
             exit 1
           fi
 
+      - name: Verify original modular lore parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          LORE=src/main/java/io/github/wickidcow/sfdracfun2/modular/LegacyModularLore.java
+          LIVE=src/main/java/io/github/wickidcow/sfdracfun2/modular/ModularLore.java
+          REG=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunModularRegistry.java
+          grep -Fq '"Arrow Immunity"' "$LORE"
+          grep -Fq '"Flight Boost"' "$LORE"
+          grep -Fq '"Shield Recharge Rate"' "$LORE"
+          grep -Fq '"Module Size"' "$LORE"
+          grep -Fq '"Gear Type"' "$LORE"
+          grep -Fq '" QS"' "$LORE"
+          grep -Fq 'LegacyModularLore.liveGearLore(stack, gear)' "$LIVE"
+          grep -Fq 'LegacyModularLore.defaultGearLore(type, tier)' "$REG"
+          grep -Fq 'LegacyModularLore.moduleLore(family, tier)' "$REG"
+          if grep -Fq 'DracFun Reborn compatibility module' "$REG"; then
+            echo 'Generic Reborn modular lore returned.' >&2
+            exit 1
+          fi
+
+      - name: Verify original item theme parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          THEME=src/main/java/io/github/wickidcow/sfdracfun2/compat/LegacyTheme.java
+          grep -Fq 'ORE("#C0C0C0", "Ore Resource")' "$THEME"
+          grep -Fq 'BASIC_CRAFTING("#800080", "Basic Crafting Component")' "$THEME"
+          grep -Fq 'ADVANCED_CRAFTING("#FFA500", "Advanced Crafting Component")' "$THEME"
+          grep -Fq 'END_GAME_CRAFTING("#333333", "End-Game Crafting Component")' "$THEME"
+          grep -Fq 'ENERGY_CORE("#FF0000", "Energy Core Component")' "$THEME"
+          grep -Fq 'FUSION_CRAFTING("#40E0D0", "Fusion Crafting Component")' "$THEME"
+          grep -Fq 'MACHINE("#FFFF00", "Electric Machine")' "$THEME"
+          grep -Fq 'MOB("#3A3B3C", "Mob Drop")' "$THEME"
+          grep -Fq 'REACTOR("#FFA500", "Draconic Reactor Part")' "$THEME"
+          grep -Fq 'LegacyTheme.ORE.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
+          grep -Fq 'LegacyTheme.FUSION_CRAFTING.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunFusionComponentRegistry.java
+          grep -Fq 'LegacyTheme.ENERGY_CORE.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunEnergyCoreRegistry.java
+          grep -Fq 'LegacyTheme.REACTOR.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunReactorRegistry.java
+
+      - name: Verify original machine UI parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          FUSION=src/main/java/io/github/wickidcow/sfdracfun2/fusion/FusionCrafterMachine.java
+          INFUSER=src/main/java/io/github/wickidcow/sfdracfun2/machines/EnergyInfuserMachine.java
+          CONVERTER=src/main/java/io/github/wickidcow/sfdracfun2/machines/ItemConverterMachine.java
+          grep -Fq 'private static final int[] INPUTS = {10, 13, 16, 19, 25, 28, 34, 37, 43};' "$FUSION"
+          grep -Fq 'private static final int STATUS = 31;' "$FUSION"
+          grep -Fq 'private static final int OUTPUT = 40;' "$FUSION"
+          grep -Fq 'setSize(54)' "$FUSION"
+          grep -Fq 'Click To Start Fusion Crafting!' "$FUSION"
+          grep -Fq 'You may not start another fusion as output slot is occupied!' "$FUSION"
+          grep -Fq 'Invalid recipe!' "$FUSION"
+          grep -Fq 'This Fusion Craft requires a minimum of ' "$FUSION"
+          grep -Fq 'private static final int INPUT = 10;' "$INFUSER"
+          grep -Fq 'private static final int STATUS = 13;' "$INFUSER"
+          grep -Fq 'private static final int OUTPUT = 16;' "$INFUSER"
+          grep -Fq 'Current Power' "$INFUSER"
+          grep -Fq 'Click to update your old DracFun Items!' "$CONVERTER"
+          grep -Fq 'Make sure to enter plain item ONLY!' "$CONVERTER"
+          grep -Fq 'Remove all the enchant and stuff before updating!' "$CONVERTER"
+
+      - name: Verify original DracFun guide presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          GUIDE=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunItemGroups.java
+          grep -Fq 'String main = ChatColor.DARK_PURPLE + "DracFun"' "$GUIDE"
+          grep -Fq 'Material.NETHERITE_INGOT' "$GUIDE"
+          grep -Fq 'ChatColor.GREEN + "Materials"' "$GUIDE"
+          grep -Fq 'Material.BEACON' "$GUIDE"
+          grep -Fq 'ChatColor.RED + "EnergyCore"' "$GUIDE"
+          grep -Fq 'Material.LEATHER_HELMET' "$GUIDE"
+          grep -Fq 'ChatColor.DARK_PURPLE + "WyvernGear"' "$GUIDE"
+          grep -Fq 'ChatColor.GOLD + "DraconicGear"' "$GUIDE"
+          grep -Fq 'Color.BLACK' "$GUIDE"
+          grep -Fq 'ChatColor.DARK_GRAY + "ChaoticGear"' "$GUIDE"
+          grep -Fq 'ChatColor.AQUA + "Modules"' "$GUIDE"
+          grep -Fq 'Material.RESPAWN_ANCHOR' "$GUIDE"
+          grep -Fq 'ChatColor.YELLOW + "Electric"' "$GUIDE"
+          grep -Fq 'Material.CRYING_OBSIDIAN' "$GUIDE"
+          grep -Fq 'ChatColor.GOLD + "Reactor"' "$GUIDE"
+
+      - name: Verify original modular registration themes
+        shell: bash
+        run: |
+          set -euo pipefail
+          REG=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunModularRegistry.java
+          grep -Fq 'LegacyTheme.BASIC_MODULAR.stack' "$REG"
+          grep -Fq 'tierName(tier) + " Modular " + displayName(type)' "$REG"
+          grep -Fq 'case BASIC -> Material.MUSIC_DISC_WAIT;' "$REG"
+          grep -Fq 'case WYVERN -> Material.MUSIC_DISC_MALL;' "$REG"
+          grep -Fq 'case DRACONIC -> Material.MUSIC_DISC_13;' "$REG"
+          grep -Fq 'case CHAOTIC -> Material.MUSIC_DISC_STAL;' "$REG"
+          grep -Fq 'case 1 -> LegacyTheme.WYVERN_MODULAR;' "$REG"
+          grep -Fq 'case 2 -> LegacyTheme.DRACONIC_MODULAR;' "$REG"
+          grep -Fq 'case 3 -> LegacyTheme.CHAOTIC_MODULAR;' "$REG"
+          grep -Fq 'Material.LODESTONE' "$REG"
+          grep -Fq '"Module Integrater"' "$REG"
+
+      - name: Verify machine items and Chaos Orb metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          MACH=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMachineRegistry.java
+          ORB=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunChaosGuardianRegistry.java
+          grep -Fq 'Material.DAYLIGHT_DETECTOR' "$MACH"
+          grep -Fq 'LoreBuilder.powerBuffer(EnergyInfuserMachine.ENERGY_CAPACITY)' "$MACH"
+          grep -Fq 'Material.LODESTONE' "$MACH"
+          grep -Fq 'Material.LIGHT_BLUE_GLAZED_TERRACOTTA' "$MACH"
+          grep -Fq 'Material.PURPLE_GLAZED_TERRACOTTA' "$MACH"
+          grep -Fq 'Material.ORANGE_GLAZED_TERRACOTTA' "$MACH"
+          grep -Fq 'Material.BLACK_GLAZED_TERRACOTTA' "$MACH"
+          grep -Fq 'LegacyTheme.FUSION_CRAFTING.stack' "$MACH"
+          grep -Fq '2_147_483_646' "$ORB"
+          grep -Fq 'LegacyDracFunKeys.FUSION_POWER' "$ORB"
+
+      - name: Verify original DracFun Guide book
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAT=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
+          grep -Fq '"DracFun Guide"' "$MAT"
+          grep -Fq 'Currently just a placeholder item for future guide.' "$MAT"
+          grep -Fq 'I intend it to be a whole in game guide in later versions.' "$MAT"
+          grep -Fq 'For help just contact p_yt on discord.' "$MAT"
+          grep -Fq 'Alternatively you can join discord.gg/xFtghGVCVD and create ticket.' "$MAT"
+          grep -Fq 'Good Luck and Have fun!' "$MAT"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 

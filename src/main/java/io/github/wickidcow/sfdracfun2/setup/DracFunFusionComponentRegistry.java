@@ -8,6 +8,7 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
@@ -38,8 +39,8 @@ public final class DracFunFusionComponentRegistry {
         ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
         ItemStack draconicCore = required("DRACFUN_DRACONIC_CORE");
 
-        SlimefunItemStack wyvernCore = stack(
-                "DRACFUN_WYVERN_CORE", Material.AMETHYST_SHARD, "&dWyvern Core");
+        SlimefunItemStack wyvernCore = LegacyTheme.BASIC_CRAFTING.stack(
+                "DRACFUN_WYVERN_CORE", Material.AMETHYST_SHARD, "Wyvern Core");
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -50,8 +51,8 @@ public final class DracFunFusionComponentRegistry {
                         draconicCore, new ItemStack(Material.NETHER_STAR), draconicCore,
                         draconium, draconicCore, draconium));
 
-        SlimefunItemStack fusionCore = stack(
-                "DRACFUN_FUSION_CRAFTING_CORE", Material.LODESTONE, "&dFusion Crafting Core");
+        SlimefunItemStack fusionCore = LegacyTheme.FUSION_CRAFTING.stack(
+                "DRACFUN_FUSION_CRAFTING_CORE", Material.LODESTONE, "Fusion Crafting Core");
         registered += registerUnplaceable(
                 addon,
                 machines,
@@ -62,10 +63,10 @@ public final class DracFunFusionComponentRegistry {
                         diamond, draconicCore, diamond,
                         new ItemStack(Material.LAPIS_BLOCK), diamond, new ItemStack(Material.LAPIS_BLOCK)));
 
-        SlimefunItemStack basicInjector = stack(
+        SlimefunItemStack basicInjector = LegacyTheme.FUSION_CRAFTING.stack(
                 "DRACFUN_BASIC_FUSION_CRAFTING_INJECTOR",
                 Material.COPPER_BLOCK,
-                "&fBasic Fusion Crafting Injector");
+                "Basic Fusion Crafting Injector");
         registered += registerUnplaceable(
                 addon,
                 machines,
@@ -79,12 +80,12 @@ public final class DracFunFusionComponentRegistry {
         // Register guide prerequisites before Fusion outputs reference them.
         registered += DracFunSharedProgressionRegistry.registerDragonHeart(addon);
 
-        SlimefunItemStack smallChaos = stack(
-                "DRACFUN_SMALL_CHAOS_FRAGMENT", Material.PRISMARINE_CRYSTALS, "&5Small Chaos Fragment");
-        SlimefunItemStack largeChaos = stack(
-                "DRACFUN_LARGE_CHAOS_FRAGMENT", Material.ECHO_SHARD, "&5Large Chaos Fragment");
-        SlimefunItemStack chaosShard = stack(
-                "DRACFUN_CHAOS_SHARD", Material.NETHER_STAR, "&5Chaos Shard");
+        SlimefunItemStack smallChaos = LegacyTheme.MOB.stack(
+                "DRACFUN_SMALL_CHAOS_FRAGMENT", Material.BLACK_DYE, "Small Chaos Fragment");
+        SlimefunItemStack largeChaos = LegacyTheme.MOB.stack(
+                "DRACFUN_LARGE_CHAOS_FRAGMENT", Material.FLINT, "Large Chaos Fragment");
+        SlimefunItemStack chaosShard = LegacyTheme.MOB.stack(
+                "DRACFUN_CHAOS_SHARD", Material.NETHER_STAR, "Chaos Shard");
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -106,8 +107,8 @@ public final class DracFunFusionComponentRegistry {
                 fill(largeChaos));
 
         if (!useDragonEgg) {
-            SlimefunItemStack customEgg = stack(
-                    "DRACFUN_DRAGON_EGG", Material.DRAGON_EGG, "&5Draconic Dragon Egg");
+            SlimefunItemStack customEgg = LegacyTheme.ADVANCED_CRAFTING.stack(
+                    "DRACFUN_DRAGON_EGG", Material.DRAGON_EGG, "DracFun's Dragon Egg");
             registered += registerUnplaceable(
                     addon,
                     materials,
@@ -120,15 +121,16 @@ public final class DracFunFusionComponentRegistry {
         }
 
         SlimefunItemStack awakenedBlock = fusionOutput(
+                LegacyTheme.ADVANCED_CRAFTING,
                 "DRACFUN_AWAKENED_DRACONIUM_BLOCK",
-                Material.NETHERITE_BLOCK,
-                "&6Awakened Draconium Block",
+                Material.WAXED_COPPER_BLOCK,
+                "Awakened Draconium Block",
                 50_000_000);
         registered += registerFusionSimple(
                 addon, materials, awakenedBlock, hardMode, useDragonEgg);
 
-        SlimefunItemStack awakenedIngot = stack(
-                "DRACFUN_AWAKENED_DRACONIUM_INGOT", Material.NETHERITE_INGOT, "&6Awakened Draconium Ingot");
+        SlimefunItemStack awakenedIngot = LegacyTheme.ADVANCED_CRAFTING.stack(
+                "DRACFUN_AWAKENED_DRACONIUM_INGOT", Material.COPPER_INGOT, "Awakened Draconium Ingot");
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -137,8 +139,8 @@ public final class DracFunFusionComponentRegistry {
                 center(awakenedBlock),
                 awakenedIngot.asQuantity(9));
 
-        SlimefunItemStack awakenedNugget = stack(
-                "DRACFUN_AWAKENED_DRACONIUM_NUGGET", Material.GOLD_NUGGET, "&6Awakened Draconium Nugget");
+        SlimefunItemStack awakenedNugget = LegacyTheme.ADVANCED_CRAFTING.stack(
+                "DRACFUN_AWAKENED_DRACONIUM_NUGGET", Material.GOLD_NUGGET, "Awakened Draconium Nugget");
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -148,29 +150,34 @@ public final class DracFunFusionComponentRegistry {
                 awakenedNugget.asQuantity(9));
 
         SlimefunItemStack awakenedCore = fusionOutput(
-                "DRACFUN_AWAKENED_CORE", Material.HEART_OF_THE_SEA, "&6Awakened Core", 1_000_000);
+                LegacyTheme.ADVANCED_CRAFTING,
+                "DRACFUN_AWAKENED_CORE", Material.HEART_OF_THE_SEA, "Awakened Core", 1_000_000);
         registered += registerFusionUnplaceable(
                 addon, materials, awakenedCore, hardMode, useDragonEgg);
 
         SlimefunItemStack chaoticCore = fusionOutput(
-                "DRACFUN_CHAOTIC_CORE", Material.NETHER_STAR, "&5Chaotic Core", 100_000_000);
+                LegacyTheme.END_GAME_CRAFTING,
+                "DRACFUN_CHAOTIC_CORE", Material.NETHER_STAR, "Chaotic Core", 100_000_000);
         registered += registerFusionUnplaceable(
                 addon, materials, chaoticCore, hardMode, useDragonEgg);
 
         SlimefunItemStack wyvernInjector = fusionOutput(
+                LegacyTheme.FUSION_CRAFTING,
                 "DRACFUN_WYVERN_FUSION_CRAFTING_INJECTOR",
                 Material.AMETHYST_BLOCK,
-                "&dWyvern Fusion Crafting Injector",
+                "Wyvern Fusion Crafting Injector",
                 32_000);
         SlimefunItemStack draconicInjector = fusionOutput(
+                LegacyTheme.FUSION_CRAFTING,
                 "DRACFUN_DRACONIC_FUSION_CRAFTING_INJECTOR",
                 Material.RESPAWN_ANCHOR,
-                "&5Draconic Fusion Crafting Injector",
+                "Draconic Fusion Crafting Injector",
                 256_000);
         SlimefunItemStack chaoticInjector = fusionOutput(
+                LegacyTheme.FUSION_CRAFTING,
                 "DRACFUN_CHAOTIC_FUSION_CRAFTING_INJECTOR",
                 Material.CRYING_OBSIDIAN,
-                "&5Chaotic Fusion Crafting Injector",
+                "Chaotic Fusion Crafting Injector",
                 8_000_000);
 
         registered += registerFusionUnplaceable(
@@ -203,10 +210,10 @@ public final class DracFunFusionComponentRegistry {
         ItemStack redstoneBlock = new ItemStack(Material.REDSTONE_BLOCK);
         ItemStack blazeRod = new ItemStack(Material.BLAZE_ROD);
 
-        SlimefunItemStack particleGenerator = stack(
+        SlimefunItemStack particleGenerator = LegacyTheme.BASIC_CRAFTING.stack(
                 id,
                 Material.END_CRYSTAL,
-                "&dParticle Generator");
+                "Particle Generator");
 
         registered += registerUnplaceable(
                 addon,
@@ -234,10 +241,10 @@ public final class DracFunFusionComponentRegistry {
         ItemStack gold = hardMode ? SlimefunItems.GOLD_24K_BLOCK : SlimefunItems.GOLD_24K;
         ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
 
-        SlimefunItemStack draconicCore = stack(
+        SlimefunItemStack draconicCore = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIC_CORE",
                 Material.ECHO_SHARD,
-                "&5Draconic Core");
+                "Draconic Core");
 
         return registerUnplaceable(
                 addon,
@@ -334,13 +341,10 @@ public final class DracFunFusionComponentRegistry {
         return 1;
     }
 
-    private static SlimefunItemStack stack(String id, Material material, String name) {
-        return new SlimefunItemStack(id, material, name, "&8DracFun Reborn clean-room item");
-    }
 
     private static SlimefunItemStack fusionOutput(
-            String id, Material material, String name, int fusionPower) {
-        SlimefunItemStack stack = stack(id, material, name);
+            LegacyTheme theme, String id, Material material, String name, int fusionPower) {
+        SlimefunItemStack stack = theme.stack(id, material, name);
         ItemMeta meta = stack.getItemMeta();
         meta.getPersistentDataContainer().set(
                 LegacyDracFunKeys.FUSION_POWER,

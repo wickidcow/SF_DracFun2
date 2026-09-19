@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.reactor.ReactorMachine;
@@ -36,45 +37,43 @@ public final class DracFunReactorRegistry {
         ItemStack draconicCore = required("DRACFUN_DRACONIC_CORE");
         ItemStack wyvernCore = required("DRACFUN_WYVERN_CORE");
 
-        SlimefunItemStack innerRotor = stack(
+        SlimefunItemStack innerRotor = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_INNER_ROTOR",
-                Material.COPPER_INGOT,
-                "&5Reactor Stabilizer Inner Rotor");
-        SlimefunItemStack outerRotor = stack(
+                Material.LIGHT_WEIGHTED_PRESSURE_PLATE,
+                "Reactor Stabilizer Inner Rotor");
+        SlimefunItemStack outerRotor = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_OUTER_ROTOR",
-                Material.IRON_INGOT,
-                "&5Reactor Stabilizer Outer Rotor");
-        SlimefunItemStack rotorAssembly = stack(
+                Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
+                "Reactor Stabilizer Outer Rotor");
+        SlimefunItemStack rotorAssembly = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_ROTOR_ASSEMBLY",
-                Material.PISTON,
-                "&5Reactor Stabilizer Rotor Assembly");
-        SlimefunItemStack focusRing = stack(
+                Material.GILDED_BLACKSTONE,
+                "Reactor Stabilizer Rotor Assembly");
+        SlimefunItemStack focusRing = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_FOCUS_RING",
-                Material.ENDER_EYE,
-                "&5Reactor Stabilizer Focus Ring");
-        SlimefunItemStack stabilizerFrame = stack(
+                Material.GOLD_NUGGET,
+                "Reactor Stabilizer Focus Ring");
+        SlimefunItemStack stabilizerFrame = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_FRAME",
-                Material.IRON_BLOCK,
-                "&5Reactor Stabilizer Frame");
+                Material.BLACK_STAINED_GLASS,
+                "Reactor Stabilizer Frame");
 
-        SlimefunItemStack energyInjector = stack(
+        SlimefunItemStack energyInjector = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_ENERGY_INJECTOR",
-                Material.LIGHTNING_ROD,
-                "&5Reactor Energy Injector");
-        SlimefunItemStack stabilizer = stack(
+                Material.POLISHED_BLACKSTONE_PRESSURE_PLATE,
+                "Reactor Energy Injector");
+        SlimefunItemStack stabilizer = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER",
-                Material.BEACON,
-                "&5Reactor Stabilizer");
-        SlimefunItemStack reactorCore = stack(
+                Material.TINTED_GLASS,
+                "Reactor Stabilizer");
+        SlimefunItemStack reactorCore = LegacyTheme.REACTOR.stack(
                 "DRACFUN_DRACONIC_REACTOR_CORE",
                 Material.RESPAWN_ANCHOR,
-                "&5Draconic Reactor Core");
-        SlimefunItemStack reactor = stack(
+                "Draconic Reactor Core");
+        SlimefunItemStack reactor = LegacyTheme.REACTOR.stack(
                 "DRACFUN_DRACONIC_REACTOR",
-                Material.CRYING_OBSIDIAN,
-                "&5Draconic Reactor",
-                "&7Dangerous high-output reactor.",
-                "&7Uses Awakened Draconium Blocks as fuel.");
+                Material.ORANGE_GLAZED_TERRACOTTA,
+                "Draconic Reactor");
 
         int registered = 0;
 

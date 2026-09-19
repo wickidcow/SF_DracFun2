@@ -3,7 +3,9 @@ package io.github.wickidcow.sfdracfun2.setup;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.utils.LoreBuilder;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.fusion.FusionCrafterMachine;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
@@ -33,12 +35,11 @@ public final class DracFunMachineRegistry {
         ItemStack particleGenerator = requiredItem("DRACFUN_PARTICLE_GENERATOR");
         ItemStack draconicCore = requiredItem("DRACFUN_DRACONIC_CORE");
 
-        SlimefunItemStack stack = new SlimefunItemStack(
+        SlimefunItemStack stack = LegacyTheme.MACHINE.stack(
                 id,
-                Material.RESPAWN_ANCHOR,
-                "&dEnergy Infuser",
-                "&7Charges powered DracFun modular equipment.",
-                "&71000 J = 1 item charge unit.");
+                Material.DAYLIGHT_DETECTOR,
+                "Energy Infuser",
+                LoreBuilder.powerBuffer(EnergyInfuserMachine.ENERGY_CAPACITY));
         new EnergyInfuserMachine(
                         group,
                         stack,
@@ -59,12 +60,12 @@ public final class DracFunMachineRegistry {
         }
 
         ItemGroup group = DracFunItemGroups.materials(addon);
-        SlimefunItemStack stack = new SlimefunItemStack(
+        SlimefunItemStack stack = LegacyTheme.MACHINE.stack(
                 id,
-                Material.SMITHING_TABLE,
-                "&dItem Converter",
-                "&7Rebuilds supported legacy DracFun items",
-                "&7using the current clean-room item templates.");
+                Material.LODESTONE,
+                "Item Converter",
+                "Update your old DracFun Items!",
+                "Make sure to enter plain item ONLY!");
         new ItemConverterMachine(
                         group,
                         stack,
@@ -89,28 +90,28 @@ public final class DracFunMachineRegistry {
                 group,
                 recipes,
                 FusionTier.BASIC,
-                Material.CRAFTING_TABLE,
+                Material.LIGHT_BLUE_GLAZED_TERRACOTTA,
                 altarRecipe(requiredItem("DRACFUN_BASIC_FUSION_CRAFTING_INJECTOR"), fusionCore));
         registered += registerFusionCrafter(
                 addon,
                 group,
                 recipes,
                 FusionTier.WYVERN,
-                Material.SMITHING_TABLE,
+                Material.PURPLE_GLAZED_TERRACOTTA,
                 altarRecipe(requiredItem("DRACFUN_WYVERN_FUSION_CRAFTING_INJECTOR"), fusionCore));
         registered += registerFusionCrafter(
                 addon,
                 group,
                 recipes,
                 FusionTier.DRACONIC,
-                Material.RESPAWN_ANCHOR,
+                Material.ORANGE_GLAZED_TERRACOTTA,
                 altarRecipe(requiredItem("DRACFUN_DRACONIC_FUSION_CRAFTING_INJECTOR"), fusionCore));
         registered += registerFusionCrafter(
                 addon,
                 group,
                 recipes,
                 FusionTier.CHAOTIC,
-                Material.CRYING_OBSIDIAN,
+                Material.BLACK_GLAZED_TERRACOTTA,
                 altarRecipe(requiredItem("DRACFUN_CHAOTIC_FUSION_CRAFTING_INJECTOR"), fusionCore));
         return registered;
     }
@@ -126,13 +127,11 @@ public final class DracFunMachineRegistry {
             return 0;
         }
 
-        SlimefunItemStack stack = new SlimefunItemStack(
+        SlimefunItemStack stack = LegacyTheme.FUSION_CRAFTING.stack(
                 tier.machineId(),
                 material,
-                "&d" + tier.displayName() + " Fusion Crafter",
-                "&7Clean-room Fusion Crafting machine.",
-                "&7Capacity: &f" + tier.capacity() + " J",
-                "&7Fusion duration: &f5 seconds");
+                tier.displayName() + " Fusion Crafter",
+                LoreBuilder.powerBuffer(tier.capacity()));
         new FusionCrafterMachine(group, stack, tier, recipes, craftingRecipe).register(addon);
         return 1;
     }

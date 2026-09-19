@@ -38,6 +38,10 @@ public final class EnergyInfuserMachine extends SlimefunItem implements EnergyNe
     private static final int STATUS = 13;
     private static final int OUTPUT = 16;
 
+    private static final int[] INPUT_BORDER = {0, 1, 2, 9, 11, 18, 19, 20};
+    private static final int[] OUTPUT_BORDER = {6, 7, 8, 15, 17, 24, 25, 26};
+    private static final int[] BACKGROUND = {3, 4, 5, 12, 14, 21, 22, 23};
+
     public EnergyInfuserMachine(
             ItemGroup group,
             SlimefunItemStack item,
@@ -49,14 +53,10 @@ public final class EnergyInfuserMachine extends SlimefunItem implements EnergyNe
             @Override
             public void init() {
                 setSize(27);
-                int[] background = new int[] {
-                    0, 1, 2, 3, 4, 5, 6, 7, 8,
-                    9, 11, 12, 14, 15, 17,
-                    18, 19, 20, 21, 22, 23, 24, 25, 26
-                };
-                drawBackground(background);
+                drawBackground(BACKGROUND);
+                drawBackground(new ItemStack(Material.BLUE_STAINED_GLASS_PANE), INPUT_BORDER);
+                drawBackground(new ItemStack(Material.ORANGE_STAINED_GLASS_PANE), OUTPUT_BORDER);
                 addItem(STATUS, statusItem(0), ChestMenuUtils.getEmptyClickHandler());
-                addMenuClickHandler(OUTPUT, (player, slot, clicked, action) -> !isEmpty(clicked));
             }
 
             @Override
@@ -172,12 +172,12 @@ public final class EnergyInfuserMachine extends SlimefunItem implements EnergyNe
     }
 
     private static ItemStack statusItem(long charge) {
+        // Original used the Electric category custom head; keep a vanilla icon
+        // while preserving the original observable title and lore.
         ItemStack item = new ItemStack(Material.LIGHTNING_ROD);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.AQUA + "Energy Infuser");
-        meta.setLore(java.util.List.of(
-                ChatColor.GRAY + "Stored: " + ChatColor.GREEN + charge + ChatColor.GRAY + " / " + ENERGY_CAPACITY + " J",
-                ChatColor.GRAY + "Rate: " + ChatColor.WHITE + JOULES_PER_ITEM_CHARGE + " J per item charge"));
+        meta.setDisplayName(ChatColor.GREEN + "Current Power");
+        meta.setLore(java.util.List.of(ChatColor.GREEN + Long.toString(charge)));
         item.setItemMeta(meta);
         return item;
     }
