@@ -172,6 +172,38 @@ jobs:
           grep -Fq 'new EnergyCorePieceItem(group, item, type, recipe)' "$SHARED"
           grep -Fq 'new EnergyCorePieceItem(group, stack' "$REG"
 
+      - name: Verify all Fusion outputs have guide recipes
+        shell: bash
+        run: |
+          set -euo pipefail
+          CATALOG=src/main/java/io/github/wickidcow/sfdracfun2/fusion/FusionRecipeCatalog.java
+          SPEC=src/main/java/io/github/wickidcow/sfdracfun2/fusion/FusionRecipeSpec.java
+          SHARED=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunSharedProgressionRegistry.java
+          COMPONENTS=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunFusionComponentRegistry.java
+          ENERGY=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunEnergyCoreRegistry.java
+          GUARDIAN=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunChaosGuardianRegistry.java
+          REACTOR=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunReactorRegistry.java
+
+          grep -Fq 'requireByOutput(' "$CATALOG"
+          grep -Fq '"DRACFUN_AWAKENED_DRACONIUM_BLOCK".equals(outputId)' "$SPEC"
+          grep -Fq 'recipe[1].setAmount(4);' "$SPEC"
+          grep -Fq 'registerFusionSimple(' "$SHARED"
+          grep -Fq 'registerFusionUnplaceable(' "$COMPONENTS"
+          grep -Fq 'chaoticEnergyRecipe.toGuideRecipe()' "$ENERGY"
+          grep -Fq 'recipe.toGuideRecipe()' "$GUARDIAN"
+          grep -Fq 'registerFusionUnplaceable(addon, machines, energyInjector, hardMode)' "$REACTOR"
+          grep -Fq 'registerFusionUnplaceable(addon, machines, stabilizer, hardMode)' "$REACTOR"
+          grep -Fq 'registerFusionUnplaceable(addon, machines, reactorCore, hardMode)' "$REACTOR"
+
+          if grep -E 'wyvernInjector|draconicInjector|chaoticInjector|awakenedBlock|awakenedCore|chaoticCore' "$COMPONENTS"               | grep -F 'RecipeType.NULL'; then
+            echo 'A Fusion-produced progression component still uses RecipeType.NULL.' >&2
+            exit 1
+          fi
+          if grep -E 'energyInjector|reactorCore' "$REACTOR" | grep -F 'RecipeType.NULL'; then
+            echo 'A Fusion-produced reactor component still uses RecipeType.NULL.' >&2
+            exit 1
+          fi
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
