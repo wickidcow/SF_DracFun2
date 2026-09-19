@@ -7,7 +7,8 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
-import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;\nimport io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
+import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.items.DragonHeartItem;
@@ -110,6 +111,7 @@ public final class DracFunSharedProgressionRegistry {
         }
 
         SlimefunItemStack awakenedBlock = fusionOutput(
+                LegacyTheme.ADVANCED_CRAFTING,
                 "DRACFUN_AWAKENED_DRACONIUM_BLOCK",
                 Material.NETHERITE_BLOCK,
                 "&6Awakened Draconium Block",
@@ -146,6 +148,7 @@ public final class DracFunSharedProgressionRegistry {
                 awakenedNugget.asQuantity(9));
 
         SlimefunItemStack awakenedCore = fusionOutput(
+                LegacyTheme.ADVANCED_CRAFTING,
                 "DRACFUN_AWAKENED_CORE",
                 Material.HEART_OF_THE_SEA,
                 "&6Awakened Core",
@@ -158,6 +161,7 @@ public final class DracFunSharedProgressionRegistry {
                 useDragonEgg);
 
         SlimefunItemStack chaoticCore = fusionOutput(
+                LegacyTheme.END_GAME_CRAFTING,
                 "DRACFUN_CHAOTIC_CORE",
                 Material.NETHER_STAR,
                 "&5Chaotic Core",
@@ -283,6 +287,7 @@ public final class DracFunSharedProgressionRegistry {
     }
 
     private static SlimefunItemStack fusionOutput(
+            LegacyTheme theme,
             String id,
             Material material,
             String name,
