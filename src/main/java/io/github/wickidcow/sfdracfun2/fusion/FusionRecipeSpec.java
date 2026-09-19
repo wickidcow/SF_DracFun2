@@ -24,6 +24,15 @@ public record FusionRecipeSpec(
         }
     }
 
+    public ItemStack[] toGuideRecipe() {
+        ItemStack[] recipe = new ItemStack[9];
+        for (int i = 0; i < ingredients.size(); i++) {
+            FusionIngredient ingredient = ingredients.get(i);
+            recipe[i] = ingredient == null ? null : ingredient.toGuideItemStack();
+        }
+        return recipe;
+    }
+
     public boolean matches(ItemStack[] input) {
         if (input == null || input.length != 9) {
             return false;

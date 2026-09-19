@@ -7,6 +7,8 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
+import io.github.wickidcow.sfdracfun2.fusion.LegacyModularFusionRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.modular.GearType;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
 import io.github.wickidcow.sfdracfun2.modular.LegacyModuleRecipeCatalog;
@@ -41,6 +43,7 @@ public final class DracFunModularRegistry {
             boolean hardMode,
             boolean useDragonEgg) {
         ItemGroup moduleGroup = DracFunItemGroups.modules(addon);
+        List<FusionRecipeSpec> gearFusionRecipes = LegacyModularFusionRecipeCatalog.create(hardMode);
         int registered = 0;
 
         registered += DracFunSharedProgressionRegistry.register(
@@ -62,12 +65,12 @@ public final class DracFunModularRegistry {
                 GearType.SHOVEL,
                 GearType.SWORD)) {
             for (int tier = 1; tier <= 3; tier++) {
-                registered += registerGear(addon, type, tier);
+                registered += registerGear(addon, type, tier, gearFusionRecipes);
             }
         }
 
-        registered += registerGear(addon, GearType.STAFF, 2);
-        registered += registerGear(addon, GearType.STAFF, 3);
+        registered += registerGear(addon, GearType.STAFF, 2, gearFusionRecipes);
+        registered += registerGear(addon, GearType.STAFF, 3, gearFusionRecipes);
 
         for (ModuleFamily family : ModuleFamily.values()) {
             for (ModuleTier tier : ModuleTier.values()) {
@@ -119,7 +122,11 @@ public final class DracFunModularRegistry {
         return 1;
     }
 
-    private static int registerGear(SFDracFun2 addon, GearType type, int tier) {
+    private static int registerGear(
+            SFDracFun2 addon,
+            GearType type,
+            int tier,
+            List<FusionRecipeSpec> gearFusionRecipes) {
         ItemGroup group = DracFunItemGroups.gear(addon, tier);
         String id = type.legacyItemId(tier);
         if (SlimefunItem.getById(id) != null) {
@@ -155,14 +162,22 @@ public final class DracFunModularRegistry {
             addToolAttributes(addon, meta, type, tier);
         }
 
+        FusionRecipeSpec fusionRecipe = gearFusionRecipes.stream()
+                .filter(spec -> spec.outputId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "Missing audited Fusion guide recipe for " + id));
+        RecipeType fusionRecipeType = DracFunRecipeTypes.fusion(fusionRecipe.tier());
+        ItemStack[] guideRecipe = fusionRecipe.toGuideRecipe();
+
         base.setItemMeta(meta);
         SlimefunItemStack stack = new SlimefunItemStack(id, base);
         if (type == GearType.ARMOR) {
-            new ModularArmorItem(group, stack, tier).register(addon);
+            new ModularArmorItem(group, stack, tier, fusionRecipeType, guideRecipe).register(addon);
         } else if (type == GearType.SWORD || type == GearType.STAFF) {
-            new ModularWeaponItem(group, stack, type, tier).register(addon);
+            new ModularWeaponItem(group, stack, type, tier, fusionRecipeType, guideRecipe).register(addon);
         } else {
-            new ModularGearItem(group, stack, type, tier).register(addon);
+            new ModularGearItem(group, stack, type, tier, fusionRecipeType, guideRecipe).register(addon);
         }
         return 1;
     }
