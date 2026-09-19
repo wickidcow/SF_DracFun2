@@ -48,7 +48,7 @@ These systems will be restored independently so a failure in one subsystem does 
 
 ## Identity audit details
 
-- `DRACFUN_GUIDE` is the legacy Slimefun guide/category icon identity, not a normal craftable item. SF_DracFun2 uses it as the icon for one shared `DracFun` ItemGroup and excludes it from inert placeholder registration.
+- `DRACFUN_GUIDE` is a real legacy Slimefun BOOK item. Reborn registers that book as an actual item and uses a separate identity-neutral icon for the nested `DracFun` guide parent so the item ID is not duplicated on the category icon.
 
 Not every Java field name in the old binary is the actual persisted Slimefun ID. Two generated families matter for migration:
 
@@ -75,7 +75,7 @@ A source-level coverage pass now accounts for every identity in `LegacyIdentityC
 - 56 module IDs are generated from every supported `ModuleFamily` / `ModuleTier` combination.
 - 3 Energy Core activator IDs are supplied by `EnergyCoreTier`.
 - 4 Fusion Crafter IDs are supplied by `FusionTier`.
-- `DRACFUN_GUIDE` is intentionally the shared guide-category icon identity rather than a normal Slimefun item.
+- `DRACFUN_GUIDE` is registered as the real legacy Guide book; the nested guide parent uses a separate plain icon.
 
 Total accounted legacy 2.0.10 identity surface: **134 / 134**. Feature toggles can still intentionally leave disabled subsystems represented by hidden compatibility placeholders at runtime.
 
@@ -87,7 +87,7 @@ Reborn preserves the same fallback through Slimefun Legacy's maintained `CustomI
 
 ### Runtime identity self-audit
 
-After feature registration and optional placeholder registration, Reborn performs a startup audit of the complete legacy identity surface. The audit reports the number of registered non-placeholder items, hidden placeholders, whether the `DRACFUN_GUIDE` category identity is present, and how many of the three pre-2.0.10 armor migration aliases are registered. With `compatibility.preserve-legacy-ids: true`, anything short of 134/134 legacy identities or 3/3 migration aliases produces a warning. When all restored feature flags are enabled, the audit also verifies that compatibility placeholders are not masking a subsystem registration failure. The only expected placeholder on the 134-ID main surface is `DRACFUN_DRAGON_EGG` when `options.use-dragon-egg: true` selects the vanilla Dragon Egg; the three older chestplate aliases are audited separately.
+After feature registration and optional placeholder registration, Reborn performs a startup audit of the complete legacy identity surface. The audit reports the number of registered non-placeholder items, hidden placeholders, whether the nested DracFun guide category is present, and how many of the three pre-2.0.10 armor migration aliases are registered. With `compatibility.preserve-legacy-ids: true`, anything short of 134/134 legacy identities or 3/3 migration aliases produces a warning. When all restored feature flags are enabled, the audit also verifies that compatibility placeholders are not masking a subsystem registration failure. The only expected placeholder on the 134-ID main surface is `DRACFUN_DRAGON_EGG` when `options.use-dragon-egg: true` selects the vanilla Dragon Egg; the three older chestplate aliases are audited separately.
 
 The Module Integrator and Item Converter both use the shared fail-closed `ProtectionCompat` bridge rather than maintaining separate reflective protection implementations.
 
@@ -140,17 +140,28 @@ AUTO_FEED also uses the separate family key `DRACFUN_AUTO_FEED` as a buffered-fo
 - On starvation damage, the chestplate feeds the player from the buffer but does not cancel the current starvation hit.
 - Reborn preserves offhand item metadata when consuming only part of a food stack; the old implementation rebuilt leftovers from material/amount and could discard metadata.
 
-### Energy Core and Guardian safety corrections
+### Energy Core safety correction and Guardian legacy behavior
 
-The Energy Core keeps 2.0.10's multiblock layouts and capacities, but replaces the old global `notComplete` flag with per-activator state. Because Slimefun Legacy's capacitor path does not consult `isEnergyNetActive()`, Reborn validates at the actual charge read/write boundary as well as from its synchronized ticker. The result is cached in memory for the current game tick (never written as per-tick block data): a known broken structure returns zero supply, rejects new charge, and clears stored charge, while an `UNKNOWN` validation caused only by unloaded neighboring data retains the last-known state and never destroys charge. The in-memory cache entry is removed when the activator is broken.
+The Energy Core keeps 2.0.10's exact Tier 1/2/3 multiblock layouts and capacities, but replaces the old global `notComplete` flag with per-activator state. Because Slimefun Legacy's capacitor path does not consult `isEnergyNetActive()`, Reborn validates at the actual charge read/write boundary as well as from its synchronized ticker. The result is cached in memory for the current game tick (never written as per-tick block data): a known broken structure returns zero supply, rejects new charge, and clears stored charge, while an `UNKNOWN` validation caused only by unloaded neighboring data retains the last-known state and never destroys charge. The in-memory cache entry is removed when the activator is broken.
 
-Chaos Guardian crystal cages are terrain-safe in both directions. Reborn only places cage blocks into air, records the exact coordinates and materials it created, persists that record on the crystal for restart recovery, and removes only those exact unchanged blocks during cleanup. Pre-existing/player blocks in the cage shell are never deleted by the cleanup pass.
+Chaos Guardian crystal cages now default to the observable DracFun 2.0.10 behavior: the full 5x5x5 cage volume is built from iron bars with an obsidian/crying-obsidian top and the cage is left behind after the fight. This can overwrite existing blocks, just like the legacy encounter. Server owners who prefer the earlier Reborn safety behavior can set `guardian.cleanup-crystal-cages: true` to clean up tracked cage blocks after the encounter.
 
-### 2.0.1 default feature set
+### 2.0.2 default feature set
 
-The restoration-era configuration originally left Energy Infuser, Item Converter, Fusion Crafting, modular gear, Energy Core, Reactor and Chaos Guardian disabled while those systems were being implemented. DracFun Reborn 2.0.1 now enables the complete restored feature set on fresh configurations. All feature flags remain independent and existing explicit server configuration values are never overwritten.
+The restoration-era configuration originally left Energy Infuser, Item Converter, Fusion Crafting, modular gear, Energy Core, Reactor and Chaos Guardian disabled while those systems were being implemented. DracFun Reborn 2.0.2 now enables the complete restored feature set on fresh configurations. All feature flags remain independent and existing explicit server configuration values are never overwritten.
 
 The release workflow verifies that the packaged `config.yml` has all nine restored feature flags enabled, in addition to the existing cross-platform compilation, clean-room boundary and raw-JAR checks. Main-branch/tag builds also boot a real Paper 26.2 server with Slimefun Legacy 4.1.51 and the built JAR; the smoke test requires a completed server startup plus the exact 134/134 main identity and 3/3 migration-alias audit.
+
+### Intentional modern corrections retained in 2.0.2
+
+The clean-room goal is observable DracFun 2.0.10 compatibility, but several implementation defects are intentionally not reproduced:
+
+- Arrow Penetration works. The legacy bow handler divided 25/50/75 by 100 using integer division, storing zero and making the module inert.
+- Energy Core completeness is per activator instead of the original global static flag, preventing one broken core from invalidating unrelated cores.
+- player/entity/inventory work uses Paper/Folia-safe scheduling rather than the original asynchronous Bukkit mutation.
+- Fusion transactions persist across restart while preserving the original commit-at-start behavior.
+- the Reactor keeps a configurable modern explosion-power ceiling while retaining the original per-item explosion settings and formulas.
+- optional Guardian cage/Wither cleanup controls remain available even though fresh defaults now follow the legacy encounter.
 
 ## Confirmed modern compatibility breakpoints
 
