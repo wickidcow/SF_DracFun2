@@ -2,51 +2,118 @@ package io.github.wickidcow.sfdracfun2.setup;
 
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.items.groups.NestedItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.groups.SubItemGroup;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 
 /**
- * Legacy-compatible DracFun guide category.
+ * Restores DracFun 2.0.10's nested guide layout.
  *
- * <p>DracFun 2.0.10 used {@code DRACFUN_GUIDE} as its guide/category icon
- * identity rather than as a normal craftable Slimefun item. Reborn keeps one
- * shared DracFun category so restored materials, modular gear and machines
- * appear together in the Slimefun guide.</p>
+ * <p>The original addon exposed one DracFun parent with eight child sections:
+ * Materials, Energy Core, Wyvern Gear, Draconic Gear, Chaotic Gear, Modules,
+ * Electric and Reactor.</p>
  */
 public final class DracFunItemGroups {
 
-    private static ItemGroup dracFun;
+    private static NestedItemGroup dracFun;
+    private static SubItemGroup materials;
+    private static SubItemGroup energyCore;
+    private static SubItemGroup wyvernGear;
+    private static SubItemGroup draconicGear;
+    private static SubItemGroup chaoticGear;
+    private static SubItemGroup modules;
+    private static SubItemGroup electric;
+    private static SubItemGroup reactor;
 
     private DracFunItemGroups() {}
 
     public static ItemGroup materials(SFDracFun2 addon) {
-        return dracFun(addon);
+        ensure(addon);
+        return materials;
     }
 
+    public static ItemGroup energyCore(SFDracFun2 addon) {
+        ensure(addon);
+        return energyCore;
+    }
+
+    public static ItemGroup gear(SFDracFun2 addon, int tier) {
+        ensure(addon);
+        return switch (tier) {
+            case 1 -> wyvernGear;
+            case 2 -> draconicGear;
+            case 3 -> chaoticGear;
+            default -> throw new IllegalArgumentException("Gear tier must be 1-3, got " + tier);
+        };
+    }
+
+    public static ItemGroup modules(SFDracFun2 addon) {
+        ensure(addon);
+        return modules;
+    }
+
+    public static ItemGroup electric(SFDracFun2 addon) {
+        ensure(addon);
+        return electric;
+    }
+
+    public static ItemGroup reactor(SFDracFun2 addon) {
+        ensure(addon);
+        return reactor;
+    }
+
+    /** Compatibility alias for older Reborn registry code. */
     public static ItemGroup modular(SFDracFun2 addon) {
-        return dracFun(addon);
+        return modules(addon);
     }
 
+    /** Compatibility alias for older Reborn registry code. */
     public static ItemGroup machines(SFDracFun2 addon) {
-        return dracFun(addon);
+        return electric(addon);
     }
 
     public static boolean hasLegacyGuideCategory() {
         return dracFun != null;
     }
 
-    private static ItemGroup dracFun(SFDracFun2 addon) {
-        if (dracFun == null) {
-            SlimefunItemStack guideIcon = new SlimefunItemStack(
-                    "DRACFUN_GUIDE",
-                    Material.DRAGON_HEAD,
-                    "&5DracFun",
-                    "&7DracFun Reborn progression, modular gear and machines.");
-            dracFun = new ItemGroup(
-                    new NamespacedKey(addon, "dracfun"),
-                    guideIcon);
+    private static void ensure(SFDracFun2 addon) {
+        if (dracFun != null) {
+            return;
         }
-        return dracFun;
+
+        SlimefunItemStack guideIcon = new SlimefunItemStack(
+                "DRACFUN_GUIDE",
+                Material.DRAGON_HEAD,
+                "&5DracFun",
+                "&7DracFun 2.0.10 progression restored for Slimefun Legacy.");
+
+        dracFun = new NestedItemGroup(
+                new NamespacedKey(addon, "dracfun_nested"),
+                guideIcon);
+
+        materials = subgroup(addon, "dracfun_material", Material.END_STONE, "&aMaterials");
+        energyCore = subgroup(addon, "dracfun_energy_core", Material.RESPAWN_ANCHOR, "&cEnergy Core");
+        wyvernGear = subgroup(addon, "dracfun_wyvern_gear", Material.LEATHER_CHESTPLATE, "&5Wyvern Gear");
+        draconicGear = subgroup(addon, "dracfun_draconic_gear", Material.NETHERITE_CHESTPLATE, "&6Draconic Gear");
+        chaoticGear = subgroup(addon, "dracfun_chaotic_gear", Material.CRYING_OBSIDIAN, "&5Chaotic Gear");
+        modules = subgroup(addon, "dracfun_module", Material.HEART_OF_THE_SEA, "&dModules");
+        electric = subgroup(addon, "dracfun_electric", Material.ENCHANTING_TABLE, "&bElectric");
+        reactor = subgroup(addon, "dracfun_reactor", Material.BEACON, "&4Reactor");
+    }
+
+    private static SubItemGroup subgroup(
+            SFDracFun2 addon,
+            String key,
+            Material material,
+            String name) {
+        return new SubItemGroup(
+                new NamespacedKey(addon, key),
+                dracFun,
+                new SlimefunItemStack(
+                        "DRACFUN_CATEGORY_" + key.toUpperCase(java.util.Locale.ROOT),
+                        material,
+                        name));
     }
 }

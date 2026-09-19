@@ -27,7 +27,7 @@ public final class DracFunMachineRegistry {
             return registered;
         }
 
-        ItemGroup group = DracFunItemGroups.machines(addon);
+        ItemGroup group = DracFunItemGroups.electric(addon);
         ItemStack draconium = requiredItem(
                 hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
         ItemStack particleGenerator = requiredItem("DRACFUN_PARTICLE_GENERATOR");
@@ -58,7 +58,7 @@ public final class DracFunMachineRegistry {
             return 0;
         }
 
-        ItemGroup group = DracFunItemGroups.machines(addon);
+        ItemGroup group = DracFunItemGroups.electric(addon);
         SlimefunItemStack stack = new SlimefunItemStack(
                 id,
                 Material.SMITHING_TABLE,
@@ -79,7 +79,7 @@ public final class DracFunMachineRegistry {
     }
 
     public static int registerFusionCrafters(SFDracFun2 addon, boolean hardMode, boolean useDragonEgg) {
-        ItemGroup group = DracFunItemGroups.machines(addon);
+        ItemGroup group = DracFunItemGroups.electric(addon);
         List<FusionRecipeSpec> recipes = FusionRecipeCatalog.create(hardMode, useDragonEgg);
         ItemStack fusionCore = requiredItem("DRACFUN_FUSION_CRAFTING_CORE");
         int registered = 0;

@@ -24,7 +24,7 @@ public final class DracFunFusionComponentRegistry {
 
     public static int register(SFDracFun2 addon, boolean hardMode, boolean useDragonEgg) {
         ItemGroup materials = DracFunItemGroups.materials(addon);
-        ItemGroup machines = DracFunItemGroups.machines(addon);
+        ItemGroup machines = DracFunItemGroups.electric(addon);
 
         int registered = registerParticleGenerator(addon, hardMode);
 

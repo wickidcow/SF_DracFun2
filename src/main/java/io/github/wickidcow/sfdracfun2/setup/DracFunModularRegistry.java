@@ -40,7 +40,7 @@ public final class DracFunModularRegistry {
             SFDracFun2 addon,
             boolean hardMode,
             boolean useDragonEgg) {
-        ItemGroup group = DracFunItemGroups.modular(addon);
+        ItemGroup moduleGroup = DracFunItemGroups.modules(addon);
         int registered = 0;
 
         registered += DracFunSharedProgressionRegistry.register(
@@ -50,7 +50,7 @@ public final class DracFunModularRegistry {
         registered += DracFunEnergyCoreRegistry.registerEnergyMaterials(
                 addon,
                 hardMode);
-        registered += registerModuleCore(addon, group, hardMode);
+        registered += registerModuleCore(addon, moduleGroup, hardMode);
 
         for (GearType type : List.of(
                 GearType.ARMOR,
@@ -62,19 +62,19 @@ public final class DracFunModularRegistry {
                 GearType.SHOVEL,
                 GearType.SWORD)) {
             for (int tier = 1; tier <= 3; tier++) {
-                registered += registerGear(addon, group, type, tier);
+                registered += registerGear(addon, type, tier);
             }
         }
 
-        registered += registerGear(addon, group, GearType.STAFF, 2);
-        registered += registerGear(addon, group, GearType.STAFF, 3);
+        registered += registerGear(addon, GearType.STAFF, 2);
+        registered += registerGear(addon, GearType.STAFF, 3);
 
         for (ModuleFamily family : ModuleFamily.values()) {
             for (ModuleTier tier : ModuleTier.values()) {
                 if (family.supports(tier)) {
                     registered += registerModule(
                             addon,
-                            group,
+                            moduleGroup,
                             family,
                             tier,
                             hardMode);
@@ -82,7 +82,7 @@ public final class DracFunModularRegistry {
             }
         }
 
-        registered += registerIntegrator(addon, group, hardMode);
+        registered += registerIntegrator(addon, DracFunItemGroups.electric(addon), hardMode);
         return registered;
     }
 
@@ -119,7 +119,8 @@ public final class DracFunModularRegistry {
         return 1;
     }
 
-    private static int registerGear(SFDracFun2 addon, ItemGroup group, GearType type, int tier) {
+    private static int registerGear(SFDracFun2 addon, GearType type, int tier) {
+        ItemGroup group = DracFunItemGroups.gear(addon, tier);
         String id = type.legacyItemId(tier);
         if (SlimefunItem.getById(id) != null) {
             return 0;
