@@ -259,6 +259,29 @@ jobs:
           grep -Fq 'LegacyTheme.ENERGY_CORE.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunEnergyCoreRegistry.java
           grep -Fq 'LegacyTheme.REACTOR.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunReactorRegistry.java
 
+      - name: Verify original machine UI parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          FUSION=src/main/java/io/github/wickidcow/sfdracfun2/fusion/FusionCrafterMachine.java
+          INFUSER=src/main/java/io/github/wickidcow/sfdracfun2/machines/EnergyInfuserMachine.java
+          CONVERTER=src/main/java/io/github/wickidcow/sfdracfun2/machines/ItemConverterMachine.java
+          grep -Fq 'private static final int[] INPUTS = {10, 13, 16, 19, 25, 28, 34, 37, 43};' "$FUSION"
+          grep -Fq 'private static final int STATUS = 31;' "$FUSION"
+          grep -Fq 'private static final int OUTPUT = 40;' "$FUSION"
+          grep -Fq 'setSize(54)' "$FUSION"
+          grep -Fq 'Click To Start Fusion Crafting!' "$FUSION"
+          grep -Fq 'You may not start another fusion as output slot is occupied!' "$FUSION"
+          grep -Fq 'Invalid recipe!' "$FUSION"
+          grep -Fq 'This Fusion Craft requires a minimum of ' "$FUSION"
+          grep -Fq 'private static final int INPUT = 10;' "$INFUSER"
+          grep -Fq 'private static final int STATUS = 13;' "$INFUSER"
+          grep -Fq 'private static final int OUTPUT = 16;' "$INFUSER"
+          grep -Fq 'Current Power' "$INFUSER"
+          grep -Fq 'Click to update your old DracFun Items!' "$CONVERTER"
+          grep -Fq 'Make sure to enter plain item ONLY!' "$CONVERTER"
+          grep -Fq 'Remove all the enchant and stuff before updating!' "$CONVERTER"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
