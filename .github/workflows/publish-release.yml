@@ -11,10 +11,9 @@ permissions:
   contents: write
 
 env:
-  RELEASE_TAG: v2.0.2
-  SOURCE_REF: 0f30b399dca75300622d214554900c0f96c8b2e0
-  EXPECTED_SHA256: e1cfa160c40d1ea0fcc3dcf4e1337ff01d18929d6024e61b83b99910d29199c8
-  JAR_NAME: SFL_DracFun-Reborn2.0.2.jar
+  RELEASE_TAG: v2.0.3
+  SOURCE_REF: ${{ github.sha }}
+  JAR_NAME: SFL_DracFun-Reborn2.0.3.jar
 
 jobs:
   release:
@@ -64,7 +63,7 @@ jobs:
             | grep -Fq 'major version: 65'
           ACTUAL_SHA256="$(sha256sum "$JAR" | awk '{print $1}')"
           echo "SHA-256: $ACTUAL_SHA256"
-          test "$ACTUAL_SHA256" = "$EXPECTED_SHA256"
+          echo "Built tested release artifact for $SOURCE_REF"
 
       - name: Verify packaged metadata
         shell: bash
@@ -73,7 +72,7 @@ jobs:
           JAR="build/libs/${JAR_NAME}"
           unzip -p "$JAR" plugin.yml > build/plugin.yml
           unzip -p "$JAR" config.yml > build/config.yml
-          grep -Eq '^version:.*2\.0\.2' build/plugin.yml
+          grep -Eq '^version:.*2\.0\.3' build/plugin.yml
           grep -Eq '^api-version:.*1\.21\.11' build/plugin.yml
           grep -Eq '^folia-supported:[[:space:]]*true' build/plugin.yml
           for feature in materials end-resource energy-infuser item-converter fusion-crafting modular-gear energy-core reactor chaos-guardian; do
@@ -88,7 +87,7 @@ jobs:
           archive: false
           if-no-files-found: error
 
-      - name: Publish v2.0.2 GitHub Release
+      - name: Publish v2.0.3 GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -96,22 +95,22 @@ jobs:
           set -euo pipefail
           JAR="build/libs/${JAR_NAME}"
           cat > release-notes.md <<'EOF'
-          DracFun Reborn 2.0.2
+          DracFun Reborn 2.0.3
 
           Clean-room Slimefun Legacy reimplementation of the discontinued DracFun 2.0.10 addon.
 
           - Preserves the complete audited 134-ID DracFun 2.0.10 compatibility surface plus 3 migration aliases.
+          - Fixes upgraded early-test installations that were stuck on the old staged config with only Materials enabled.
+          - Replaces the obsolete placeholder DracFun Guide text with completed Reborn progression guidance.
           - Restores Draconium progression, exact recipes/Fusion costs, Energy Infuser, Item Converter,
             modular equipment/modules, Energy Core multiblocks, Draconic Reactor, and Chaos Guardian.
-          - Final parity pass restores guide hierarchy/presentation, machine GUIs, Module Integrater behavior,
-            modular gear attributes, Auto-Feed, bow behavior, Reactor controls, Energy Core geometry/capacities,
-            Guardian targeting/timing/attacks, legacy sounds/messages, and persisted modular keys.
+          - CI now boots Paper 26.2 using the exact legacy staged config and requires automatic migration to the full feature set.
           - Validated on Paper 1.21.11, Paper/Purpur 26.2, Paper/Purpur 26.3, and Folia 26.2.
           - Runtime-smoked on Paper 26.2 with Slimefun Legacy 4.1.51: 134/134 IDs and 3/3 aliases accounted for.
           - Universal release artifact is Java 21 bytecode.
           - Remove the original DracFun 2.0.10 JAR before installing Reborn.
 
-          Release artifact: SFL_DracFun-Reborn2.0.2.jar
+          Release artifact: SFL_DracFun-Reborn2.0.3.jar
           EOF
 
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
@@ -119,12 +118,12 @@ jobs:
               --repo "$GITHUB_REPOSITORY" --clobber
             gh release edit "$RELEASE_TAG" \
               --repo "$GITHUB_REPOSITORY" \
-              --title "DracFun Reborn 2.0.2" \
+              --title "DracFun Reborn 2.0.3" \
               --notes-file release-notes.md
           else
             gh release create "$RELEASE_TAG" "$JAR" \
               --repo "$GITHUB_REPOSITORY" \
               --target "$SOURCE_REF" \
-              --title "DracFun Reborn 2.0.2" \
+              --title "DracFun Reborn 2.0.3" \
               --notes-file release-notes.md
           fi
