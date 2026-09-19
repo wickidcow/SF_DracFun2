@@ -854,6 +854,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                 0,
                 0,
                 0,
+                0,
                 0);
     }
 
