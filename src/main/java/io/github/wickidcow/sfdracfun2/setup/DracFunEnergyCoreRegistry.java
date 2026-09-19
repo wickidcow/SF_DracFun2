@@ -250,9 +250,6 @@ public final class DracFunEnergyCoreRegistry {
         return item.getItem().clone();
     }
 
-    private static SlimefunItemStack stack(String id, Material material, String name) {
-        return new SlimefunItemStack(id, material, name, "&8DracFun Reborn clean-room item");
-    }
 
     private static ItemStack[] surround(ItemStack outside, ItemStack center) {
         return recipe(
