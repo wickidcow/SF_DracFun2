@@ -7,7 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
-import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
+import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;\nimport io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.items.DragonHeartItem;
@@ -41,7 +41,7 @@ public final class DracFunSharedProgressionRegistry {
         ItemStack diamond = new ItemStack(hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND);
         ItemStack draconicCore = required("DRACFUN_DRACONIC_CORE");
 
-        SlimefunItemStack wyvernCore = stack(
+        SlimefunItemStack wyvernCore = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_WYVERN_CORE",
                 Material.AMETHYST_SHARD,
                 "&dWyvern Core");
@@ -60,15 +60,15 @@ public final class DracFunSharedProgressionRegistry {
         // their exact Slimefun item identities.
         registered += registerDragonHeart(addon);
 
-        SlimefunItemStack smallChaos = stack(
+        SlimefunItemStack smallChaos = LegacyTheme.MOB.stack(
                 "DRACFUN_SMALL_CHAOS_FRAGMENT",
                 Material.PRISMARINE_CRYSTALS,
                 "&5Small Chaos Fragment");
-        SlimefunItemStack largeChaos = stack(
+        SlimefunItemStack largeChaos = LegacyTheme.MOB.stack(
                 "DRACFUN_LARGE_CHAOS_FRAGMENT",
                 Material.ECHO_SHARD,
                 "&5Large Chaos Fragment");
-        SlimefunItemStack chaosShard = stack(
+        SlimefunItemStack chaosShard = LegacyTheme.MOB.stack(
                 "DRACFUN_CHAOS_SHARD",
                 Material.NETHER_STAR,
                 "&5Chaos Shard");
@@ -94,7 +94,7 @@ public final class DracFunSharedProgressionRegistry {
                 fill(largeChaos));
 
         if (!useDragonEgg) {
-            SlimefunItemStack customEgg = stack(
+            SlimefunItemStack customEgg = LegacyTheme.ADVANCED_CRAFTING.stack(
                     "DRACFUN_DRAGON_EGG",
                     Material.DRAGON_EGG,
                     "&5Draconic Dragon Egg");
@@ -121,7 +121,7 @@ public final class DracFunSharedProgressionRegistry {
                 hardMode,
                 useDragonEgg);
 
-        SlimefunItemStack awakenedIngot = stack(
+        SlimefunItemStack awakenedIngot = LegacyTheme.ADVANCED_CRAFTING.stack(
                 "DRACFUN_AWAKENED_DRACONIUM_INGOT",
                 Material.NETHERITE_INGOT,
                 "&6Awakened Draconium Ingot");
@@ -133,7 +133,7 @@ public final class DracFunSharedProgressionRegistry {
                 center(awakenedBlock),
                 awakenedIngot.asQuantity(9));
 
-        SlimefunItemStack awakenedNugget = stack(
+        SlimefunItemStack awakenedNugget = LegacyTheme.ADVANCED_CRAFTING.stack(
                 "DRACFUN_AWAKENED_DRACONIUM_NUGGET",
                 Material.GOLD_NUGGET,
                 "&6Awakened Draconium Nugget");
@@ -178,7 +178,7 @@ public final class DracFunSharedProgressionRegistry {
             return 0;
         }
 
-        SlimefunItemStack dragonHeart = stack(
+        SlimefunItemStack dragonHeart = LegacyTheme.MOB.stack(
                 id,
                 Material.DRAGON_BREATH,
                 "&5Dragon Heart");
@@ -287,7 +287,7 @@ public final class DracFunSharedProgressionRegistry {
             Material material,
             String name,
             int fusionPower) {
-        SlimefunItemStack stack = stack(id, material, name);
+        SlimefunItemStack stack = theme.stack(id, material, name);
         ItemMeta meta = stack.getItemMeta();
         meta.getPersistentDataContainer().set(
                 LegacyDracFunKeys.FUSION_POWER,
