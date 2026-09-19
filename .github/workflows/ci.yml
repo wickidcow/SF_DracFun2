@@ -651,6 +651,45 @@ jobs:
           grep -Fq 'ModularData.removeCharge(bow, 1)' "$BOW"
           grep -Fq 'event.setDamage(event.getDamage() + arrow.getDamage())' "$BOW"
 
+      - name: Verify original modular gear core parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          REG=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunModularRegistry.java
+          FEED=src/main/java/io/github/wickidcow/sfdracfun2/modular/ModularAutoFeedService.java
+
+          grep -Fq 'case 1 -> 1.25D;' "$REG"
+          grep -Fq 'case 2 -> 1.75D;' "$REG"
+          grep -Fq 'case 3 -> 2.50D;' "$REG"
+
+          grep -Fq '20.0D * modifier' "$REG"
+          grep -Fq '8.0D * modifier' "$REG"
+          grep -Fq 'baseSpeed = 1.0D;' "$REG"
+          grep -Fq 'baseDamage = 9.0D;' "$REG"
+          grep -Fq 'baseSpeed = 4.0D;' "$REG"
+          grep -Fq 'baseDamage = 1.0D;' "$REG"
+          grep -Fq 'baseSpeed = 1.1D;' "$REG"
+          grep -Fq 'baseDamage = 5.25D;' "$REG"
+          grep -Fq 'baseSpeed = 1.6D;' "$REG"
+          grep -Fq 'baseDamage = 7.0D;' "$REG"
+          grep -Fq 'baseSpeed = 0.5D;' "$REG"
+          grep -Fq 'AttributeModifier.Operation.ADD_NUMBER' "$REG"
+
+          grep -Fq 'case ARMOR -> Material.LEATHER_CHESTPLATE;' "$REG"
+          grep -Fq 'case AXE -> chaotic ? Material.NETHERITE_AXE : Material.DIAMOND_AXE;' "$REG"
+          grep -Fq 'case BOW -> Material.BOW;' "$REG"
+          grep -Fq 'case HOE -> chaotic ? Material.NETHERITE_HOE : Material.DIAMOND_HOE;' "$REG"
+          grep -Fq 'case PICKAXE, TOOL -> chaotic ? Material.NETHERITE_PICKAXE : Material.DIAMOND_PICKAXE;' "$REG"
+          grep -Fq 'case SHOVEL -> chaotic ? Material.NETHERITE_SHOVEL : Material.DIAMOND_SHOVEL;' "$REG"
+          grep -Fq 'case STAFF -> Material.TRIDENT;' "$REG"
+          grep -Fq 'case SWORD -> chaotic ? Material.NETHERITE_SWORD : Material.DIAMOND_SWORD;' "$REG"
+
+          grep -Fq '!food.getType().isEdible()' "$FEED"
+          grep -Fq 'foods.put(Material.CAKE, 14);' "$FEED"
+          grep -Fq 'foods.put(Material.MUSHROOM_STEM, 6);' "$FEED"
+          grep -Fq 'foods.put(Material.RABBIT_STEW, 10);' "$FEED"
+          grep -Fq 'foods.put(Material.COOKED_BEEF, 8);' "$FEED"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
