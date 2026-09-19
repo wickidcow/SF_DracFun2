@@ -631,6 +631,26 @@ jobs:
           grep -Fq 'wither.lookAt(player);' "$GUARD"
           grep -Fq 'wither.setTarget(player);' "$GUARD"
 
+      - name: Verify original modular bow parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          BOW=src/main/java/io/github/wickidcow/sfdracfun2/modular/ModularBowEffectService.java
+          CONFIG=src/main/resources/config.yml
+
+          grep -Fq 'event.getProjectile() instanceof Arrow arrow' "$BOW"
+          grep -Fq 'event.getDamager() instanceof Arrow arrow' "$BOW"
+          grep -Fq 'arrow.setGlowing(true)' "$BOW"
+          grep -Fq 'arrow.setCritical(true)' "$BOW"
+          grep -Fq 'arrow.setGravity(false)' "$BOW"
+          grep -Fq '1D + speedPercent / 100D' "$BOW"
+          grep -Fq '1D + damagePercent / 100D' "$BOW"
+          grep -Fq 'penetrationPercent / 100' "$BOW"
+          grep -Fq 'fix-broken-arrow-penetration", false' "$BOW"
+          grep -Fq 'fix-broken-arrow-penetration: false' "$CONFIG"
+          grep -Fq 'ModularData.removeCharge(bow, 1)' "$BOW"
+          grep -Fq 'event.setDamage(event.getDamage() + arrow.getDamage())' "$BOW"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
