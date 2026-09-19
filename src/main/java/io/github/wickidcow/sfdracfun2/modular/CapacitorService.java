@@ -21,8 +21,8 @@ import org.bukkit.inventory.PlayerInventory;
  */
 public final class CapacitorService implements Listener {
 
-    private static final long INITIAL_DELAY_TICKS = 20L;
-    private static final long PERIOD_TICKS = 20L;
+    private static final long INITIAL_DELAY_TICKS = 600L;
+    private static final long PERIOD_TICKS = 600L;
 
     private final SFDracFun2 plugin;
     private final Set<UUID> scheduled = ConcurrentHashMap.newKeySet();

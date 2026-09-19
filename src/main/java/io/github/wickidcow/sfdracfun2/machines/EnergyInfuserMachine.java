@@ -115,7 +115,15 @@ public final class EnergyInfuserMachine extends SlimefunItem implements EnergyNe
             return;
         }
 
+        // DracFun 2.0.10 left vanilla/unregistered items in the input slot.
+        if (input.getItemMeta() == null) {
+            return;
+        }
+
         SlimefunItem sfItem = SlimefunItem.getByItem(input);
+        if (sfItem == null) {
+            return;
+        }
         if (!(sfItem instanceof ModularGearItem gear)) {
             moveToOutput(menu, input);
             return;
@@ -123,30 +131,34 @@ public final class EnergyInfuserMachine extends SlimefunItem implements EnergyNe
 
         int capacity = ModularData.getCapacity(input);
         int charge = ModularData.getCharge(input);
-        if (capacity <= 0 || charge >= capacity) {
+        if (capacity == charge || capacity == 0) {
             moveToOutput(menu, input);
-            return;
-        }
-
-        long availableUnits = machineCharge / JOULES_PER_ITEM_CHARGE;
-        if (availableUnits <= 0) {
             return;
         }
 
         int needed = capacity - charge;
+        long availableUnits = machineCharge / JOULES_PER_ITEM_CHARGE;
         int transfer = (int) Math.min(needed, Math.min(availableUnits, Integer.MAX_VALUE));
-        if (transfer <= 0) {
-            return;
+
+        // Preserve 2.0.10's exact integer-conversion behavior: when the machine
+        // cannot finish the item, all stored J are consumed, including a <1000 J
+        // remainder that cannot become one item-charge unit.
+        if (needed > availableUnits) {
+            ModularData.addCharge(input, transfer);
+            if (machineCharge > 0) {
+                removeCharge(block.getLocation(), machineCharge, data);
+            }
+        } else {
+            ModularData.addCharge(input, needed);
+            removeCharge(
+                    block.getLocation(),
+                    (long) needed * JOULES_PER_ITEM_CHARGE,
+                    data);
         }
 
-        ModularData.addCharge(input, transfer);
         ModularLore.refresh(input, gear);
         menu.replaceExistingItem(INPUT, input);
-        removeCharge(block.getLocation(), (long) transfer * JOULES_PER_ITEM_CHARGE, data);
-
-        if (ModularData.getCharge(input) >= capacity) {
-            moveToOutput(menu, input);
-        }
+        // The original moved a now-full item on the following ticker pass.
     }
 
     private static void moveToOutput(BlockMenu menu, ItemStack input) {

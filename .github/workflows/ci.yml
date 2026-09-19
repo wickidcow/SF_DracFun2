@@ -75,6 +75,27 @@ jobs:
           grep -Fq 'legacyDataKeyId' src/main/java/io/github/wickidcow/sfdracfun2/modular/ModuleFamily.java
           grep -Fq 'return "DRACFUN_" + name() + '\''_'\'' + tier.legacyName() + "_MODULE";' src/main/java/io/github/wickidcow/sfdracfun2/modular/ModuleFamily.java
 
+      - name: Verify audited modular runtime parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          REG=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunModularRegistry.java
+          INF=src/main/java/io/github/wickidcow/sfdracfun2/machines/EnergyInfuserMachine.java
+          grep -Fq 'case STAFF -> Material.TRIDENT;' "$REG"
+          grep -Fq 'Material.NETHERITE_AXE : Material.DIAMOND_AXE' "$REG"
+          grep -Fq 'Material.NETHERITE_PICKAXE : Material.DIAMOND_PICKAXE' "$REG"
+          grep -Fq 'Material.NETHERITE_SWORD : Material.DIAMOND_SWORD' "$REG"
+          grep -Fq 'if (sfItem == null)' "$INF"
+          grep -Fq 'if (needed > availableUnits)' "$INF"
+          ARM=src/main/java/io/github/wickidcow/sfdracfun2/modular/ModularArmorEffectService.java
+          CAP=src/main/java/io/github/wickidcow/sfdracfun2/modular/CapacitorService.java
+          grep -Fq 'PASSIVE_EVERY_PASSES = 6' "$ARM"
+          grep -Fq 'player.setFlying(true);' "$ARM"
+          grep -Fq 'type,' "$ARM"
+          grep -Fq '600,' "$ARM"
+          grep -Fq 'INITIAL_DELAY_TICKS = 600L' "$CAP"
+          grep -Fq 'PERIOD_TICKS = 600L' "$CAP"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
