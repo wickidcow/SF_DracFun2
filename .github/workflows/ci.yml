@@ -212,7 +212,7 @@ jobs:
           grep -Fq 'setSize(54)' "$FILE"
           grep -Fq '37, 38, 39, 40, 41, 42, 43' "$FILE"
           grep -Fq '46, 47, 48, 49, 50, 51, 52' "$FILE"
-          grep -Fq 'Empty all module-return output slots before removing modules.' "$FILE"
+          grep -Fq 'Unable to remove modules. Ensure all output slots are empty before proceeding!' "$FILE"
           grep -Fq 'menu.replaceExistingItem(MODULE_OUTPUTS[i], stack);' "$FILE"
           if grep -Fq 'player.getInventory().addItem' "$FILE"; then
             echo 'Module removal still bypasses the original machine output slots.' >&2
