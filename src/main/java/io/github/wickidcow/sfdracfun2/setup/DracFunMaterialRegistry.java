@@ -28,11 +28,11 @@ public final class DracFunMaterialRegistry {
                     "DRACFUN_GUIDE",
                     Material.BOOK,
                     "DracFun Guide",
-                    "Currently just a placeholder item for future guide.",
-                    "I intend it to be a whole in game guide in later versions.",
-                    "For help just contact p_yt on discord.",
-                    "Alternatively you can join discord.gg/xFtghGVCVD and create ticket.",
-                    "Good Luck and Have fun!");
+                    "DracFun Reborn 2.0.3 progression guide.",
+                    "Open the DracFun category to browse Materials, Energy Core,",
+                    "Wyvern, Draconic and Chaotic Gear, Modules, Electric machines",
+                    "and the Draconic Reactor.",
+                    "Progress through Fusion Crafting and prepare for the Chaos Guardian.");
             new LegacyGuideItem(group, guide).register(addon);
             registered++;
         }

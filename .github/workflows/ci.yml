@@ -130,6 +130,15 @@ jobs:
           COMPAT=src/main/java/io/github/wickidcow/sfdracfun2/compat/LegacyCompatibilityRegistry.java
           grep -Fq 'new LegacyGuideItem(group, guide).register(addon);' "$MAT"
           grep -Fq 'Material.BOOK' "$MAT"
+          grep -Fq 'DracFun Reborn 2.0.3 progression guide.' "$MAT"
+          if grep -Fq 'placeholder item for future guide' "$MAT"; then
+            echo 'Stale placeholder DracFun Guide wording returned.' >&2
+            exit 1
+          fi
+          MIGRATION=src/main/java/io/github/wickidcow/sfdracfun2/compat/LegacyConfigMigration.java
+          grep -Fq 'features.energy-infuser' "$MIGRATION"
+          grep -Fq 'features.chaos-guardian' "$MIGRATION"
+          grep -Fq 'Migrated pre-completion DracFun Reborn config defaults' "$MIGRATION"
           grep -Fq 'implements NotPlaceable, RandomMobDrop' "$HEART"
           grep -Fq '"dragon-drop-chance", 1, 100, 100' "$HEART"
           grep -Fq 'RecipeType.MOB_DROP' "$HEART"
@@ -337,17 +346,21 @@ jobs:
           grep -Fq '2_147_483_646' "$ORB"
           grep -Fq 'LegacyDracFunKeys.FUSION_POWER' "$ORB"
 
-      - name: Verify original DracFun Guide book
+      - name: Verify completed DracFun Guide book
         shell: bash
         run: |
           set -euo pipefail
           MAT=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
           grep -Fq '"DracFun Guide"' "$MAT"
-          grep -Fq 'Currently just a placeholder item for future guide.' "$MAT"
-          grep -Fq 'I intend it to be a whole in game guide in later versions.' "$MAT"
-          grep -Fq 'For help just contact p_yt on discord.' "$MAT"
-          grep -Fq 'Alternatively you can join discord.gg/xFtghGVCVD and create ticket.' "$MAT"
-          grep -Fq 'Good Luck and Have fun!' "$MAT"
+          grep -Fq 'DracFun Reborn 2.0.3 progression guide.' "$MAT"
+          grep -Fq 'Open the DracFun category to browse Materials, Energy Core,' "$MAT"
+          grep -Fq 'Wyvern, Draconic and Chaotic Gear, Modules, Electric machines' "$MAT"
+          grep -Fq 'and the Draconic Reactor.' "$MAT"
+          grep -Fq 'Progress through Fusion Crafting and prepare for the Chaos Guardian.' "$MAT"
+          if grep -Eq 'placeholder item for future guide|contact p_yt|discord\.gg/xFtghGVCVD' "$MAT"; then
+            echo 'Obsolete placeholder/contact wording remains in the completed DracFun Guide.' >&2
+            exit 1
+          fi
 
       - name: Verify parent guide icon does not reuse DRACFUN_GUIDE item ID
         shell: bash
@@ -720,22 +733,52 @@ jobs:
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
       - name: Runtime smoke on Paper 26.2
-        if: github.event_name != 'pull_request'
         shell: bash
         run: |
           set -euo pipefail
           SMOKE_DIR="$RUNNER_TEMP/dracfun-paper-smoke"
           mkdir -p "$SMOKE_DIR/plugins"
-          cp build/libs/SFL_DracFun-Reborn2.0.2.jar "$SMOKE_DIR/plugins/"
+          cp build/libs/SFL_DracFun-Reborn2.0.3.jar "$SMOKE_DIR/plugins/"
           cp libs/Slimefun-Legacy.jar "$SMOKE_DIR/plugins/Slimefun-Legacy4.1.51.jar"
 
+          # Reproduce the staged-development config that left upgraded servers
+          # with only the Guide + five basic Draconium materials visible.
+          mkdir -p "$SMOKE_DIR/plugins/SF_DracFun2"
+          cat > "$SMOKE_DIR/plugins/SF_DracFun2/config.yml" <<'EOF'
+          options:
+            hard-mode: true
+            use-dragon-egg: true
+          compatibility:
+            preserve-legacy-ids: true
+          reactor:
+            explosion-multiplier: 0.25
+            explosion-power-cap: 64.0
+            break-explosion-power: 4.0
+            meltdown-explosion-enabled: true
+          guardian:
+            crystal-cages-enabled: true
+            punish-unarmored: true
+            laser-damage-cap: 5000.0
+            wither-minion-lifetime-ticks: 200
+          features:
+            materials: true
+            end-resource: true
+            energy-infuser: false
+            item-converter: false
+            fusion-crafting: false
+            modular-gear: false
+            energy-core: false
+            reactor: false
+            chaos-guardian: false
+          EOF
+
           PAPER_URL=$(curl -fsSL --retry 3 \
-            -H 'User-Agent: SF_DracFun2-CI/2.0.2 (https://github.com/wickidcow/SF_DracFun2)' \
+            -H 'User-Agent: SF_DracFun2-CI/2.0.3 (https://github.com/wickidcow/SF_DracFun2)' \
             https://fill.papermc.io/v3/projects/paper/versions/26.2/builds \
             | jq -r 'first(.[] | select(.channel == "STABLE") | .downloads."server:default".url) // empty')
           test -n "$PAPER_URL"
           curl -fL --retry 3 \
-            -H 'User-Agent: SF_DracFun2-CI/2.0.2 (https://github.com/wickidcow/SF_DracFun2)' \
+            -H 'User-Agent: SF_DracFun2-CI/2.0.3 (https://github.com/wickidcow/SF_DracFun2)' \
             "$PAPER_URL" -o "$SMOKE_DIR/paper.jar"
 
           printf 'eula=true\n' > "$SMOKE_DIR/eula.txt"
@@ -778,7 +821,12 @@ jobs:
           fi
 
           grep -Fq 'SF_DracFun2 clean-room compatibility layer starting.' "$SMOKE_DIR/server.log"
+          grep -Fq 'Migrated pre-completion DracFun Reborn config defaults' "$SMOKE_DIR/server.log"
           grep -Fq 'Legacy identity runtime audit: 134/134 accounted for (133 non-placeholder items, 1 placeholders, guide category present); migration aliases 3/3 registered.' "$SMOKE_DIR/server.log"
+          grep -Eq '^config-version:[[:space:]]*1[[:space:]]*$' "$SMOKE_DIR/plugins/SF_DracFun2/config.yml"
+          for feature in energy-infuser item-converter fusion-crafting modular-gear energy-core reactor chaos-guardian; do
+            grep -Eq "^[[:space:]]{2}${feature}:[[:space:]]*true[[:space:]]*$" "$SMOKE_DIR/plugins/SF_DracFun2/config.yml"
+          done
           if grep -Fq 'Complete-restoration audit expected' "$SMOKE_DIR/server.log"; then
             echo 'DracFun complete-restoration runtime audit failed.' >&2
             cat "$SMOKE_DIR/server.log"
@@ -800,19 +848,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          JAR=build/libs/SFL_DracFun-Reborn2.0.2.jar
+          JAR=build/libs/SFL_DracFun-Reborn2.0.3.jar
           test -s "$JAR"
           unzip -p "$JAR" plugin.yml > build/plugin.yml
           grep -Eq '^api-version:.*1\.21\.11' build/plugin.yml
           grep -Eq '^folia-supported:[[:space:]]*true' build/plugin.yml
-          grep -Eq '^version:.*2\.0\.2' build/plugin.yml
+          grep -Eq '^version:.*2\.0\.3' build/plugin.yml
           unzip -p "$JAR" config.yml > build/config.yml
+          grep -Eq '^config-version:[[:space:]]*1[[:space:]]*$' build/config.yml
           for feature in materials end-resource energy-infuser item-converter fusion-crafting modular-gear energy-core reactor chaos-guardian; do
             grep -Eq "^[[:space:]]{2}${feature}:[[:space:]]*true[[:space:]]*$" build/config.yml
           done
           grep -Eq '^[[:space:]]{2}fix-broken-arrow-penetration:[[:space:]]*false[[:space:]]*$' build/config.yml
           if grep -Fq 'DracFun Reborn 2.0.1' build/config.yml; then
-            echo 'Stale 2.0.1 branding remains in packaged 2.0.2 config.' >&2
+            echo 'Stale 2.0.1 branding remains in packaged 2.0.3 config.' >&2
             exit 1
           fi
           if unzip -l "$JAR" | grep -Eq 'me/phoenix/(dracfun|metrics)/'; then
@@ -825,8 +874,8 @@ jobs:
       - name: Upload raw JAR artifact
         uses: actions/upload-artifact@v7
         with:
-          name: SFL_DracFun-Reborn2.0.2.jar
-          path: build/libs/SFL_DracFun-Reborn2.0.2.jar
+          name: SFL_DracFun-Reborn2.0.3.jar
+          path: build/libs/SFL_DracFun-Reborn2.0.3.jar
           archive: false
           if-no-files-found: error
 
