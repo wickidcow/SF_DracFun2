@@ -23,8 +23,12 @@ reactor:
   meltdown-explosion-enabled: true
 
 guardian:
-  # Preserve the old caged healing-crystal mechanic without overwriting terrain.
+  # Preserve the old caged healing-crystal mechanic.
   crystal-cages-enabled: true
+
+  # DracFun 2.0.10 left its iron-bar/obsidian crystal cages behind.
+  # Set true only if you prefer Reborn's safer post-fight cleanup behavior.
+  cleanup-crystal-cages: false
 
   # The original battle killed nearby unarmored players when the Guardian died.
   punish-unarmored: true
@@ -32,8 +36,8 @@ guardian:
   # Old laser pulses reached 5,000 damage at the end of the attack sequence.
   laser-damage-cap: 5000.0
 
-  # Reborn removes summoned Guardian Withers after this many ticks to prevent
-  # abandoned minions from permanently accumulating in The End.
+  # DracFun 2.0.10 did not force-remove summoned Guardian Withers.
+  # Set a positive tick value only if you want Reborn's cleanup override.
   wither-minion-lifetime-ticks: 0
 
 features:

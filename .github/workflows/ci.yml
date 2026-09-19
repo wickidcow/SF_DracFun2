@@ -487,6 +487,35 @@ jobs:
           grep -Fq 'The core is not completed yet!' "$MACHINE"
           grep -Fq 'You broke a part of the core! All stored energy has been expelled!' "$MACHINE"
 
+      - name: Verify Guardian participant and cage parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          GUARD=src/main/java/io/github/wickidcow/sfdracfun2/guardian/ChaosGuardianService.java
+          CONFIG=src/main/resources/config.yml
+
+          grep -Fq 'private final Map<UUID, List<UUID>> participantSnapshots' "$GUARD"
+          grep -Fq 'world.getNearbyPlayers(origin, 256D)' "$GUARD"
+          grep -Fq 'participantSnapshots.put(' "$GUARD"
+          grep -Fq 'snapshotParticipants(dragon, dragon.getLocation())' "$GUARD"
+          grep -Fq 'List<UUID> snapshot = participantSnapshots.remove(dragon.getUniqueId());' "$GUARD"
+          grep -Fq 'if (snapshot == null || snapshot.isEmpty())' "$GUARD"
+          grep -Fq 'Set<UUID> participantIds = Set.copyOf(snapshot);' "$GUARD"
+          grep -Fq 'EnderDragonShootFireballEvent' "$GUARD"
+          grep -Fq 'guardiansWithNaturalFireball.add(dragon.getUniqueId());' "$GUARD"
+          grep -Fq 'attackSnapshot(dragon);' "$GUARD"
+          grep -Fq 'if (guardiansWithNaturalFireball.contains(dragon.getUniqueId()))' "$GUARD"
+
+          grep -Fq 'cleanup-crystal-cages: false' "$CONFIG"
+          grep -Fq 'if (cleanupCrystalCages)' "$GUARD"
+          grep -Fq 'cageBlocks.remove(crystalId);' "$GUARD"
+
+          grep -Fq 'initializeBossBar(wither.getBossBar());' "$GUARD"
+          if grep -Fq 'dragon.setCustomNameVisible(true)' "$GUARD"; then
+            echo 'Original Guardian did not force the custom name visible.' >&2
+            exit 1
+          fi
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
