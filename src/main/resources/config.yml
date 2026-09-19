@@ -34,7 +34,7 @@ guardian:
 
   # Reborn removes summoned Guardian Withers after this many ticks to prevent
   # abandoned minions from permanently accumulating in The End.
-  wither-minion-lifetime-ticks: 200
+  wither-minion-lifetime-ticks: 0
 
 features:
   # DracFun Reborn 2.0.1 ships the completed restoration enabled on fresh installs.
