@@ -337,6 +337,18 @@ jobs:
           grep -Fq '2_147_483_646' "$ORB"
           grep -Fq 'LegacyDracFunKeys.FUSION_POWER' "$ORB"
 
+      - name: Verify original DracFun Guide book
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAT=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
+          grep -Fq '"DracFun Guide"' "$MAT"
+          grep -Fq 'Currently just a placeholder item for future guide.' "$MAT"
+          grep -Fq 'I intend it to be a whole in game guide in later versions.' "$MAT"
+          grep -Fq 'For help just contact p_yt on discord.' "$MAT"
+          grep -Fq 'Alternatively you can join discord.gg/xFtghGVCVD and create ticket.' "$MAT"
+          grep -Fq 'Good Luck and Have fun!' "$MAT"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
