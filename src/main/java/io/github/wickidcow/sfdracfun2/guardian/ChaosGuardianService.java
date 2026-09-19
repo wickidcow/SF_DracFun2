@@ -304,7 +304,7 @@ public final class ChaosGuardianService implements Listener {
     }
 
     private void basicAttack(EnderDragon dragon, Player player) {
-        int shots = 12 + ThreadLocalRandom.current().nextInt(6);
+        int shots = ThreadLocalRandom.current().nextInt(6, 12);
         for (int i = 0; i < shots; i++) {
             long delay = (long) i * 4L;
             Slimefun.runSyncFor(player, () -> {
@@ -550,6 +550,7 @@ public final class ChaosGuardianService implements Listener {
         }
 
         player.damage(500D);
+        player.getWorld().createExplosion(player.getLocation(), 5.0F, false, false);
         player.getWorld().spawnParticle(Particle.FLAME, player.getLocation(), 32);
         player.playSound(
                 player.getLocation(),
