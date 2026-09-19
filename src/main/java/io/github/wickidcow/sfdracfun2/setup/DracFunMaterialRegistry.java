@@ -6,7 +6,7 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.WitherProofBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
-import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
+import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;\nimport io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.items.EnderDraconiumOre;
 import io.github.wickidcow.sfdracfun2.items.LegacyGuideItem;
 import org.bukkit.Material;
@@ -33,24 +33,24 @@ public final class DracFunMaterialRegistry {
             registered++;
         }
 
-        SlimefunItemStack ore = stack(
+        SlimefunItemStack ore = LegacyTheme.ORE.stack(
                 "DRACFUN_DRACONIUM_ORE",
                 Material.END_STONE,
                 "&dEnder Draconium Ore",
                 "&7A virtual ore resource found by GEO Miner in The End.");
-        SlimefunItemStack dust = stack(
+        SlimefunItemStack dust = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_DUST",
                 Material.NETHERITE_SCRAP,
                 "&dDraconium Dust");
-        SlimefunItemStack ingot = stack(
+        SlimefunItemStack ingot = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_INGOT",
                 Material.NETHERITE_INGOT,
                 "&dDraconium Ingot");
-        SlimefunItemStack block = stack(
+        SlimefunItemStack block = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_BLOCK",
                 Material.NETHERITE_BLOCK,
                 "&dDraconium Block");
-        SlimefunItemStack infusedObsidian = stack(
+        SlimefunItemStack infusedObsidian = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_INFUSED_OBSIDIAN",
                 Material.OBSIDIAN,
                 "&dDraconium Infused Obsidian");
