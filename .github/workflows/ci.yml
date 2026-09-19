@@ -121,6 +121,23 @@ jobs:
           grep -Fq 'ReactorState.bool(data, ReactorState.REBORN_PROGRESS_MIGRATED, true);' "$REACTOR"
           grep -Fq 'ReactorState.progress(data, clampInt(Math.max(1L, reactable) * 120L));' "$REACTOR"
 
+      - name: Verify Guide and Dragon Heart parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAT=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
+          HEART=src/main/java/io/github/wickidcow/sfdracfun2/items/DragonHeartItem.java
+          COMPAT=src/main/java/io/github/wickidcow/sfdracfun2/compat/LegacyCompatibilityRegistry.java
+          grep -Fq 'new LegacyGuideItem(group, guide).register(addon);' "$MAT"
+          grep -Fq 'Material.BOOK' "$MAT"
+          grep -Fq 'implements NotPlaceable, RandomMobDrop' "$HEART"
+          grep -Fq '"dragon-drop-chance", 1, 100, 100' "$HEART"
+          grep -Fq 'RecipeType.MOB_DROP' "$HEART"
+          if grep -Fq 'GUIDE_ID.equals(id)' "$COMPAT"; then
+            echo 'DRACFUN_GUIDE is still excluded from the actual 134-item audit.' >&2
+            exit 1
+          fi
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
@@ -209,7 +226,7 @@ jobs:
           fi
 
           grep -Fq 'SF_DracFun2 clean-room compatibility layer starting.' "$SMOKE_DIR/server.log"
-          grep -Fq 'Legacy identity runtime audit: 134/134 accounted for (132 non-placeholder items, 1 placeholders, guide category present); migration aliases 3/3 registered.' "$SMOKE_DIR/server.log"
+          grep -Fq 'Legacy identity runtime audit: 134/134 accounted for (133 non-placeholder items, 1 placeholders, guide category present); migration aliases 3/3 registered.' "$SMOKE_DIR/server.log"
           if grep -Fq 'Complete-restoration audit expected' "$SMOKE_DIR/server.log"; then
             echo 'DracFun complete-restoration runtime audit failed.' >&2
             cat "$SMOKE_DIR/server.log"
