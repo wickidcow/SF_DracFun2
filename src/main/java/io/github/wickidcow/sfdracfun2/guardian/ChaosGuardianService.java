@@ -400,6 +400,8 @@ public final class ChaosGuardianService implements Listener {
         applyEffect(player, "CONFUSION", 100, 2);
         applyEffect(player, "NAUSEA", 100, 2);
         applyEffect(player, "DARKNESS", 100, 2);
+        applyEffect(player, "HARM", 100, 2);
+        applyEffect(player, "INSTANT_DAMAGE", 100, 2);
         applyEffect(player, "HUNGER", 100, 2);
         applyEffect(player, "LEVITATION", 100, 2);
         applyEffect(player, "POISON", 100, 2);
