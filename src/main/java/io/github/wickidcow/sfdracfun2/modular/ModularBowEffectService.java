@@ -3,7 +3,7 @@ package io.github.wickidcow.sfdracfun2.modular;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.AbstractArrow;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,10 +19,11 @@ import org.bukkit.persistence.PersistentDataType;
  *
  * <p>DracFun 2.0.10 applied speed/damage/gravity modifiers when a powered
  * modular bow was fired while the shooter wore modular armor, then consumed
- * one charge. Reborn preserves that gate and charge cost. The original
- * Arrow Penetration code stored 25/50/75 percent using integer division by
- * 100, producing zero; Reborn maps that intended percentage to an actual
- * Bukkit pierce level instead of preserving the dead value.</p>
+ * one charge. Reborn preserves that gate and charge cost. DracFun 2.0.10's
+ * Arrow Penetration implementation used integer division by 100, so its
+ * 25/50/75 values became zero. Legacy-exact behavior is the default; server
+ * owners may opt into the corrected pierce behavior through compatibility
+ * config.</p>
  */
 public final class ModularBowEffectService implements Listener {
 
@@ -31,14 +32,18 @@ public final class ModularBowEffectService implements Listener {
     private static final NamespacedKey PENETRATION =
             LegacyDracFunKeys.key("DRACFUN_ARROW_PENETRATION");
 
+    private final boolean fixBrokenPenetration;
+
     public ModularBowEffectService(SFDracFun2 plugin) {
+        fixBrokenPenetration = plugin.getConfig()
+                .getBoolean("compatibility.fix-broken-arrow-penetration", false);
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onShoot(EntityShootBowEvent event) {
         if (!(event.getEntity() instanceof Player player)
-                || !(event.getProjectile() instanceof AbstractArrow arrow)) {
+                || !(event.getProjectile() instanceof Arrow arrow)) {
             return;
         }
 
@@ -71,14 +76,23 @@ public final class ModularBowEffectService implements Listener {
 
         int penetrationPercent = ModuleEffects.arrowPenetration(bow);
         if (penetrationPercent > 0) {
-            int pierce = Math.max(
-                    1,
-                    (int) Math.ceil(penetrationPercent / 25D));
-            arrow.setPierceLevel((byte) Math.min(127, pierce));
-            arrow.getPersistentDataContainer().set(
-                    PENETRATION,
-                    PersistentDataType.INTEGER,
-                    penetrationPercent);
+            if (fixBrokenPenetration) {
+                int pierce = Math.max(
+                        1,
+                        (int) Math.ceil(penetrationPercent / 25D));
+                arrow.setPierceLevel((byte) Math.min(127, pierce));
+                arrow.getPersistentDataContainer().set(
+                        PENETRATION,
+                        PersistentDataType.INTEGER,
+                        penetrationPercent);
+            } else {
+                // Exact DracFun 2.0.10 bug/behavior: integer division makes
+                // 25/50/75 all become zero before the value is stored.
+                arrow.getPersistentDataContainer().set(
+                        PENETRATION,
+                        PersistentDataType.INTEGER,
+                        penetrationPercent / 100);
+            }
         }
 
         arrow.getPersistentDataContainer().set(
@@ -98,7 +112,7 @@ public final class ModularBowEffectService implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onArrowDamage(EntityDamageByEntityEvent event) {
-        if (!(event.getDamager() instanceof AbstractArrow arrow)) {
+        if (!(event.getDamager() instanceof Arrow arrow)) {
             return;
         }
 
