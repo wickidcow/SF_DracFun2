@@ -63,10 +63,17 @@ jobs:
           grep -R -Fq 'DRACFUN_BASIC_AOE_MODULE' src/main
           grep -R -Fq 'DRACFUN_WYVERN_ENERGY_MODULE' src/main
           grep -R -Fq 'DRACFUN_DRACONIC_STAFF' src/main
-          if grep -R -nE 'DRACFUN_(AOE|ARROW_DAMAGE|ARROW_GRAVITY|ARROW_IMMUNITY|ARROW_PENETRATION|ARROW_SPEED|DAMAGE|POWER|FLIGHT|AUTO_FEED|HARVEST|JUMP|SHIELD_CAPACITY|SHIELD_CONTROL|SHIELD_RECOVERY|SPEED|UNDYING|VISION)_(BASIC|WYVERN|DRACONIC|CHAOTIC)_MODULE|DRACFUN_(DRACONIC|CHAOTIC)_STAFF_OF_POWER' src/main; then
-            echo 'Found an inferred identifier that does not match DracFun 2.0.10 runtime IDs.' >&2
+          # Item IDs are tier-first. Family-first strings are valid only as
+          # legacy per-item PDC keys, so scope this guard to identity/recipe data.
+          if grep -nE 'DRACFUN_(AOE|ARROW_DAMAGE|ARROW_GRAVITY|ARROW_IMMUNITY|ARROW_PENETRATION|ARROW_SPEED|DAMAGE|POWER|FLIGHT|AUTO_FEED|HARVEST|JUMP|SHIELD_CAPACITY|SHIELD_CONTROL|SHIELD_RECOVERY|SPEED|UNDYING|VISION)_(BASIC|WYVERN|DRACONIC|CHAOTIC)_MODULE|DRACFUN_(DRACONIC|CHAOTIC)_STAFF_OF_POWER' \
+              src/main/java/io/github/wickidcow/sfdracfun2/compat/LegacyIdentityCatalog.java \
+              src/main/resources/legacy-module-recipes.txt \
+              src/main/resources/legacy-modular-fusion-recipes.txt; then
+            echo 'Found an inferred item identifier that does not match DracFun 2.0.10 runtime IDs.' >&2
             exit 1
           fi
+          grep -Fq 'legacyDataKeyId' src/main/java/io/github/wickidcow/sfdracfun2/modular/ModuleFamily.java
+          grep -Fq 'return "DRACFUN_" + name() + '\''_'\'' + tier.legacyName() + "_MODULE";' src/main/java/io/github/wickidcow/sfdracfun2/modular/ModuleFamily.java
 
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
