@@ -219,6 +219,27 @@ jobs:
             exit 1
           fi
 
+      - name: Verify original modular lore parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          LORE=src/main/java/io/github/wickidcow/sfdracfun2/modular/LegacyModularLore.java
+          LIVE=src/main/java/io/github/wickidcow/sfdracfun2/modular/ModularLore.java
+          REG=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunModularRegistry.java
+          grep -Fq '"Arrow Immunity"' "$LORE"
+          grep -Fq '"Flight Boost"' "$LORE"
+          grep -Fq '"Shield Recharge Rate"' "$LORE"
+          grep -Fq '"Module Size"' "$LORE"
+          grep -Fq '"Gear Type"' "$LORE"
+          grep -Fq '" QS"' "$LORE"
+          grep -Fq 'LegacyModularLore.liveGearLore(stack, gear)' "$LIVE"
+          grep -Fq 'LegacyModularLore.defaultGearLore(type, tier)' "$REG"
+          grep -Fq 'LegacyModularLore.moduleLore(family, tier)' "$REG"
+          if grep -Fq 'DracFun Reborn compatibility module' "$REG"; then
+            echo 'Generic Reborn modular lore returned.' >&2
+            exit 1
+          fi
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
