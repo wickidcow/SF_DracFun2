@@ -42,9 +42,16 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
     private static final String DATA_OUTPUT = "reborn-fusion-output";
     private static final String DATA_COMPLETE_AT = "reborn-fusion-complete-at";
 
-    private static final int[] INPUTS = {0, 1, 2, 9, 10, 11, 18, 19, 20};
-    private static final int STATUS = 13;
-    private static final int OUTPUT = 16;
+    private static final int[] INPUTS = {10, 13, 16, 19, 25, 28, 34, 37, 43};
+    private static final int STATUS = 31;
+    private static final int OUTPUT = 40;
+
+    private static final int[] OUTPUT_BORDER = {30, 31, 32, 39, 41, 48, 49, 50};
+    private static final int[] INPUT_BORDER = {
+        0, 1, 2, 6, 7, 8, 9, 11, 15, 17, 18, 20, 24, 26,
+        27, 29, 33, 35, 36, 38, 42, 44, 45, 46, 47, 51, 52, 53
+    };
+    private static final int[] BACKGROUND = {3, 4, 5, 12, 14, 21, 22, 23};
 
     private final FusionTier tier;
     private final List<FusionRecipeSpec> recipes;
@@ -62,11 +69,11 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         new BlockMenuPreset(getId(), getItemName()) {
             @Override
             public void init() {
-                setSize(27);
-                int[] background = {3, 4, 5, 6, 7, 8, 12, 14, 15, 17, 21, 22, 23, 24, 25, 26};
-                drawBackground(background);
-                addItem(STATUS, statusItem("Ready", 0L), ChestMenuUtils.getEmptyClickHandler());
-                addMenuClickHandler(OUTPUT, (player, slot, clicked, action) -> !isEmpty(clicked));
+                setSize(54);
+                drawBackground(new ItemStack(Material.ORANGE_STAINED_GLASS_PANE), OUTPUT_BORDER);
+                drawBackground(new ItemStack(Material.BLUE_STAINED_GLASS_PANE), INPUT_BORDER);
+                drawBackground(BACKGROUND);
+                addItem(STATUS, statusItem(), ChestMenuUtils.getEmptyClickHandler());
             }
 
             @Override
@@ -119,38 +126,34 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
                 .getBlockDataController()
                 .getBlockData(block.getLocation());
         if (data == null || !data.isDataLoaded() || data.isPendingRemove()) {
-            error(player, "Fusion Crafter data is not ready yet.");
             return;
         }
 
         if (isActive(data)) {
-            error(player, "A fusion is already in progress.");
             return;
         }
         if (!isEmpty(menu.getItemInSlot(OUTPUT))) {
-            error(player, "Take the existing output before starting another fusion.");
+            warning(player, "You may not start another fusion as output slot is occupied!");
             return;
         }
 
         FusionRecipeSpec recipe = findRecipe(readInputs(menu));
         if (recipe == null) {
-            error(player, "No valid " + tier.displayName() + " Fusion recipe matches these inputs.");
+            warning(player, "Invalid recipe!");
             return;
         }
 
         ItemStack output = createOutput(recipe);
         if (output == null) {
-            error(player, "The output " + recipe.outputId() + " is not enabled or available on this server.");
             return;
         }
         if (!menu.fits(output, OUTPUT)) {
-            error(player, "The output slot cannot accept this fusion result.");
             return;
         }
 
         long charge = getChargeLong(block.getLocation(), data);
         if (charge < recipe.energyCost()) {
-            error(player, "This fusion requires " + recipe.energyCost() + " J; stored energy is " + charge + " J.");
+            warning(player, "This Fusion Craft requires a minimum of " + recipe.energyCost() + "J of power!");
             return;
         }
 
@@ -167,8 +170,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         long completeAt = System.currentTimeMillis() + FUSION_DELAY_MILLIS;
         data.setData(DATA_OUTPUT, recipe.outputId());
         data.setData(DATA_COMPLETE_AT, Long.toString(completeAt));
-        menu.replaceExistingItem(STATUS, statusItem("Fusion in progress", FUSION_DELAY_MILLIS));
-        player.sendMessage(ChatColor.LIGHT_PURPLE + "Fusion started. Inputs and energy committed.");
+        menu.replaceExistingItem(STATUS, statusItem());
     }
 
     private void tickFusion(Block block, SlimefunBlockData data) {
@@ -180,7 +182,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         String outputId = data.getData(DATA_OUTPUT);
         if (outputId == null || outputId.isBlank()) {
             if (menu.hasViewer()) {
-                menu.replaceExistingItem(STATUS, statusItem("Ready", 0L));
+                menu.replaceExistingItem(STATUS, statusItem());
             }
             return;
         }
@@ -189,7 +191,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         long remaining = Math.max(0L, completeAt - System.currentTimeMillis());
         if (remaining > 0L) {
             if (menu.hasViewer()) {
-                menu.replaceExistingItem(STATUS, statusItem("Fusion in progress", remaining));
+                menu.replaceExistingItem(STATUS, statusItem());
             }
             return;
         }
@@ -203,7 +205,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
             // A committed legacy-style fusion must never refund or silently
             // discard its transaction. Keep it pending for an administrator to
             // diagnose rather than cancelling spent inputs/energy.
-            menu.replaceExistingItem(STATUS, statusItem("Pending: output recipe unavailable", 0L));
+            menu.replaceExistingItem(STATUS, statusItem());
             return;
         }
 
@@ -212,13 +214,13 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
             // The original delayed task simply attempted to push its result.
             // Reborn waits instead of deleting a committed result if the output
             // cannot currently be delivered.
-            menu.replaceExistingItem(STATUS, statusItem("Pending: clear output slot", 0L));
+            menu.replaceExistingItem(STATUS, statusItem());
             return;
         }
 
         menu.pushItem(output, OUTPUT);
         clearPending(data);
-        menu.replaceExistingItem(STATUS, statusItem("Fusion complete", 0L));
+        menu.replaceExistingItem(STATUS, statusItem());
     }
 
     private FusionRecipeSpec findRecipe(ItemStack[] input) {
@@ -278,19 +280,13 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         }
     }
 
-    private ItemStack statusItem(String state, long remainingMillis) {
-        ItemStack item = new ItemStack(Material.END_CRYSTAL);
+    private ItemStack statusItem() {
+        // Original used a custom arrow-down head; use a vanilla arrow without
+        // copying the original bundled asset.
+        ItemStack item = new ItemStack(Material.ARROW);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.LIGHT_PURPLE + tier.displayName() + " Fusion Crafter");
-        java.util.List<String> lore = new java.util.ArrayList<>();
-        lore.add(ChatColor.GRAY + "State: " + ChatColor.WHITE + state);
-        lore.add(ChatColor.GRAY + "Capacity: " + ChatColor.WHITE + tier.capacity() + " J");
-        if (remainingMillis > 0L) {
-            lore.add(ChatColor.GRAY + "Completes in: " + ChatColor.WHITE + Math.max(1L, (remainingMillis + 999L) / 1000L) + "s");
-        } else {
-            lore.add(ChatColor.YELLOW + "Click to start a matching fusion recipe.");
-        }
-        meta.setLore(lore);
+        meta.setDisplayName(ChatColor.GREEN + "Click To Start Fusion Crafting!");
+        meta.setLore(java.util.List.of(""));
         item.setItemMeta(meta);
         return item;
     }
@@ -306,8 +302,8 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         return stack == null || stack.getType().isAir();
     }
 
-    private static void error(Player player, String message) {
-        player.sendMessage(ChatColor.RED + message);
+    private static void warning(Player player, String message) {
+        player.sendMessage(ChatColor.YELLOW + message);
     }
 
     @Override
