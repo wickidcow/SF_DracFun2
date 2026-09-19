@@ -19,6 +19,7 @@ import io.github.wickidcow.sfdracfun2.compat.ProtectionCompat;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
+import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
@@ -26,6 +27,7 @@ import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -57,10 +59,34 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
     private static final int SHUTDOWN = 41;
     private static final int OUTPUT = 43;
 
+    private static final int[] BORDER = {
+        0, 1, 2, 3, 4, 5, 6, 7, 8,
+        9, 11, 13, 15, 17,
+        18, 19, 20, 21, 22, 23, 24, 25, 26,
+        30, 31, 32, 48, 49, 50
+    };
+    private static final int[] INPUT_BORDER = {27, 28, 29, 36, 38, 45, 46, 47};
+    private static final int[] OUTPUT_BORDER = {33, 34, 35, 42, 44, 51, 52, 53};
+
+    private static final int[] STATUS_BORDER = {
+        2, 3, 4, 5, 6, 11, 15, 20, 24, 29, 33,
+        36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 47, 48, 50, 51, 53
+    };
+    private static final int[] REACTOR_STATUS = {12, 13, 14, 21, 22, 23, 30, 31, 32};
+    private static final int[] CORE_TEMPERATURE = {0, 9, 18, 27};
+    private static final int[] CONTAINMENT_FIELD_STRENGTH = {1, 10, 19, 28};
+    private static final int[] ENERGY_SATURATION = {7, 16, 25, 34};
+    private static final int[] FUEL_CONVERSION_LEVEL = {8, 17, 26, 35};
+    private static final int GENERATION_RATE_SLOT = 46;
+    private static final int FIELD_INPUT_RATE_SLOT = 49;
+    private static final int FUEL_CONVERSION_RATE_SLOT = 52;
+
+
     private final ItemSetting<Integer> breakExplosion;
     private final ItemSetting<Double> explosionMultiplier;
     private final double explosionPowerCap;
     private final boolean meltdownExplosionEnabled;
+    private final ChestMenu statsMenu;
 
     public ReactorMachine(
             SFDracFun2 addon,
@@ -79,21 +105,58 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         explosionPowerCap = Math.max(0D, addon.getConfig().getDouble("reactor.explosion-power-cap", 64D));
         meltdownExplosionEnabled = addon.getConfig().getBoolean("reactor.meltdown-explosion-enabled", true);
 
+        statsMenu = new ChestMenu(getItemName(), 54);
+        statsMenu.setEmptySlotsClickable(false);
+        statsMenu.setPlayerInventoryClickable(false);
+        initializeStatsMenu();
+
         new BlockMenuPreset(getId(), getItemName()) {
             @Override
             public void init() {
                 setSize(54);
-                drawBackground(backgroundSlots());
+                drawBackground(new ItemStack(Material.GRAY_STAINED_GLASS_PANE), BORDER);
+                drawBackground(new ItemStack(Material.BLUE_STAINED_GLASS_PANE), INPUT_BORDER);
+                drawBackground(new ItemStack(Material.ORANGE_STAINED_GLASS_PANE), OUTPUT_BORDER);
 
-                addItem(SHIELD_SET, shieldInputItem(0), ChestMenuUtils.getEmptyClickHandler());
-                addItem(MIN_SATURATION_SET, minimumSaturationItem(0), ChestMenuUtils.getEmptyClickHandler());
-                addItem(FAILSAFE_SET, failsafeItem(false), ChestMenuUtils.getEmptyClickHandler());
-                addItem(STATUS, statusItem(null, null), ChestMenuUtils.getEmptyClickHandler());
-                addItem(CHARGE, actionItem(Material.YELLOW_STAINED_GLASS_PANE, "&eCharge Reactor"),
+                addItem(
+                        SHIELD_SET,
+                        controlItem(
+                                Material.CYAN_STAINED_GLASS_PANE,
+                                ChatColor.AQUA,
+                                "Determine the energy allocation for the generation of a containment field."),
                         ChestMenuUtils.getEmptyClickHandler());
-                addItem(ACTIVATE, actionItem(Material.LIME_STAINED_GLASS_PANE, "&aActivate Reactor"),
+                addItem(
+                        MIN_SATURATION_SET,
+                        controlItem(
+                                Material.GREEN_STAINED_GLASS_PANE,
+                                ChatColor.GREEN,
+                                "Determine the saturation level prior to initiating the generation of energy."),
                         ChestMenuUtils.getEmptyClickHandler());
-                addItem(SHUTDOWN, actionItem(Material.RED_STAINED_GLASS_PANE, "&cShutdown Reactor"),
+                addItem(
+                        FAILSAFE_SET,
+                        controlItem(
+                                Material.YELLOW_STAINED_GLASS_PANE,
+                                ChatColor.RED,
+                                "Toggle the fail-safe to ensure the automatic termination in the event of an emergency."),
+                        ChestMenuUtils.getEmptyClickHandler());
+                addItem(
+                        CHARGE,
+                        controlItem(Material.YELLOW_STAINED_GLASS_PANE, ChatColor.YELLOW, "Charge Reactor"),
+                        ChestMenuUtils.getEmptyClickHandler());
+                addItem(
+                        ACTIVATE,
+                        controlItem(Material.YELLOW_STAINED_GLASS_PANE, ChatColor.YELLOW, "Activate Reactor"),
+                        ChestMenuUtils.getEmptyClickHandler());
+                addItem(
+                        SHUTDOWN,
+                        controlItem(Material.YELLOW_STAINED_GLASS_PANE, ChatColor.YELLOW, "Shutdown Reactor"),
+                        ChestMenuUtils.getEmptyClickHandler());
+                addItem(
+                        STATUS,
+                        controlItem(
+                                Material.BOOK,
+                                ChatColor.RED,
+                                "Click to view the current operational status of the reactor."),
                         ChestMenuUtils.getEmptyClickHandler());
                 addMenuClickHandler(OUTPUT, (player, slot, clicked, action) -> !isEmpty(clicked));
             }
@@ -124,6 +187,16 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                 });
                 menu.addMenuClickHandler(SHUTDOWN, (player, slot, clicked, action) -> {
                     shutdownReactor(location, player);
+                    return false;
+                });
+                menu.addMenuClickHandler(STATUS, (player, slot, clicked, action) -> {
+                    menu.close();
+                    SlimefunBlockData data = blockData(location);
+                    if (usable(data)) {
+                        ReactorState.ensureDefaults(data);
+                        refreshStatsMenu(location, data);
+                        statsMenu.open(player);
+                    }
                     return false;
                 });
             }
@@ -747,72 +820,174 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
     }
 
     private void refreshMenu(Location location, SlimefunBlockData data, BlockMenu menu) {
-        menu.replaceExistingItem(
-                SHIELD_SET,
-                shieldInputItem(ReactorState.integer(data, ReactorState.SHIELD_INPUT)));
-        menu.replaceExistingItem(
-                MIN_SATURATION_SET,
-                minimumSaturationItem(ReactorState.integer(data, ReactorState.MIN_SATURATION)));
-        menu.replaceExistingItem(
-                FAILSAFE_SET,
-                failsafeItem(ReactorState.bool(data, ReactorState.FAILSAFE)));
-        menu.replaceExistingItem(STATUS, statusItem(location, data));
+        // DracFun 2.0.10 kept the main control panel static. The detailed
+        // operational values are rendered only when the player opens Stats.
     }
 
-    private static ItemStack shieldInputItem(int input) {
-        return actionItem(
-                Material.CYAN_STAINED_GLASS_PANE,
-                "&bContainment Field Input",
-                "&7Current: &f" + input + " J/tick",
-                "&eClick and enter a positive whole number.");
+    private void initializeStatsMenu() {
+        ChestMenuUtils.drawBackground(statsMenu, STATUS_BORDER);
+        fillStatsSlots(REACTOR_STATUS, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
+        refreshStatsItems(
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0);
     }
 
-    private static ItemStack minimumSaturationItem(int minimum) {
-        return actionItem(
-                Material.LIME_STAINED_GLASS_PANE,
-                "&aMinimum Saturation",
-                "&7Current: &f" + minimum + "%",
-                "&eClick and enter a value from 1 to 99.");
-    }
-
-    private static ItemStack failsafeItem(boolean enabled) {
-        return actionItem(
-                enabled ? Material.LIME_DYE : Material.GRAY_DYE,
-                "&eReactor Fail-safe",
-                "&7Current: " + (enabled ? "&aON" : "&cOFF"),
-                "&eClick to toggle automatic emergency shutdown.");
-    }
-
-    private ItemStack statusItem(Location location, SlimefunBlockData data) {
-        if (location == null || data == null) {
-            return actionItem(Material.NETHER_STAR, "&dDraconic Reactor", "&7Waiting for reactor data...");
-        }
-
-        int maxShield = ReactorState.integer(data, ReactorState.MAX_SHIELD_CHARGE);
+    private void refreshStatsMenu(Location location, SlimefunBlockData data) {
+        int temperature = ReactorState.integer(data, ReactorState.TEMPERATURE);
         int shield = ReactorState.integer(data, ReactorState.SHIELD_CHARGE);
-        int maxSat = ReactorState.integer(data, ReactorState.MAX_SATURATION);
+        int maxShield = ReactorState.integer(data, ReactorState.MAX_SHIELD_CHARGE);
         int saturation = ReactorState.integer(data, ReactorState.SATURATION);
-        int reactable = ReactorState.integer(data, ReactorState.REACTABLE_FUEL);
-        int converted = ReactorState.integer(data, ReactorState.CONVERTED_FUEL);
+        int maxSaturation = ReactorState.integer(data, ReactorState.MAX_SATURATION);
+        int convertedFuel = ReactorState.integer(data, ReactorState.CONVERTED_FUEL);
+        int reactableFuel = ReactorState.integer(data, ReactorState.REACTABLE_FUEL);
+        int generationRate = ReactorState.integer(data, ReactorState.GENERATION_RATE);
+        int fieldInputRate = ReactorState.integer(data, ReactorState.FIELD_INPUT_RATE);
+        int fuelUseRate = ReactorState.integer(data, ReactorState.FUEL_USE_RATE);
 
-        List<String> lore = new ArrayList<>();
-        lore.add("&7State: &f" + ReactorState.phase(data).legacyValue());
-        lore.add("&7Temperature: &c" + ReactorState.integer(data, ReactorState.TEMPERATURE) + " C");
-        lore.add("&7Field: &b" + shield + " / " + maxShield);
-        lore.add("&7Saturation: &a" + saturation + " / " + maxSat);
-        lore.add("&7Fuel: &e" + reactable + " reactable / " + converted + " converted");
-        lore.add("&7Stored output energy: &f" + getChargeLong(location, data) + " J");
-        lore.add("&7Generation: &f" + ReactorState.integer(data, ReactorState.GENERATION_RATE) + " J/tick");
-        lore.add("&7Field demand: &f" + ReactorState.integer(data, ReactorState.FIELD_INPUT_RATE) + " J/tick");
-        lore.add("&7Fuel use: &f" + ReactorState.integer(data, ReactorState.FUEL_USE_RATE));
-        int progress = ReactorState.progress(data);
-        lore.add("&7Chaos Shard progress: &f" + (progress < 0 ? "not charged" : progress + " ticks"));
-        if (ReactorState.phase(data) == ReactorPhase.BEYOND_HOPE) {
-            lore.add("&cMELTDOWN: " + ReactorState.integer(data, ReactorState.EXPLOSION_COUNTDOWN)
-                    + " reactor ticks remaining");
+        fillStatsSlots(
+                REACTOR_STATUS,
+                new ItemStack(
+                        ReactorState.phase(data) == ReactorPhase.RUNNING
+                                ? Material.ORANGE_STAINED_GLASS_PANE
+                                : Material.BLACK_STAINED_GLASS_PANE));
+
+        refreshStatsItems(
+                temperature,
+                shield,
+                maxShield,
+                saturation,
+                maxSaturation,
+                convertedFuel,
+                reactableFuel,
+                generationRate,
+                fieldInputRate,
+                fuelUseRate);
+    }
+
+    private void refreshStatsItems(
+            int temperature,
+            int shield,
+            int maxShield,
+            int saturation,
+            int maxSaturation,
+            int convertedFuel,
+            int reactableFuel,
+            int generationRate,
+            int fieldInputRate,
+            int fuelUseRate) {
+        fillStatsSlots(
+                CORE_TEMPERATURE,
+                statsItem(
+                        Material.RED_STAINED_GLASS_PANE,
+                        ChatColor.RED,
+                        "Core Temperature",
+                        statLine(ChatColor.RED, temperature + " K"),
+                        ""));
+        fillStatsSlots(
+                CONTAINMENT_FIELD_STRENGTH,
+                statsItem(
+                        Material.CYAN_STAINED_GLASS_PANE,
+                        ChatColor.AQUA,
+                        "Containment Field Strength",
+                        statRatio(ChatColor.AQUA, shield, maxShield),
+                        ""));
+        fillStatsSlots(
+                ENERGY_SATURATION,
+                statsItem(
+                        Material.LIME_STAINED_GLASS_PANE,
+                        ChatColor.GREEN,
+                        "Energy Saturation",
+                        statRatio(ChatColor.GREEN, saturation, maxSaturation),
+                        ""));
+        fillStatsSlots(
+                FUEL_CONVERSION_LEVEL,
+                statsItem(
+                        Material.YELLOW_STAINED_GLASS_PANE,
+                        ChatColor.YELLOW,
+                        "Fuel Conversion Level",
+                        fuelRatio(convertedFuel, reactableFuel),
+                        ""));
+
+        statsMenu.replaceExistingItem(
+                GENERATION_RATE_SLOT,
+                statsItem(
+                        Material.RED_STAINED_GLASS_PANE,
+                        ChatColor.RED,
+                        "Generation Rate",
+                        ChatColor.WHITE + "This is the current RF/t being generated by the reactor.",
+                        powerPerTick(generationRate)));
+        statsMenu.replaceExistingItem(
+                FIELD_INPUT_RATE_SLOT,
+                statsItem(
+                        Material.CYAN_STAINED_GLASS_PANE,
+                        ChatColor.AQUA,
+                        "Field Input Rate",
+                        ChatColor.WHITE
+                                + "This is the exact RF/t required to maintain the current field strength.",
+                        ChatColor.WHITE
+                                + "As field strength increases, this will increase exponentially.",
+                        powerPerTick(fieldInputRate)));
+        statsMenu.replaceExistingItem(
+                FUEL_CONVERSION_RATE_SLOT,
+                statsItem(
+                        Material.YELLOW_STAINED_GLASS_PANE,
+                        ChatColor.YELLOW,
+                        "Fuel Conversion Rate",
+                        ChatColor.WHITE + "This is how fast the reactor is currently using fuel.",
+                        ChatColor.WHITE + "As the reactor saturation increases, this will go down.",
+                        ChatColor.RED + "• " + ChatColor.WHITE + fuelUseRate + " nb/t"));
+    }
+
+    private void fillStatsSlots(int[] slots, ItemStack item) {
+        for (int slot : slots) {
+            statsMenu.replaceExistingItem(slot, item.clone());
         }
+    }
 
-        return actionItem(Material.NETHER_STAR, "&dDraconic Reactor", lore.toArray(String[]::new));
+    private static ItemStack controlItem(Material material, ChatColor color, String name) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(color + name);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack statsItem(Material material, ChatColor color, String name, String... lore) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(color + name);
+        meta.setLore(java.util.Arrays.asList(lore));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static String statLine(ChatColor color, String value) {
+        return color + "• " + ChatColor.WHITE + value;
+    }
+
+    private static String statRatio(ChatColor color, int value, int maximum) {
+        int divisor = maximum + 1;
+        int percent = divisor <= 0 ? 0 : (int) ((long) value * 100L / divisor);
+        return color + "• " + ChatColor.WHITE + value + "/" + divisor + " (" + percent + "%)";
+    }
+
+    private static String fuelRatio(int convertedFuel, int reactableFuel) {
+        int second = reactableFuel + 1;
+        long total = Math.max(1L, (long) convertedFuel + second);
+        int percent = (int) ((long) convertedFuel * 100L / total);
+        return ChatColor.YELLOW + "• " + ChatColor.WHITE + convertedFuel + "/" + second
+                + " (" + percent + "%)";
+    }
+
+    private static String powerPerTick(int amount) {
+        return ChatColor.DARK_GRAY + "⚡" + ChatColor.YELLOW + " • " + ChatColor.GRAY + amount + " J/t";
     }
 
     private static ItemStack actionItem(Material material, String name, String... lore) {
@@ -826,26 +1001,6 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         meta.setLore(lines);
         item.setItemMeta(meta);
         return item;
-    }
-
-    private static int[] backgroundSlots() {
-        int[] excluded = {SHIELD_SET, MIN_SATURATION_SET, FAILSAFE_SET, STATUS, INPUT, CHARGE, ACTIVATE, SHUTDOWN, OUTPUT};
-        List<Integer> slots = new ArrayList<>();
-        outer:
-        for (int slot = 0; slot < 54; slot++) {
-            for (int skip : excluded) {
-                if (slot == skip) {
-                    continue outer;
-                }
-            }
-            slots.add(slot);
-        }
-
-        int[] result = new int[slots.size()];
-        for (int i = 0; i < slots.size(); i++) {
-            result[i] = slots.get(i);
-        }
-        return result;
     }
 
     private static boolean isFuel(ItemStack stack) {
