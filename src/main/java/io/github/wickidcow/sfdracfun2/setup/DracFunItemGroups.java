@@ -6,10 +6,12 @@ import io.github.thebusybiscuit.slimefun4.api.items.groups.NestedItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.groups.SubItemGroup;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 /**
  * Restores DracFun 2.0.10's nested guide layout.
@@ -96,46 +98,47 @@ public final class DracFunItemGroups {
                 new NamespacedKey(addon, "dracfun_nested"),
                 guideIcon);
 
+        String main = ChatColor.DARK_PURPLE + "DracFun";
         materials = subgroup(
                 addon,
                 "dracfun_material",
                 Material.NETHERITE_INGOT,
-                ChatColor.LIGHT_PURPLE + "DracFun Materials");
+                main + ChatColor.GREEN + "Materials");
         energyCore = subgroup(
                 addon,
                 "dracfun_energy_core",
                 Material.BEACON,
-                ChatColor.AQUA + "DracFun Energy Core");
-        wyvernGear = subgroup(
+                main + ChatColor.RED + "EnergyCore");
+        wyvernGear = armorSubgroup(
                 addon,
                 "dracfun_wyvern_gear",
-                Material.IRON_CHESTPLATE,
-                ChatColor.LIGHT_PURPLE + "Wyvern Gear");
-        draconicGear = subgroup(
+                Color.PURPLE,
+                main + ChatColor.DARK_PURPLE + "WyvernGear");
+        draconicGear = armorSubgroup(
                 addon,
                 "dracfun_draconic_gear",
-                Material.NETHERITE_CHESTPLATE,
-                ChatColor.GOLD + "Draconic Gear");
-        chaoticGear = subgroup(
+                Color.ORANGE,
+                main + ChatColor.GOLD + "DraconicGear");
+        chaoticGear = armorSubgroup(
                 addon,
                 "dracfun_chaotic_gear",
-                Material.NETHER_STAR,
-                ChatColor.DARK_PURPLE + "Chaotic Gear");
+                Color.BLACK,
+                main + ChatColor.DARK_GRAY + "ChaoticGear");
         modules = subgroup(
                 addon,
                 "dracfun_module",
-                Material.AMETHYST_SHARD,
-                ChatColor.LIGHT_PURPLE + "DracFun Modules");
+                Material.HEART_OF_THE_SEA,
+                main + ChatColor.AQUA + "Modules");
         electric = subgroup(
                 addon,
                 "dracfun_electric",
-                Material.REDSTONE_TORCH,
-                ChatColor.RED + "DracFun Electric");
+                Material.RESPAWN_ANCHOR,
+                main + ChatColor.YELLOW + "Electric");
         reactor = subgroup(
                 addon,
                 "dracfun_reactor",
-                Material.RESPAWN_ANCHOR,
-                ChatColor.DARK_PURPLE + "Draconic Reactor");
+                Material.CRYING_OBSIDIAN,
+                main + ChatColor.GOLD + "Reactor");
     }
 
     private static SubItemGroup subgroup(
@@ -152,4 +155,20 @@ public final class DracFunItemGroups {
                 dracFun,
                 icon);
     }
+    private static SubItemGroup armorSubgroup(
+            SFDracFun2 addon,
+            String key,
+            Color color,
+            String displayName) {
+        ItemStack icon = new ItemStack(Material.LEATHER_HELMET);
+        LeatherArmorMeta meta = (LeatherArmorMeta) icon.getItemMeta();
+        meta.setColor(color);
+        meta.setDisplayName(displayName);
+        icon.setItemMeta(meta);
+        return new SubItemGroup(
+                new NamespacedKey(addon, key),
+                dracFun,
+                icon);
+    }
+
 }
