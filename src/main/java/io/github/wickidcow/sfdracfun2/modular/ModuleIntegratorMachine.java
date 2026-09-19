@@ -8,7 +8,6 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.wickidcow.sfdracfun2.compat.ProtectionCompat;
-import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -32,7 +31,11 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
     private static final int MODULE_INPUT = 12;
     private static final int INSTALL_BUTTON = 14;
     private static final int OUTPUT = 16;
-    private static final int REMOVE_BUTTON = 22;
+    private static final int REMOVE_BUTTON = 26;
+    private static final int[] MODULE_OUTPUTS = {
+        37, 38, 39, 40, 41, 42, 43,
+        46, 47, 48, 49, 50, 51, 52
+    };
 
     public ModuleIntegratorMachine(
             ItemGroup group,
@@ -44,7 +47,7 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
         new BlockMenuPreset(getId(), getItemName()) {
             @Override
             public void init() {
-                setSize(27);
+                setSize(54);
                 constructMenu(this);
             }
 
@@ -79,22 +82,40 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
                         .getBlockData(event.getBlock().getLocation());
                 if (data != null && data.getBlockMenu() != null) {
                     BlockMenu menu = data.getBlockMenu();
-                    menu.dropItems(menu.getLocation(), new int[] {GEAR_INPUT, MODULE_INPUT, OUTPUT});
+                    menu.dropItems(menu.getLocation(), breakDropSlots());
                 }
             }
         });
     }
 
     private void constructMenu(BlockMenuPreset preset) {
-        int[] background = new int[] {
-            0, 1, 2, 3, 4, 5, 6, 7, 8,
-            9, 11, 13, 15, 17,
-            18, 19, 20, 21, 23, 24, 25, 26
+        int[] inputBorder = {
+            0, 1, 2, 3, 4, 9, 11, 13, 18, 19, 20, 21, 22
         };
-        preset.drawBackground(background);
-        preset.addItem(INSTALL_BUTTON, button(Material.LIME_DYE, "&aInstall Module", "&7Gear in slot 10", "&7Module in slot 12"), ChestMenuUtils.getEmptyClickHandler());
-        preset.addItem(REMOVE_BUTTON, button(Material.BARRIER, "&cRemove All Modules", "&7Returns installed modules", "&7and resets stored energy"), ChestMenuUtils.getEmptyClickHandler());
+        int[] outputBorder = {6, 7, 8, 15, 17, 24, 25};
+        int[] moduleOutputBorder = {
+            27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 44, 45, 53
+        };
+
+        preset.drawBackground(ChestMenuUtils.getInputSlotTexture(), inputBorder);
+        preset.drawBackground(ChestMenuUtils.getOutputSlotTexture(), outputBorder);
+        preset.drawBackground(new ItemStack(Material.LIME_STAINED_GLASS_PANE), moduleOutputBorder);
+        preset.addItem(5, new ItemStack(Material.BLACK_STAINED_GLASS_PANE), ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(23, new ItemStack(Material.BLACK_STAINED_GLASS_PANE), ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(11, button(Material.BOOK, "&aModule Integrator Guide",
+                "&7Place modular gear in slot 10.",
+                "&7Place a module in slot 12.",
+                "&7Removed modules appear below."), ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(INSTALL_BUTTON, button(Material.GREEN_STAINED_GLASS_PANE, "&aInstall Module"),
+                ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(REMOVE_BUTTON, button(Material.BARRIER, "&cRemove All Modules",
+                "&7Returns installed modules to the",
+                "&7dedicated output slots below."), ChestMenuUtils.getEmptyClickHandler());
+
         preset.addMenuClickHandler(OUTPUT, (player, slot, clicked, action) -> !isEmpty(clicked));
+        for (int slot : MODULE_OUTPUTS) {
+            preset.addMenuClickHandler(slot, (player, clickedSlot, clicked, action) -> !isEmpty(clicked));
+        }
     }
 
     private void install(BlockMenu menu, Player player) {
@@ -146,6 +167,12 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
             error(player, "Take the existing output before removing modules.");
             return;
         }
+        for (int slot : MODULE_OUTPUTS) {
+            if (!isEmpty(menu.getItemInSlot(slot))) {
+                error(player, "Empty all module-return output slots before removing modules.");
+                return;
+            }
+        }
 
         ItemStack gearInput = menu.getItemInSlot(GEAR_INPUT);
         if (isEmpty(gearInput)) {
@@ -161,7 +188,19 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
 
         ItemStack resultStack = gearInput.clone();
         resultStack.setAmount(1);
-        int returned = returnModules(player, resultStack);
+        java.util.List<ItemStack> returnedModules = collectModules(resultStack);
+        if (returnedModules.size() > MODULE_OUTPUTS.length) {
+            error(player, "Too many distinct module stacks to return safely.");
+            return;
+        }
+
+        int returned = 0;
+        for (int i = 0; i < returnedModules.size(); i++) {
+            ItemStack stack = returnedModules.get(i);
+            returned += stack.getAmount();
+            menu.replaceExistingItem(MODULE_OUTPUTS[i], stack);
+        }
+
         ModularData.removeAllModules(resultStack);
         ModularLore.refresh(resultStack, gear);
 
@@ -170,8 +209,8 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
         player.sendMessage(ChatColor.GREEN + "Removed and returned " + returned + " module(s).");
     }
 
-    private int returnModules(Player player, ItemStack gear) {
-        int total = 0;
+    private java.util.List<ItemStack> collectModules(ItemStack gear) {
+        java.util.List<ItemStack> returned = new java.util.ArrayList<>();
         for (ModuleFamily family : ModuleFamily.values()) {
             for (ModuleTier tier : family.supportedTiers()) {
                 int count = ModularData.getModuleCount(gear, family, tier);
@@ -184,26 +223,21 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
                     continue;
                 }
 
-                total += count;
-                ItemStack template = registered.getItem().clone();
-                int remaining = count;
-                while (remaining > 0) {
-                    ItemStack stack = template.clone();
-                    int amount = Math.min(remaining, stack.getMaxStackSize());
-                    stack.setAmount(amount);
-                    giveOrDrop(player, stack);
-                    remaining -= amount;
-                }
+                ItemStack stack = registered.getItem().clone();
+                stack.setAmount(count);
+                returned.add(stack);
             }
         }
-        return total;
+        return returned;
     }
 
-    private void giveOrDrop(Player player, ItemStack stack) {
-        Map<Integer, ItemStack> leftovers = player.getInventory().addItem(stack);
-        for (ItemStack leftover : leftovers.values()) {
-            player.getWorld().dropItemNaturally(player.getLocation(), leftover);
-        }
+    private static int[] breakDropSlots() {
+        int[] slots = new int[3 + MODULE_OUTPUTS.length];
+        slots[0] = GEAR_INPUT;
+        slots[1] = MODULE_INPUT;
+        slots[2] = OUTPUT;
+        System.arraycopy(MODULE_OUTPUTS, 0, slots, 3, MODULE_OUTPUTS.length);
+        return slots;
     }
 
     private void consumeOne(BlockMenu menu, int slot, ItemStack input) {
