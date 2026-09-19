@@ -37,24 +37,24 @@ public final class DracFunMaterialRegistry {
         SlimefunItemStack ore = LegacyTheme.ORE.stack(
                 "DRACFUN_DRACONIUM_ORE",
                 Material.END_STONE,
-                "&dEnder Draconium Ore",
+                "Ender Draconium Ore",
                 "&7A virtual ore resource found by GEO Miner in The End.");
         SlimefunItemStack dust = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_DUST",
                 Material.NETHERITE_SCRAP,
-                "&dDraconium Dust");
+                "Draconium Dust");
         SlimefunItemStack ingot = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_INGOT",
                 Material.NETHERITE_INGOT,
-                "&dDraconium Ingot");
+                "Draconium Ingot");
         SlimefunItemStack block = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_BLOCK",
                 Material.NETHERITE_BLOCK,
-                "&dDraconium Block");
+                "Draconium Block");
         SlimefunItemStack infusedObsidian = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_INFUSED_OBSIDIAN",
                 Material.OBSIDIAN,
-                "&dDraconium Infused Obsidian");
+                "Draconium Infused Obsidian");
 
         if (enableEndResource && SlimefunItem.getById(ore.getItemId()) == null) {
             EnderDraconiumOre resource = new EnderDraconiumOre(
