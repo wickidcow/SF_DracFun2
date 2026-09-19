@@ -653,15 +653,14 @@ public final class ChaosGuardianService implements Listener {
         Map<CageBlock, Material> tracked = new ConcurrentHashMap<>();
         cageBlocks.put(crystalId, tracked);
 
+        // DracFun 2.0.10 filled the entire 5x5x5 cage with iron bars,
+        // then replaced the top y=3 layer with random obsidian/crying obsidian.
+        // Track only blocks that were originally air for Reborn's safe cleanup;
+        // overwritten blocks remain persistent like the legacy behavior.
         for (int x = -2; x <= 2; x++) {
             for (int y = -1; y <= 3; y++) {
                 for (int z = -2; z <= 2; z++) {
                     boolean top = y == 3;
-                    boolean shell = top || y == -1 || Math.abs(x) == 2 || Math.abs(z) == 2;
-                    if (!shell) {
-                        continue;
-                    }
-
                     Location target = base.clone().add(x, y, z);
                     CageBlock key = new CageBlock(
                             target.getBlockX(),
@@ -674,17 +673,16 @@ public final class ChaosGuardianService implements Listener {
                         }
 
                         var block = target.getBlock();
-                        if (!block.getType().isAir()) {
-                            return;
-                        }
-
+                        boolean wasAir = block.getType().isAir();
                         Material placed = top
                                 ? (ThreadLocalRandom.current().nextBoolean()
                                         ? Material.CRYING_OBSIDIAN
                                         : Material.OBSIDIAN)
                                 : Material.IRON_BARS;
                         block.setType(placed);
-                        tracked.put(key, placed);
+                        if (wasAir) {
+                            tracked.put(key, placed);
+                        }
                     });
                 }
             }
