@@ -59,8 +59,6 @@ public final class DracFunFusionComponentRegistry {
         SlimefunItemStack chaoticCore = fusionOutput(
                 "DRACFUN_CHAOTIC_CORE", Material.NETHER_STAR, "&5Chaotic Core", 100_000_000);
 
-        SlimefunItemStack dragonHeart = stack(
-                "DRACFUN_DRAGON_HEART", Material.DRAGON_BREATH, "&5Dragon Heart");
         SlimefunItemStack smallChaos = stack(
                 "DRACFUN_SMALL_CHAOS_FRAGMENT", Material.PRISMARINE_CRYSTALS, "&5Small Chaos Fragment");
         SlimefunItemStack largeChaos = stack(
@@ -120,7 +118,7 @@ public final class DracFunFusionComponentRegistry {
         registered += registerUnplaceable(addon, materials, awakenedCore, RecipeType.NULL, emptyRecipe());
         registered += registerUnplaceable(addon, materials, chaoticCore, RecipeType.NULL, emptyRecipe());
 
-        registered += registerUnplaceable(addon, materials, dragonHeart, RecipeType.NULL, emptyRecipe());
+        registered += DracFunSharedProgressionRegistry.registerDragonHeart(addon);
         registered += registerUnplaceable(
                 addon,
                 materials,
