@@ -3,8 +3,11 @@ package io.github.wickidcow.sfdracfun2.reactor;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ASlimefunDataContainer;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
+import io.github.thebusybiscuit.slimefun4.api.items.ItemSetting;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.items.settings.DoubleRangeSetting;
+import io.github.thebusybiscuit.slimefun4.api.items.settings.IntRangeSetting;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.attributes.EnergyNetProvider;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
@@ -54,9 +57,9 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
     private static final int SHUTDOWN = 41;
     private static final int OUTPUT = 43;
 
-    private final double explosionMultiplier;
+    private final ItemSetting<Integer> breakExplosion;
+    private final ItemSetting<Double> explosionMultiplier;
     private final double explosionPowerCap;
-    private final float breakExplosionPower;
     private final boolean meltdownExplosionEnabled;
 
     public ReactorMachine(
@@ -66,12 +69,14 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
             ItemStack[] recipe) {
         super(group, item, RecipeType.ENHANCED_CRAFTING_TABLE, recipe);
 
-        explosionMultiplier = clamp(addon.getConfig().getDouble("reactor.explosion-multiplier", 0.25D), 0D, 1D);
+        // Exact DracFun 2.0.10 Slimefun item settings.
+        breakExplosion = new IntRangeSetting(this, "explosion-on-break", 0, 4, 10);
+        explosionMultiplier =
+                new DoubleRangeSetting(this, "explosion-multiplier", 0D, 0.25D, 1D);
+        addItemSetting(breakExplosion, explosionMultiplier);
+
+        // Reborn-only safety controls remain outside the legacy gameplay surface.
         explosionPowerCap = Math.max(0D, addon.getConfig().getDouble("reactor.explosion-power-cap", 64D));
-        breakExplosionPower = (float) clamp(
-                addon.getConfig().getDouble("reactor.break-explosion-power", 4D),
-                0D,
-                10D);
         meltdownExplosionEnabled = addon.getConfig().getBoolean("reactor.meltdown-explosion-enabled", true);
 
         new BlockMenuPreset(getId(), getItemName()) {
@@ -157,9 +162,10 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                         menu.dropItems(menu.getLocation(), new int[] {INPUT, OUTPUT});
                     }
 
-                    if (ReactorState.phase(data) != ReactorPhase.COLD && breakExplosionPower > 0F) {
+                    float breakPower = breakExplosion.getValue().floatValue();
+                    if (ReactorState.phase(data) != ReactorPhase.COLD && breakPower > 0F) {
                         Location location = event.getBlock().getLocation();
-                        location.getWorld().createExplosion(location, breakExplosionPower, true, true);
+                        location.getWorld().createExplosion(location, breakPower, true, true);
                     }
                 }
             }
@@ -577,8 +583,9 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         }
 
         double fuel = (long) reactableFuel + convertedFuel;
+        double multiplier = explosionMultiplier.getValue();
         double legacyPower =
-                (50D + ((fuel - 162D) * explosionMultiplier / 100D)) * explosionMultiplier;
+                (50D + ((fuel - 162D) * multiplier / 100D)) * multiplier;
         float power = (float) Math.min(explosionPowerCap, Math.max(0D, legacyPower));
         explode(location, power);
     }
