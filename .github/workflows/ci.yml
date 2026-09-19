@@ -346,17 +346,21 @@ jobs:
           grep -Fq '2_147_483_646' "$ORB"
           grep -Fq 'LegacyDracFunKeys.FUSION_POWER' "$ORB"
 
-      - name: Verify original DracFun Guide book
+      - name: Verify completed DracFun Guide book
         shell: bash
         run: |
           set -euo pipefail
           MAT=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
           grep -Fq '"DracFun Guide"' "$MAT"
-          grep -Fq 'Currently just a placeholder item for future guide.' "$MAT"
-          grep -Fq 'I intend it to be a whole in game guide in later versions.' "$MAT"
-          grep -Fq 'For help just contact p_yt on discord.' "$MAT"
-          grep -Fq 'Alternatively you can join discord.gg/xFtghGVCVD and create ticket.' "$MAT"
-          grep -Fq 'Good Luck and Have fun!' "$MAT"
+          grep -Fq 'DracFun Reborn 2.0.3 progression guide.' "$MAT"
+          grep -Fq 'Open the DracFun category to browse Materials, Energy Core,' "$MAT"
+          grep -Fq 'Wyvern, Draconic and Chaotic Gear, Modules, Electric machines' "$MAT"
+          grep -Fq 'and the Draconic Reactor.' "$MAT"
+          grep -Fq 'Progress through Fusion Crafting and prepare for the Chaos Guardian.' "$MAT"
+          if grep -Eq 'placeholder item for future guide|contact p_yt|discord\.gg/xFtghGVCVD' "$MAT"; then
+            echo 'Obsolete placeholder/contact wording remains in the completed DracFun Guide.' >&2
+            exit 1
+          fi
 
       - name: Verify parent guide icon does not reuse DRACFUN_GUIDE item ID
         shell: bash
