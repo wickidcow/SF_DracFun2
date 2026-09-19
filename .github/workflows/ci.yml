@@ -876,7 +876,7 @@ jobs:
           unzip -p "$JAR" plugin.yml > build/plugin.yml
           grep -Eq '^api-version:.*1\.21\.11' build/plugin.yml
           grep -Eq '^folia-supported:[[:space:]]*true' build/plugin.yml
-          grep -Eq '^version:.*2\.0\.3' build/plugin.yml
+          grep -Eq '^version:.*2\.0\.4' build/plugin.yml
           unzip -p "$JAR" config.yml > build/config.yml
           grep -Eq '^config-version:[[:space:]]*1[[:space:]]*$' build/config.yml
           for feature in materials end-resource energy-infuser item-converter fusion-crafting modular-gear energy-core reactor chaos-guardian; do
