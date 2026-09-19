@@ -501,6 +501,10 @@ jobs:
           grep -Fq 'List<UUID> snapshot = participantSnapshots.remove(dragon.getUniqueId());' "$GUARD"
           grep -Fq 'if (snapshot == null || snapshot.isEmpty())' "$GUARD"
           grep -Fq 'Set<UUID> participantIds = Set.copyOf(snapshot);' "$GUARD"
+          grep -Fq 'EnderDragonShootFireballEvent' "$GUARD"
+          grep -Fq 'guardiansWithNaturalFireball.add(dragon.getUniqueId());' "$GUARD"
+          grep -Fq 'attackSnapshot(dragon);' "$GUARD"
+          grep -Fq 'if (guardiansWithNaturalFireball.contains(dragon.getUniqueId()))' "$GUARD"
 
           grep -Fq 'cleanup-crystal-cages: false' "$CONFIG"
           grep -Fq 'if (cleanupCrystalCages)' "$GUARD"
