@@ -82,7 +82,7 @@ public final class DracFunModularRegistry {
             }
         }
 
-        registered += registerIntegrator(addon, DracFunItemGroups.electric(addon), hardMode);
+        registered += registerIntegrator(addon, moduleGroup, hardMode);
         return registered;
     }
 
