@@ -96,6 +96,19 @@ jobs:
           grep -Fq 'INITIAL_DELAY_TICKS = 600L' "$CAP"
           grep -Fq 'PERIOD_TICKS = 600L' "$CAP"
 
+      - name: Verify audited Fusion transaction parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          FUSION=src/main/java/io/github/wickidcow/sfdracfun2/fusion/FusionCrafterMachine.java
+          grep -Fq 'removeCharge(block.getLocation(), recipe.energyCost(), data);' "$FUSION"
+          grep -Fq 'menu.consumeItem(input, 1, true);' "$FUSION"
+          grep -Fq 'findRecipeByOutput(outputId)' "$FUSION"
+          if grep -Fq 'Cancelled: inputs changed' "$FUSION"; then
+            echo 'Fusion still uses Reborn reservation/cancellation semantics instead of 2.0.10 commit-at-start behavior.' >&2
+            exit 1
+          fi
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 

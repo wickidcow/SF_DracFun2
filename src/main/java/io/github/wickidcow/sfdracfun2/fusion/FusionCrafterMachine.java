@@ -154,11 +154,21 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
             return;
         }
 
+        // DracFun 2.0.10 committed the transaction at button-click time:
+        // energy was removed and one item from every occupied input slot was
+        // consumed before the 100-tick completion task was scheduled.
+        removeCharge(block.getLocation(), recipe.energyCost(), data);
+        for (int input : INPUTS) {
+            if (!isEmpty(menu.getItemInSlot(input))) {
+                menu.consumeItem(input, 1, true);
+            }
+        }
+
         long completeAt = System.currentTimeMillis() + FUSION_DELAY_MILLIS;
         data.setData(DATA_OUTPUT, recipe.outputId());
         data.setData(DATA_COMPLETE_AT, Long.toString(completeAt));
         menu.replaceExistingItem(STATUS, statusItem("Fusion in progress", FUSION_DELAY_MILLIS));
-        player.sendMessage(ChatColor.LIGHT_PURPLE + "Fusion started. Inputs and energy will be committed on completion.");
+        player.sendMessage(ChatColor.LIGHT_PURPLE + "Fusion started. Inputs and energy committed.");
     }
 
     private void tickFusion(Block block, SlimefunBlockData data) {
@@ -188,33 +198,24 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
     }
 
     private void finishFusion(Block block, SlimefunBlockData data, BlockMenu menu, String outputId) {
-        FusionRecipeSpec recipe = findRecipeByOutput(outputId, readInputs(menu));
+        FusionRecipeSpec recipe = findRecipeByOutput(outputId);
         if (recipe == null) {
-            clearPending(data);
-            menu.replaceExistingItem(STATUS, statusItem("Cancelled: inputs changed", 0L));
+            // A committed legacy-style fusion must never refund or silently
+            // discard its transaction. Keep it pending for an administrator to
+            // diagnose rather than cancelling spent inputs/energy.
+            menu.replaceExistingItem(STATUS, statusItem("Pending: output recipe unavailable", 0L));
             return;
         }
 
         ItemStack output = createOutput(recipe);
         if (output == null || !menu.fits(output, OUTPUT)) {
-            clearPending(data);
-            menu.replaceExistingItem(STATUS, statusItem("Cancelled: output unavailable", 0L));
+            // The original delayed task simply attempted to push its result.
+            // Reborn waits instead of deleting a committed result if the output
+            // cannot currently be delivered.
+            menu.replaceExistingItem(STATUS, statusItem("Pending: clear output slot", 0L));
             return;
         }
 
-        long charge = getChargeLong(block.getLocation(), data);
-        if (charge < recipe.energyCost()) {
-            clearPending(data);
-            menu.replaceExistingItem(STATUS, statusItem("Cancelled: insufficient energy", 0L));
-            return;
-        }
-
-        for (int input : INPUTS) {
-            if (!isEmpty(menu.getItemInSlot(input))) {
-                menu.consumeItem(input, 1, true);
-            }
-        }
-        removeCharge(block.getLocation(), recipe.energyCost(), data);
         menu.pushItem(output, OUTPUT);
         clearPending(data);
         menu.replaceExistingItem(STATUS, statusItem("Fusion complete", 0L));
@@ -229,9 +230,9 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         return null;
     }
 
-    private FusionRecipeSpec findRecipeByOutput(String outputId, ItemStack[] input) {
+    private FusionRecipeSpec findRecipeByOutput(String outputId) {
         for (FusionRecipeSpec recipe : recipes) {
-            if (tier.accepts(recipe.tier()) && recipe.outputId().equals(outputId) && recipe.matches(input)) {
+            if (tier.accepts(recipe.tier()) && recipe.outputId().equals(outputId)) {
                 return recipe;
             }
         }
