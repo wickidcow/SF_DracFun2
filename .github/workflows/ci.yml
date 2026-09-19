@@ -516,6 +516,95 @@ jobs:
             exit 1
           fi
 
+      - name: Verify exact DracFun 2.0.10 recipe parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAT=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
+          ORE=src/main/java/io/github/wickidcow/sfdracfun2/items/EnderDraconiumOre.java
+          COMPONENTS=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunFusionComponentRegistry.java
+          MACH=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMachineRegistry.java
+          MOD=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunModularRegistry.java
+          REACT=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunReactorRegistry.java
+          CAT=src/main/java/io/github/wickidcow/sfdracfun2/fusion/FusionRecipeCatalog.java
+          TIER=src/main/java/io/github/wickidcow/sfdracfun2/fusion/FusionTier.java
+          SHARED=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunSharedProgressionRegistry.java
+
+          # Ender Draconium GEO defaults and base progression.
+          grep -Fq '"min-ores", 1, 8, 64' "$ORE"
+          grep -Fq '"max-ores", 1, 12, 64' "$ORE"
+          grep -Fq '"bonus-ores", 1, 12, 64' "$ORE"
+          grep -Fq 'RecipeType.ORE_CRUSHER' "$MAT"
+          grep -Fq 'RecipeType.SMELTERY' "$MAT"
+          grep -Fq 'RecipeType.MAGIC_WORKBENCH' "$MAT"
+          grep -Fq 'blazePowder, obsidian, blazePowder' "$MAT"
+          grep -Fq 'obsidian, dust, obsidian' "$MAT"
+
+          # Hard-mode substitutions observed in DracFunItemSetup.setupHardMode().
+          grep -Fq 'hardMode ? SlimefunItems.GOLD_24K_BLOCK : SlimefunItems.GOLD_24K' "$COMPONENTS"
+          grep -Fq 'hardMode ? Material.DIAMOND_BLOCK : Material.DIAMOND' "$COMPONENTS"
+          grep -Fq 'hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT"' "$SHARED"
+          grep -Fq 'hardMode ? Material.IRON_BLOCK : Material.IRON_INGOT' "$MOD"
+          grep -Fq 'hardMode ? Material.REDSTONE_BLOCK : Material.REDSTONE' "$MOD"
+
+          # Dragon Egg branch and Chaotic Injector ingredient selection.
+          grep -Fq 'if (!useDragonEgg)' "$COMPONENTS"
+          grep -Fq 'RecipeType.ANCIENT_ALTAR' "$COMPONENTS"
+          grep -Fq 'Material.NETHER_STAR' "$COMPONENTS"
+          grep -Fq 'useDragonEgg ? vanilla(Material.DRAGON_EGG) : sf("DRACFUN_DRAGON_EGG")' "$CAT"
+          grep -Fq '"DRACFUN_CHAOTIC_FUSION_CRAFTING_INJECTOR"' "$CAT"
+          grep -Fq '8_000_000' "$CAT"
+
+          # Fusion Crafting Core and Basic Injector.
+          grep -Fq '"DRACFUN_FUSION_CRAFTING_CORE"' "$COMPONENTS"
+          grep -Fq 'new ItemStack(Material.LAPIS_BLOCK), diamond, new ItemStack(Material.LAPIS_BLOCK)' "$COMPONENTS"
+          grep -Fq '"DRACFUN_BASIC_FUSION_CRAFTING_INJECTOR"' "$COMPONENTS"
+          grep -Fq 'new ItemStack(Material.IRON_BLOCK), new ItemStack(Material.IRON_BLOCK), new ItemStack(Material.IRON_BLOCK)' "$COMPONENTS"
+
+          # Energy Infuser and Item Converter.
+          grep -Fq 'draconium, particleGenerator, draconium' "$MACH"
+          grep -Fq 'draconicCore, new ItemStack(Material.ENCHANTING_TABLE), draconicCore' "$MACH"
+          grep -Fq 'new ItemStack(Material.CRAFTING_TABLE)' "$MACH"
+          grep -Fq 'RecipeType.MAGIC_WORKBENCH' "$MACH"
+
+          # Four Fusion Crafter shells: eight matching injectors around one Fusion Core.
+          grep -Fq 'altarRecipe(requiredItem("DRACFUN_BASIC_FUSION_CRAFTING_INJECTOR"), fusionCore)' "$MACH"
+          grep -Fq 'altarRecipe(requiredItem("DRACFUN_WYVERN_FUSION_CRAFTING_INJECTOR"), fusionCore)' "$MACH"
+          grep -Fq 'altarRecipe(requiredItem("DRACFUN_DRACONIC_FUSION_CRAFTING_INJECTOR"), fusionCore)' "$MACH"
+          grep -Fq 'altarRecipe(requiredItem("DRACFUN_CHAOTIC_FUSION_CRAFTING_INJECTOR"), fusionCore)' "$MACH"
+          grep -Fq 'BASIC("DRACFUN_BASIC_FUSION_CRAFTER", 32_000)' "$TIER"
+          grep -Fq 'WYVERN("DRACFUN_WYVERN_FUSION_CRAFTER", 50_000_000)' "$TIER"
+          grep -Fq 'DRACONIC("DRACFUN_DRACONIC_FUSION_CRAFTER", Integer.MAX_VALUE)' "$TIER"
+          grep -Fq 'CHAOTIC("DRACFUN_CHAOTIC_FUSION_CRAFTER", Integer.MAX_VALUE)' "$TIER"
+
+          # Module Core and Module Integrater Ancient Altar recipes.
+          grep -Fq '"DRACFUN_MODULE_CORE"' "$MOD"
+          grep -Fq 'iron, redstone, iron' "$MOD"
+          grep -Fq 'gold, draconium, gold' "$MOD"
+          grep -Fq '"DRACFUN_MODULE_INTEGRATER"' "$MOD"
+          grep -Fq 'diamond, moduleCore, diamond' "$MOD"
+          grep -Fq 'moduleCore, draconicCore, moduleCore' "$MOD"
+
+          # Reactor standard crafting progression.
+          grep -Fq 'awakened, awakened, awakened' "$REACT"
+          grep -Fq 'draconicCore, draconium, draconium' "$REACT"
+          grep -Fq 'diamond, diamond, diamond' "$REACT"
+          grep -Fq 'null, innerRotor, outerRotor' "$REACT"
+          grep -Fq 'wyvernCore, draconium, draconium' "$REACT"
+          grep -Fq 'gold, diamond, gold' "$REACT"
+          grep -Fq 'diamond, wyvernCore, diamond' "$REACT"
+          grep -Fq 'wyvernCore, awakened, null' "$REACT"
+          grep -Fq 'null, stabilizer, null' "$REACT"
+          grep -Fq 'stabilizer, reactorCore, stabilizer' "$REACT"
+          grep -Fq 'null, stabilizer, energyInjector' "$REACT"
+
+          # Reactor Fusion outputs and costs.
+          grep -Fq '"DRACFUN_REACTOR_ENERGY_INJECTOR"' "$CAT"
+          grep -Fq '"DRACFUN_REACTOR_STABILIZER"' "$CAT"
+          grep -Fq '"DRACFUN_DRACONIC_REACTOR_CORE"' "$CAT"
+          grep -Fq '16_000_000' "$CAT"
+          grep -Fq '64_000_000' "$CAT"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
