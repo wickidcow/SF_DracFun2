@@ -138,6 +138,22 @@ jobs:
             exit 1
           fi
 
+      - name: Verify Fusion guide visibility
+        shell: bash
+        run: |
+          set -euo pipefail
+          GEAR=src/main/java/io/github/wickidcow/sfdracfun2/modular/ModularGearItem.java
+          REG=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunModularRegistry.java
+          TYPES=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunRecipeTypes.java
+          grep -Fq 'DracFunRecipeTypes.fusion(fusionRecipe.tier())' "$REG"
+          grep -Fq 'fusionRecipe.toGuideRecipe()' "$REG"
+          grep -Fq 'LegacyModularFusionRecipeCatalog.create(hardMode)' "$REG"
+          grep -Fq 'LegacyDracFunKeys.key(tier.machineId())' "$TYPES"
+          if grep -Fq 'setHidden(true)' "$GEAR"; then
+            echo 'Modular gear is still hidden from the Slimefun guide.' >&2
+            exit 1
+          fi
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
