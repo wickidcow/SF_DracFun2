@@ -6,11 +6,11 @@ Clean-room Slimefun Legacy reimplementation of the gameplay concepts and world-c
 
 ## Current project version
 
-**DracFun Reborn 2.0.1**
+**DracFun Reborn 2.0.2**
 
 Final release artifact:
 
-`SFL_DracFun-Reborn2.0.1.jar`
+`SFL_DracFun-Reborn2.0.2.jar`
 
 ## Targets
 
@@ -29,9 +29,9 @@ The implementation will not copy original method bodies, decompiled Java, textur
 
 ## Restored systems
 
-DracFun Reborn 2.0.1 includes the completed clean-room restoration of the legacy ID/data surface, Draconium progression and End resource generation, Energy Infuser, Item Converter, Fusion Crafting, modular equipment and modules, Energy Core multiblocks, Draconic Reactor, and Chaos Guardian encounter.
+DracFun Reborn 2.0.2 includes the completed clean-room restoration of the legacy ID/data surface, Draconium progression and End resource generation, Energy Infuser, Item Converter, Fusion Crafting, modular equipment and modules, Energy Core multiblocks, Draconic Reactor, and Chaos Guardian encounter, with direct 2.0.10 parity guards for recipes, interfaces, runtime behavior and migration identities.
 
-Fresh 2.0.1 configurations enable the complete restoration by default. Every major system remains independently toggleable under `features:` so server owners can stage or disable individual systems without preventing the rest of the addon from loading. Existing explicit configuration values are respected.
+Fresh 2.0.2 configurations enable the complete restoration by default. Every major system remains independently toggleable under `features:` so server owners can stage or disable individual systems without preventing the rest of the addon from loading. Existing explicit configuration values are respected.
 
 Remove the original **DracFun 2.0.10** JAR before installing Reborn. If both plugins are present, Reborn disables itself rather than risk duplicate `DRACFUN_*` registrations.
 
@@ -43,7 +43,7 @@ The CI matrix compiles against Paper 1.21.11, Paper/Purpur 26.2, Paper/Purpur 26
 
 Release artifact naming is fixed to:
 
-`SFL_DracFun-Reborn2.0.1.jar`
+`SFL_DracFun-Reborn2.0.2.jar`
 
 ## Credits
 
