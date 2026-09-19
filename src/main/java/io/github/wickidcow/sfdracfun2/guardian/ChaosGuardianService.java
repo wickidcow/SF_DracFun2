@@ -1,5 +1,6 @@
 package io.github.wickidcow.sfdracfun2.guardian;
 
+import com.destroystokyo.paper.event.entity.EnderDragonFireballHitEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
@@ -29,6 +30,7 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BossBar;
 import org.bukkit.boss.DragonBattle;
+import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.DragonFireball;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.EnderDragon;
@@ -42,7 +44,6 @@ import org.bukkit.event.entity.EnderDragonChangePhaseEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
@@ -524,29 +525,28 @@ public final class ChaosGuardianService implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onFireballHit(ProjectileHitEvent event) {
-        if (!(event.getEntity() instanceof DragonFireball fireball)) {
-            return;
-        }
-
+    public void onFireballHit(EnderDragonFireballHitEvent event) {
+        DragonFireball fireball = event.getEntity();
         ProjectileSource shooter = fireball.getShooter();
         if (!(shooter instanceof EnderDragon dragon) || !isGuardian(dragon)) {
             return;
         }
 
-        Set<Player> targets = new HashSet<>();
-        if (event.getHitEntity() instanceof Player player) {
-            targets.add(player);
+        AreaEffectCloud cloud = event.getAreaEffectCloud();
+        cloud.setDuration(cloud.getDuration() * 3);
+
+        PotionEffectType harm = PotionEffectType.getByName("HARM");
+        if (harm == null) {
+            harm = PotionEffectType.getByName("INSTANT_DAMAGE");
+        }
+        if (harm != null) {
+            cloud.addCustomEffect(new PotionEffect(harm, 600, 2), true);
         }
 
-        for (Entity entity : fireball.getNearbyEntities(4D, 4D, 4D)) {
-            if (entity instanceof Player player) {
-                targets.add(player);
+        for (var target : event.getTargets()) {
+            if (target instanceof Player player) {
+                Slimefun.runSyncFor(player, () -> punishFireballHit(player));
             }
-        }
-
-        for (Player player : targets) {
-            Slimefun.runSyncFor(player, () -> punishFireballHit(player));
         }
     }
 
