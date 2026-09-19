@@ -113,6 +113,27 @@ public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetCo
         return validation;
     }
 
+    static boolean invalidateImmediately(Location location) {
+        SlimefunBlockData data = io.github.thebusybiscuit.slimefun4.implementation.Slimefun
+                .getDatabaseManager()
+                .getBlockDataController()
+                .getBlockData(location);
+        if (data == null || !data.isDataLoaded() || data.isPendingRemove()) {
+            return false;
+        }
+
+        String id = data.getSfId();
+        if (id == null || !id.contains("DRACFUN_ENERGY_CORE_ACTIVATOR")) {
+            return false;
+        }
+
+        boolean wasComplete = "true".equals(data.getData(DATA_COMPLETE));
+        data.setData(DATA_COMPLETE, "false");
+        data.setData(ENERGY_CHARGE, "0");
+        SlimefunUtils.updateCapacitorTexture(location, 0D);
+        return wasComplete;
+    }
+
     private void clearStoredCharge(Location location, ASlimefunDataContainer data) {
         String raw = data.getData(ENERGY_CHARGE);
         if (raw != null && !"0".equals(raw)) {
