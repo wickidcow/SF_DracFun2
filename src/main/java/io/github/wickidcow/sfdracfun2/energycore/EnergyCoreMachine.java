@@ -53,13 +53,10 @@ public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetCo
             public void onPlayerPlace(@Nonnull BlockPlaceEvent event) {
                 EnergyCoreStructure.Validation validation = tier.structure().validate(event.getBlock().getLocation());
                 if (validation == EnergyCoreStructure.Validation.COMPLETE) {
-                    event.getPlayer().sendMessage(ChatColor.GREEN
-                            + tier.displayName()
-                            + " Energy Core structure detected. Energy storage will activate on the next core tick.");
+                    event.getPlayer().sendMessage(
+                            ChatColor.GREEN + "You have successfully built the Energy Core " + tier.displayName());
                 } else if (validation == EnergyCoreStructure.Validation.INCOMPLETE) {
-                    event.getPlayer().sendMessage(ChatColor.YELLOW
-                            + tier.displayName()
-                            + " Energy Core placed, but its multiblock structure is incomplete.");
+                    event.getPlayer().sendMessage(ChatColor.RED + "The core is not completed yet!");
                 }
             }
         });
@@ -71,6 +68,9 @@ public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetCo
                     @Nonnull ItemStack item,
                     @Nonnull java.util.List<ItemStack> drops) {
                 validationCache.remove(BlockKey.of(event.getBlock().getLocation()));
+                event.getPlayer().sendMessage(
+                        ChatColor.RED
+                                + "You broke a part of the core! All stored energy has been expelled!");
             }
         });
 
