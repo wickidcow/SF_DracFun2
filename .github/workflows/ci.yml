@@ -319,6 +319,23 @@ jobs:
           grep -Fq 'Material.LODESTONE' "$REG"
           grep -Fq '"Module Integrater"' "$REG"
 
+      - name: Verify machine items and Chaos Orb metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          MACH=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMachineRegistry.java
+          ORB=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunChaosGuardianRegistry.java
+          grep -Fq 'Material.DAYLIGHT_DETECTOR' "$MACH"
+          grep -Fq 'LoreBuilder.powerBuffer(EnergyInfuserMachine.ENERGY_CAPACITY)' "$MACH"
+          grep -Fq 'Material.LODESTONE' "$MACH"
+          grep -Fq 'Material.LIGHT_BLUE_GLAZED_TERRACOTTA' "$MACH"
+          grep -Fq 'Material.PURPLE_GLAZED_TERRACOTTA' "$MACH"
+          grep -Fq 'Material.ORANGE_GLAZED_TERRACOTTA' "$MACH"
+          grep -Fq 'Material.BLACK_GLAZED_TERRACOTTA' "$MACH"
+          grep -Fq 'LegacyTheme.FUSION_CRAFTING.stack' "$MACH"
+          grep -Fq '2_147_483_646' "$ORB"
+          grep -Fq 'LegacyDracFunKeys.FUSION_POWER' "$ORB"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
