@@ -101,7 +101,7 @@ public final class ModularData {
         if (!family.supports(tier)) {
             return 0;
         }
-        return Math.max(0, getInt(stack, LegacyDracFunKeys.key(family.legacyItemId(tier))));
+        return Math.max(0, getInt(stack, LegacyDracFunKeys.key(family.legacyDataKeyId(tier))));
     }
 
     public static int getFamilyCount(ItemStack stack, ModuleFamily family) {
@@ -156,7 +156,7 @@ public final class ModularData {
             return result;
         }
 
-        NamespacedKey key = LegacyDracFunKeys.key(family.legacyItemId(moduleTier));
+        NamespacedKey key = LegacyDracFunKeys.key(family.legacyDataKeyId(moduleTier));
         setInt(stack, key, getModuleCount(stack, family, moduleTier) + 1);
         if (family == ModuleFamily.POWER) {
             recalculatePowerCapacity(stack);
@@ -183,7 +183,7 @@ public final class ModularData {
         PersistentDataContainer data = meta.getPersistentDataContainer();
         for (ModuleFamily family : ModuleFamily.values()) {
             for (ModuleTier tier : family.supportedTiers()) {
-                data.remove(LegacyDracFunKeys.key(family.legacyItemId(tier)));
+                data.remove(LegacyDracFunKeys.key(family.legacyDataKeyId(tier)));
             }
         }
         data.remove(LegacyDracFunKeys.SHIELD);
