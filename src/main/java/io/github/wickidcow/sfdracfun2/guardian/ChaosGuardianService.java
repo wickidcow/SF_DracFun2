@@ -124,7 +124,9 @@ public final class ChaosGuardianService implements Listener {
                 if (dragon != null && isGuardian(dragon)) {
                     Slimefun.runSyncFor(dragon, () -> {
                         initializeBossBar(dragon.getBossBar());
-                        snapshotParticipants(dragon, dragon.getLocation());
+                        snapshotParticipants(
+                        dragon,
+                        new Location(dragon.getWorld(), 0D, 0D, 0D));
                         dragon.getPersistentDataContainer().set(
                                 CRYSTAL_COUNT,
                                 PersistentDataType.INTEGER,
@@ -259,7 +261,9 @@ public final class ChaosGuardianService implements Listener {
                 PersistentDataType.INTEGER,
                 crystals.size());
 
-        snapshotParticipants(dragon, dragon.getLocation());
+        snapshotParticipants(
+                        dragon,
+                        new Location(dragon.getWorld(), 0D, 0D, 0D));
 
         for (EnderCrystal crystal : crystals) {
             Slimefun.runSyncFor(crystal, () -> {
@@ -342,7 +346,7 @@ public final class ChaosGuardianService implements Listener {
                     return;
                 }
 
-                Location target = player.getEyeLocation().clone();
+                Location target = player.getLocation().clone();
                 Slimefun.runSyncFor(dragon, () -> {
                     if (!dragon.isValid() || dragon.isDead()) {
                         return;
