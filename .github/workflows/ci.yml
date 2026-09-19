@@ -398,6 +398,56 @@ jobs:
           grep -Fq 'new DoubleRangeSetting(this, "explosion-multiplier", 0D, 0.25D, 1D)' "$REACTOR"
           grep -Fq 'wither-minion-lifetime-ticks: 0' "$CONFIG"
 
+      - name: Verify original Reactor interface parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          REACTOR=src/main/java/io/github/wickidcow/sfdracfun2/reactor/ReactorMachine.java
+
+          grep -Fq 'private static final int SHIELD_SET = 10;' "$REACTOR"
+          grep -Fq 'private static final int MIN_SATURATION_SET = 12;' "$REACTOR"
+          grep -Fq 'private static final int FAILSAFE_SET = 14;' "$REACTOR"
+          grep -Fq 'private static final int STATUS = 16;' "$REACTOR"
+          grep -Fq 'private static final int INPUT = 37;' "$REACTOR"
+          grep -Fq 'private static final int CHARGE = 39;' "$REACTOR"
+          grep -Fq 'private static final int ACTIVATE = 40;' "$REACTOR"
+          grep -Fq 'private static final int SHUTDOWN = 41;' "$REACTOR"
+          grep -Fq 'private static final int OUTPUT = 43;' "$REACTOR"
+
+          grep -Fq 'private static final int[] REACTOR_STATUS = {12, 13, 14, 21, 22, 23, 30, 31, 32};' "$REACTOR"
+          grep -Fq 'private static final int[] CORE_TEMPERATURE = {0, 9, 18, 27};' "$REACTOR"
+          grep -Fq 'private static final int[] CONTAINMENT_FIELD_STRENGTH = {1, 10, 19, 28};' "$REACTOR"
+          grep -Fq 'private static final int[] ENERGY_SATURATION = {7, 16, 25, 34};' "$REACTOR"
+          grep -Fq 'private static final int[] FUEL_CONVERSION_LEVEL = {8, 17, 26, 35};' "$REACTOR"
+          grep -Fq 'private static final int GENERATION_RATE_SLOT = 46;' "$REACTOR"
+          grep -Fq 'private static final int FIELD_INPUT_RATE_SLOT = 49;' "$REACTOR"
+          grep -Fq 'private static final int FUEL_CONVERSION_RATE_SLOT = 52;' "$REACTOR"
+
+          grep -Fq 'Determine the energy allocation for the generation of a containment field.' "$REACTOR"
+          grep -Fq 'Determine the saturation level prior to initiating the generation of energy.' "$REACTOR"
+          grep -Fq 'Toggle the fail-safe to ensure the automatic termination in the event of an emergency.' "$REACTOR"
+          grep -Fq 'Click to view the current operational status of the reactor.' "$REACTOR"
+          grep -Fq 'The reactor has been charged!' "$REACTOR"
+          grep -Fq 'Conditions for energization remain unfulfilled!' "$REACTOR"
+          grep -Fq 'The reactor has been activated!' "$REACTOR"
+          grep -Fq 'Conditions for initialization remain unfulfilled!' "$REACTOR"
+          grep -Fq 'The reactor has been deactivated!' "$REACTOR"
+          grep -Fq 'Conditions for deactivation remain unfulfilled!' "$REACTOR"
+          grep -Fq 'Fail-safe mechanism has been turned to ' "$REACTOR"
+          grep -Fq 'Invalid input! Your input should be within the range of 0 to 100.' "$REACTOR"
+          grep -Fq 'J per tick will be used for the generation of a containment field.' "$REACTOR"
+          grep -Fq '% of the max saturation level must be filled prior to the generation of energy.' "$REACTOR"
+          grep -Fq 'dracfun:dracfun.core_sound' "$REACTOR"
+
+          grep -Fq '"Core Temperature"' "$REACTOR"
+          grep -Fq '"Containment Field Strength"' "$REACTOR"
+          grep -Fq '"Energy Saturation"' "$REACTOR"
+          grep -Fq '"Fuel Conversion Level"' "$REACTOR"
+          grep -Fq '"Generation Rate"' "$REACTOR"
+          grep -Fq '"Field Input Rate"' "$REACTOR"
+          grep -Fq '"Fuel Conversion Rate"' "$REACTOR"
+          grep -Fq 'statsMenu.open(player)' "$REACTOR"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
