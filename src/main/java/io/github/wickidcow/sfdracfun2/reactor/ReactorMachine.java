@@ -172,6 +172,20 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
 
         Location location = block.getLocation();
         injectStoredEnergy(location, data);
+
+        // DracFun 2.0.10 only ran reactor physics while an explicit shard
+        // production cycle existed in its progress map. A completed cycle
+        // therefore stays idle until the player presses Charge again.
+        boolean chargedCycle = ReactorState.progress(data) >= 0;
+        if (!chargedCycle) {
+            ReactorState.integer(data, ReactorState.GENERATION_RATE, 0);
+            BlockMenu idleMenu = data.getBlockMenu();
+            if (idleMenu != null && idleMenu.hasViewer()) {
+                refreshMenu(location, data, idleMenu);
+            }
+            return;
+        }
+
         runGeneration(location, data);
 
         int temperature = ReactorState.integer(data, ReactorState.TEMPERATURE);
@@ -873,6 +887,15 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
     }
 
     private void recoverLegacyProgress(SlimefunBlockData data) {
+        // Early Reborn builds could have persisted an active 2.0.10 reactor
+        // without the original in-memory progress map. Recover that state once,
+        // then permanently mark the block migrated so finishing a cycle cannot
+        // auto-create another Chaos Shard cycle on the next tick.
+        if (ReactorState.bool(data, ReactorState.REBORN_PROGRESS_MIGRATED)) {
+            return;
+        }
+        ReactorState.bool(data, ReactorState.REBORN_PROGRESS_MIGRATED, true);
+
         if (ReactorState.progress(data) >= 0) {
             return;
         }
