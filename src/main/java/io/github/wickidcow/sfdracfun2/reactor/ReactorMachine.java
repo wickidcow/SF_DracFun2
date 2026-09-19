@@ -680,7 +680,6 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
 
         ReactorState.ensureDefaults(data);
         if (ReactorState.progress(data) >= 0) {
-            error(player, "This reactor already has a charged production cycle.");
             return;
         }
 
@@ -692,7 +691,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         }
 
         if (!canCharge(data)) {
-            error(player, "Conditions for energization remain unfulfilled. At least two fuel blocks are required.");
+            error(player, "Conditions for energization remain unfulfilled!");
             return;
         }
 
@@ -700,7 +699,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         ReactorState.progress(
                 data,
                 clampInt((long) ReactorState.integer(data, ReactorState.REACTABLE_FUEL) * 120L));
-        player.sendMessage(ChatColor.GREEN + "The reactor has been charged.");
+        player.sendMessage(ChatColor.GREEN + "The reactor has been charged!");
     }
 
     private void activateReactor(Location location, Player player) {
@@ -712,12 +711,19 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
 
         ReactorState.ensureDefaults(data);
         if (!canActivate(data)) {
-            error(player, "Conditions for initialization remain unfulfilled.");
+            error(player, "Conditions for initialization remain unfulfilled!");
             return;
         }
 
         ReactorState.phase(data, ReactorPhase.RUNNING);
-        player.sendMessage(ChatColor.GREEN + "The reactor has been activated.");
+        fillStatsSlots(REACTOR_STATUS, new ItemStack(Material.ORANGE_STAINED_GLASS_PANE));
+        player.sendMessage(ChatColor.GREEN + "The reactor has been activated!");
+        player.playSound(
+                player.getLocation(),
+                "dracfun:dracfun.core_sound",
+                SoundCategory.BLOCKS,
+                1F,
+                1F);
     }
 
     private void shutdownReactor(Location location, Player player) {
@@ -729,11 +735,12 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
 
         ReactorState.ensureDefaults(data);
         if (!shutdown(data)) {
-            error(player, "Conditions for deactivation remain unfulfilled.");
+            error(player, "Conditions for deactivation remain unfulfilled!");
             return;
         }
 
-        player.sendMessage(ChatColor.GREEN + "The reactor has been deactivated.");
+        fillStatsSlots(REACTOR_STATUS, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
+        player.sendMessage(ChatColor.GREEN + "The reactor has been deactivated!");
     }
 
     private static boolean shutdown(SlimefunBlockData data) {
@@ -782,40 +789,51 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         ReactorState.ensureDefaults(data);
         boolean enabled = !ReactorState.bool(data, ReactorState.FAILSAFE);
         ReactorState.bool(data, ReactorState.FAILSAFE, enabled);
-        player.sendMessage(ChatColor.GREEN + "Reactor fail-safe: " + (enabled ? "ON" : "OFF"));
+        player.sendMessage(
+                ChatColor.GREEN + "Fail-safe mechanism has been turned to " + (enabled ? "ON" : "OFF"));
     }
 
     private void configureShieldInput(BlockMenu menu, Location location, Player player) {
         menu.close();
-        player.sendMessage(ChatColor.AQUA + "Enter containment-field energy allocation in J/tick (positive integer).");
         ChatUtils.awaitInput(player, input -> Slimefun.runSyncAt(location, () -> {
             SlimefunBlockData data = blockData(location);
             Integer value = positiveInteger(input);
             if (!usable(data) || value == null) {
-                message(player, ChatColor.RED + "Invalid input. Enter a positive whole number.");
+                message(
+                        player,
+                        ChatColor.RED + "Invalid input! Your input should be within the range of 0 to 100.");
                 return;
             }
 
             ReactorState.ensureDefaults(data);
             ReactorState.integer(data, ReactorState.SHIELD_INPUT, value);
-            message(player, ChatColor.GREEN + "Containment-field input set to " + value + " J/tick.");
+            message(
+                    player,
+                    ChatColor.GREEN
+                            + value
+                            + " J per tick will be used for the generation of a containment field.");
         }));
     }
 
     private void configureMinimumSaturation(BlockMenu menu, Location location, Player player) {
         menu.close();
-        player.sendMessage(ChatColor.GREEN + "Enter minimum saturation percentage (1-99).");
         ChatUtils.awaitInput(player, input -> Slimefun.runSyncAt(location, () -> {
             SlimefunBlockData data = blockData(location);
             Integer value = positiveInteger(input);
             if (!usable(data) || value == null || value >= 100) {
-                message(player, ChatColor.RED + "Invalid input. Enter a whole number from 1 to 99.");
+                message(
+                        player,
+                        ChatColor.RED + "Invalid input! Your input should be within the range of 0 to 100.");
                 return;
             }
 
             ReactorState.ensureDefaults(data);
             ReactorState.integer(data, ReactorState.MIN_SATURATION, value);
-            message(player, ChatColor.GREEN + "Minimum saturation set to " + value + "%.");
+            message(
+                    player,
+                    ChatColor.GREEN
+                            + value
+                            + "% of the max saturation level must be filled prior to the generation of energy.");
         }));
     }
 
