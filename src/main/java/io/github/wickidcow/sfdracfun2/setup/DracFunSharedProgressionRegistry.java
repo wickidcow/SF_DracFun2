@@ -275,17 +275,6 @@ public final class DracFunSharedProgressionRegistry {
         return 1;
     }
 
-    private static SlimefunItemStack stack(
-            String id,
-            Material material,
-            String name) {
-        return new SlimefunItemStack(
-                id,
-                material,
-                name,
-                "&8DracFun Reborn clean-room item");
-    }
-
     private static SlimefunItemStack fusionOutput(
             LegacyTheme theme,
             String id,
