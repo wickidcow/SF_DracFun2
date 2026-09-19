@@ -188,7 +188,7 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
                 try {
                     int sharedComponents =
                             DracFunFusionComponentRegistry.register(this, hardMode, useDragonEgg);
-                    int guardianItems = DracFunChaosGuardianRegistry.register(this);
+                    int guardianItems = DracFunChaosGuardianRegistry.register(this, hardMode);
                     getLogger().info("Registered " + sharedComponents
                             + " shared material identities required by the Chaos Guardian.");
                     getLogger().info("Registered " + guardianItems

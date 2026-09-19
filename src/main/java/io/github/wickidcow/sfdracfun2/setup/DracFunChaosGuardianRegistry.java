@@ -6,6 +6,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.guardian.ChaosGuardianService;
 import io.github.wickidcow.sfdracfun2.guardian.ChaosOrbItem;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import org.bukkit.Material;
 
 /** Registers the clean-room Chaos Guardian invocation and battle listeners. */
@@ -13,7 +15,7 @@ public final class DracFunChaosGuardianRegistry {
 
     private DracFunChaosGuardianRegistry() {}
 
-    public static int register(SFDracFun2 addon) {
+    public static int register(SFDracFun2 addon, boolean hardMode) {
         ChaosGuardianService service = new ChaosGuardianService(addon);
         service.start();
 
@@ -31,7 +33,15 @@ public final class DracFunChaosGuardianRegistry {
                 "&7Requires a DracFun modular armor chestplate.",
                 "&cThe battle is intentionally dangerous.");
 
-        new ChaosOrbItem(group, orb, service).register(addon);
+        FusionRecipeSpec recipe = FusionRecipeCatalog.requireByOutput(
+                hardMode, true, id);
+        new ChaosOrbItem(
+                        group,
+                        orb,
+                        DracFunRecipeTypes.fusion(recipe.tier()),
+                        recipe.toGuideRecipe(),
+                        service)
+                .register(addon);
         return 1;
     }
 }

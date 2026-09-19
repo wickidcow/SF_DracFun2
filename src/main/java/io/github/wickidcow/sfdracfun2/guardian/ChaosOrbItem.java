@@ -23,8 +23,10 @@ public final class ChaosOrbItem extends SlimefunItem implements NotPlaceable, It
     public ChaosOrbItem(
             ItemGroup itemGroup,
             SlimefunItemStack item,
+            RecipeType recipeType,
+            ItemStack[] recipe,
             ChaosGuardianService guardianService) {
-        super(itemGroup, item, RecipeType.NULL, new ItemStack[9]);
+        super(itemGroup, item, recipeType, recipe);
         this.guardianService = guardianService;
         addItemHandler(this);
     }

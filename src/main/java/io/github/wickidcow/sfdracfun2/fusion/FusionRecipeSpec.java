@@ -30,6 +30,11 @@ public record FusionRecipeSpec(
             FusionIngredient ingredient = ingredients.get(i);
             recipe[i] = ingredient == null ? null : ingredient.toGuideItemStack();
         }
+        // DracFun 2.0.10 displayed four Draconium Blocks in slot 1 for the
+        // Awakened Draconium Block recipe even though the runtime matcher consumed one.
+        if ("DRACFUN_AWAKENED_DRACONIUM_BLOCK".equals(outputId) && recipe[1] != null) {
+            recipe[1].setAmount(4);
+        }
         return recipe;
     }
 

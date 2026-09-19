@@ -8,6 +8,8 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.items.DragonHeartItem;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
 import org.bukkit.Material;
@@ -53,66 +55,9 @@ public final class DracFunSharedProgressionRegistry {
                         draconicCore, new ItemStack(Material.NETHER_STAR), draconicCore,
                         draconium, draconicCore, draconium));
 
-        SlimefunItemStack awakenedBlock = fusionOutput(
-                "DRACFUN_AWAKENED_DRACONIUM_BLOCK",
-                Material.NETHERITE_BLOCK,
-                "&6Awakened Draconium Block",
-                50_000_000);
-        registered += registerSimple(
-                addon,
-                materials,
-                awakenedBlock,
-                RecipeType.NULL,
-                emptyRecipe());
-
-        SlimefunItemStack awakenedIngot = stack(
-                "DRACFUN_AWAKENED_DRACONIUM_INGOT",
-                Material.NETHERITE_INGOT,
-                "&6Awakened Draconium Ingot");
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                awakenedIngot,
-                RecipeType.ENHANCED_CRAFTING_TABLE,
-                center(awakenedBlock),
-                awakenedIngot.asQuantity(9));
-
-        SlimefunItemStack awakenedNugget = stack(
-                "DRACFUN_AWAKENED_DRACONIUM_NUGGET",
-                Material.GOLD_NUGGET,
-                "&6Awakened Draconium Nugget");
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                awakenedNugget,
-                RecipeType.ENHANCED_CRAFTING_TABLE,
-                center(awakenedIngot),
-                awakenedNugget.asQuantity(9));
-
-        SlimefunItemStack awakenedCore = fusionOutput(
-                "DRACFUN_AWAKENED_CORE",
-                Material.HEART_OF_THE_SEA,
-                "&6Awakened Core",
-                1_000_000);
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                awakenedCore,
-                RecipeType.NULL,
-                emptyRecipe());
-
-        SlimefunItemStack chaoticCore = fusionOutput(
-                "DRACFUN_CHAOTIC_CORE",
-                Material.NETHER_STAR,
-                "&5Chaotic Core",
-                100_000_000);
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                chaoticCore,
-                RecipeType.NULL,
-                emptyRecipe());
-
+        // Fusion guide recipes below reference Dragon Heart and the Chaos chain.
+        // Register those observable prerequisites first so the guide can resolve
+        // their exact Slimefun item identities.
         registered += registerDragonHeart(addon);
 
         SlimefunItemStack smallChaos = stack(
@@ -164,6 +109,66 @@ public final class DracFunSharedProgressionRegistry {
                             diamond, gold, diamond));
         }
 
+        SlimefunItemStack awakenedBlock = fusionOutput(
+                "DRACFUN_AWAKENED_DRACONIUM_BLOCK",
+                Material.NETHERITE_BLOCK,
+                "&6Awakened Draconium Block",
+                50_000_000);
+        registered += registerFusionSimple(
+                addon,
+                materials,
+                awakenedBlock,
+                hardMode,
+                useDragonEgg);
+
+        SlimefunItemStack awakenedIngot = stack(
+                "DRACFUN_AWAKENED_DRACONIUM_INGOT",
+                Material.NETHERITE_INGOT,
+                "&6Awakened Draconium Ingot");
+        registered += registerUnplaceable(
+                addon,
+                materials,
+                awakenedIngot,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                center(awakenedBlock),
+                awakenedIngot.asQuantity(9));
+
+        SlimefunItemStack awakenedNugget = stack(
+                "DRACFUN_AWAKENED_DRACONIUM_NUGGET",
+                Material.GOLD_NUGGET,
+                "&6Awakened Draconium Nugget");
+        registered += registerUnplaceable(
+                addon,
+                materials,
+                awakenedNugget,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                center(awakenedIngot),
+                awakenedNugget.asQuantity(9));
+
+        SlimefunItemStack awakenedCore = fusionOutput(
+                "DRACFUN_AWAKENED_CORE",
+                Material.HEART_OF_THE_SEA,
+                "&6Awakened Core",
+                1_000_000);
+        registered += registerFusionUnplaceable(
+                addon,
+                materials,
+                awakenedCore,
+                hardMode,
+                useDragonEgg);
+
+        SlimefunItemStack chaoticCore = fusionOutput(
+                "DRACFUN_CHAOTIC_CORE",
+                Material.NETHER_STAR,
+                "&5Chaotic Core",
+                100_000_000);
+        registered += registerFusionUnplaceable(
+                addon,
+                materials,
+                chaoticCore,
+                hardMode,
+                useDragonEgg);
+
         return registered;
     }
 
@@ -178,6 +183,42 @@ public final class DracFunSharedProgressionRegistry {
                 Material.DRAGON_BREATH,
                 "&5Dragon Heart");
         new DragonHeartItem(DracFunItemGroups.materials(addon), dragonHeart).register(addon);
+        return 1;
+    }
+
+    private static int registerFusionUnplaceable(
+            SFDracFun2 addon,
+            ItemGroup group,
+            SlimefunItemStack item,
+            boolean hardMode,
+            boolean useDragonEgg) {
+        FusionRecipeSpec spec = FusionRecipeCatalog.requireByOutput(
+                hardMode, useDragonEgg, item.getItemId());
+        return registerUnplaceable(
+                addon,
+                group,
+                item,
+                DracFunRecipeTypes.fusion(spec.tier()),
+                spec.toGuideRecipe());
+    }
+
+    private static int registerFusionSimple(
+            SFDracFun2 addon,
+            ItemGroup group,
+            SlimefunItemStack item,
+            boolean hardMode,
+            boolean useDragonEgg) {
+        if (SlimefunItem.getById(item.getItemId()) != null) {
+            return 0;
+        }
+        FusionRecipeSpec spec = FusionRecipeCatalog.requireByOutput(
+                hardMode, useDragonEgg, item.getItemId());
+        new EnergyCorePieceItem(
+                        group,
+                        item,
+                        DracFunRecipeTypes.fusion(spec.tier()),
+                        spec.toGuideRecipe())
+                .register(addon);
         return 1;
     }
 

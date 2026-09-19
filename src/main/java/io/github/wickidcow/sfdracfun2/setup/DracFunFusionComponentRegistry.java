@@ -7,6 +7,9 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -37,35 +40,6 @@ public final class DracFunFusionComponentRegistry {
 
         SlimefunItemStack wyvernCore = stack(
                 "DRACFUN_WYVERN_CORE", Material.AMETHYST_SHARD, "&dWyvern Core");
-        SlimefunItemStack fusionCore = stack(
-                "DRACFUN_FUSION_CRAFTING_CORE", Material.LODESTONE, "&dFusion Crafting Core");
-        SlimefunItemStack basicInjector = stack(
-                "DRACFUN_BASIC_FUSION_CRAFTING_INJECTOR", Material.COPPER_BLOCK, "&fBasic Fusion Crafting Injector");
-        SlimefunItemStack wyvernInjector = fusionOutput(
-                "DRACFUN_WYVERN_FUSION_CRAFTING_INJECTOR", Material.AMETHYST_BLOCK, "&dWyvern Fusion Crafting Injector", 32_000);
-        SlimefunItemStack draconicInjector = fusionOutput(
-                "DRACFUN_DRACONIC_FUSION_CRAFTING_INJECTOR", Material.RESPAWN_ANCHOR, "&5Draconic Fusion Crafting Injector", 256_000);
-        SlimefunItemStack chaoticInjector = fusionOutput(
-                "DRACFUN_CHAOTIC_FUSION_CRAFTING_INJECTOR", Material.CRYING_OBSIDIAN, "&5Chaotic Fusion Crafting Injector", 8_000_000);
-
-        SlimefunItemStack awakenedBlock = fusionOutput(
-                "DRACFUN_AWAKENED_DRACONIUM_BLOCK", Material.NETHERITE_BLOCK, "&6Awakened Draconium Block", 50_000_000);
-        SlimefunItemStack awakenedIngot = stack(
-                "DRACFUN_AWAKENED_DRACONIUM_INGOT", Material.NETHERITE_INGOT, "&6Awakened Draconium Ingot");
-        SlimefunItemStack awakenedNugget = stack(
-                "DRACFUN_AWAKENED_DRACONIUM_NUGGET", Material.GOLD_NUGGET, "&6Awakened Draconium Nugget");
-        SlimefunItemStack awakenedCore = fusionOutput(
-                "DRACFUN_AWAKENED_CORE", Material.HEART_OF_THE_SEA, "&6Awakened Core", 1_000_000);
-        SlimefunItemStack chaoticCore = fusionOutput(
-                "DRACFUN_CHAOTIC_CORE", Material.NETHER_STAR, "&5Chaotic Core", 100_000_000);
-
-        SlimefunItemStack smallChaos = stack(
-                "DRACFUN_SMALL_CHAOS_FRAGMENT", Material.PRISMARINE_CRYSTALS, "&5Small Chaos Fragment");
-        SlimefunItemStack largeChaos = stack(
-                "DRACFUN_LARGE_CHAOS_FRAGMENT", Material.ECHO_SHARD, "&5Large Chaos Fragment");
-        SlimefunItemStack chaosShard = stack(
-                "DRACFUN_CHAOS_SHARD", Material.NETHER_STAR, "&5Chaos Shard");
-
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -76,6 +50,8 @@ public final class DracFunFusionComponentRegistry {
                         draconicCore, new ItemStack(Material.NETHER_STAR), draconicCore,
                         draconium, draconicCore, draconium));
 
+        SlimefunItemStack fusionCore = stack(
+                "DRACFUN_FUSION_CRAFTING_CORE", Material.LODESTONE, "&dFusion Crafting Core");
         registered += registerUnplaceable(
                 addon,
                 machines,
@@ -86,6 +62,10 @@ public final class DracFunFusionComponentRegistry {
                         diamond, draconicCore, diamond,
                         new ItemStack(Material.LAPIS_BLOCK), diamond, new ItemStack(Material.LAPIS_BLOCK)));
 
+        SlimefunItemStack basicInjector = stack(
+                "DRACFUN_BASIC_FUSION_CRAFTING_INJECTOR",
+                Material.COPPER_BLOCK,
+                "&fBasic Fusion Crafting Injector");
         registered += registerUnplaceable(
                 addon,
                 machines,
@@ -96,29 +76,15 @@ public final class DracFunFusionComponentRegistry {
                         new ItemStack(Material.IRON_BLOCK), new ItemStack(Material.IRON_BLOCK), new ItemStack(Material.IRON_BLOCK),
                         new ItemStack(Material.IRON_BLOCK), new ItemStack(Material.IRON_BLOCK), new ItemStack(Material.IRON_BLOCK)));
 
-        registered += registerUnplaceable(addon, machines, wyvernInjector, RecipeType.NULL, emptyRecipe());
-        registered += registerUnplaceable(addon, machines, draconicInjector, RecipeType.NULL, emptyRecipe());
-        registered += registerUnplaceable(addon, machines, chaoticInjector, RecipeType.NULL, emptyRecipe());
-
-        registered += registerSimple(addon, materials, awakenedBlock, RecipeType.NULL, emptyRecipe());
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                awakenedIngot,
-                RecipeType.ENHANCED_CRAFTING_TABLE,
-                center(awakenedBlock),
-                awakenedIngot.asQuantity(9));
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                awakenedNugget,
-                RecipeType.ENHANCED_CRAFTING_TABLE,
-                center(awakenedIngot),
-                awakenedNugget.asQuantity(9));
-        registered += registerUnplaceable(addon, materials, awakenedCore, RecipeType.NULL, emptyRecipe());
-        registered += registerUnplaceable(addon, materials, chaoticCore, RecipeType.NULL, emptyRecipe());
-
+        // Register guide prerequisites before Fusion outputs reference them.
         registered += DracFunSharedProgressionRegistry.registerDragonHeart(addon);
+
+        SlimefunItemStack smallChaos = stack(
+                "DRACFUN_SMALL_CHAOS_FRAGMENT", Material.PRISMARINE_CRYSTALS, "&5Small Chaos Fragment");
+        SlimefunItemStack largeChaos = stack(
+                "DRACFUN_LARGE_CHAOS_FRAGMENT", Material.ECHO_SHARD, "&5Large Chaos Fragment");
+        SlimefunItemStack chaosShard = stack(
+                "DRACFUN_CHAOS_SHARD", Material.NETHER_STAR, "&5Chaos Shard");
         registered += registerUnplaceable(
                 addon,
                 materials,
@@ -126,8 +92,18 @@ public final class DracFunFusionComponentRegistry {
                 RecipeType.MAGIC_WORKBENCH,
                 center(chaosShard),
                 smallChaos.asQuantity(81));
-        registered += registerUnplaceable(addon, materials, largeChaos, RecipeType.MAGIC_WORKBENCH, fill(smallChaos));
-        registered += registerUnplaceable(addon, materials, chaosShard, RecipeType.MAGIC_WORKBENCH, fill(largeChaos));
+        registered += registerUnplaceable(
+                addon,
+                materials,
+                largeChaos,
+                RecipeType.MAGIC_WORKBENCH,
+                fill(smallChaos));
+        registered += registerUnplaceable(
+                addon,
+                materials,
+                chaosShard,
+                RecipeType.MAGIC_WORKBENCH,
+                fill(largeChaos));
 
         if (!useDragonEgg) {
             SlimefunItemStack customEgg = stack(
@@ -142,6 +118,67 @@ public final class DracFunFusionComponentRegistry {
                             gold, new ItemStack(Material.NETHER_STAR), gold,
                             diamond, gold, diamond));
         }
+
+        SlimefunItemStack awakenedBlock = fusionOutput(
+                "DRACFUN_AWAKENED_DRACONIUM_BLOCK",
+                Material.NETHERITE_BLOCK,
+                "&6Awakened Draconium Block",
+                50_000_000);
+        registered += registerFusionSimple(
+                addon, materials, awakenedBlock, hardMode, useDragonEgg);
+
+        SlimefunItemStack awakenedIngot = stack(
+                "DRACFUN_AWAKENED_DRACONIUM_INGOT", Material.NETHERITE_INGOT, "&6Awakened Draconium Ingot");
+        registered += registerUnplaceable(
+                addon,
+                materials,
+                awakenedIngot,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                center(awakenedBlock),
+                awakenedIngot.asQuantity(9));
+
+        SlimefunItemStack awakenedNugget = stack(
+                "DRACFUN_AWAKENED_DRACONIUM_NUGGET", Material.GOLD_NUGGET, "&6Awakened Draconium Nugget");
+        registered += registerUnplaceable(
+                addon,
+                materials,
+                awakenedNugget,
+                RecipeType.ENHANCED_CRAFTING_TABLE,
+                center(awakenedIngot),
+                awakenedNugget.asQuantity(9));
+
+        SlimefunItemStack awakenedCore = fusionOutput(
+                "DRACFUN_AWAKENED_CORE", Material.HEART_OF_THE_SEA, "&6Awakened Core", 1_000_000);
+        registered += registerFusionUnplaceable(
+                addon, materials, awakenedCore, hardMode, useDragonEgg);
+
+        SlimefunItemStack chaoticCore = fusionOutput(
+                "DRACFUN_CHAOTIC_CORE", Material.NETHER_STAR, "&5Chaotic Core", 100_000_000);
+        registered += registerFusionUnplaceable(
+                addon, materials, chaoticCore, hardMode, useDragonEgg);
+
+        SlimefunItemStack wyvernInjector = fusionOutput(
+                "DRACFUN_WYVERN_FUSION_CRAFTING_INJECTOR",
+                Material.AMETHYST_BLOCK,
+                "&dWyvern Fusion Crafting Injector",
+                32_000);
+        SlimefunItemStack draconicInjector = fusionOutput(
+                "DRACFUN_DRACONIC_FUSION_CRAFTING_INJECTOR",
+                Material.RESPAWN_ANCHOR,
+                "&5Draconic Fusion Crafting Injector",
+                256_000);
+        SlimefunItemStack chaoticInjector = fusionOutput(
+                "DRACFUN_CHAOTIC_FUSION_CRAFTING_INJECTOR",
+                Material.CRYING_OBSIDIAN,
+                "&5Chaotic Fusion Crafting Injector",
+                8_000_000);
+
+        registered += registerFusionUnplaceable(
+                addon, machines, wyvernInjector, hardMode, useDragonEgg);
+        registered += registerFusionUnplaceable(
+                addon, machines, draconicInjector, hardMode, useDragonEgg);
+        registered += registerFusionUnplaceable(
+                addon, machines, chaoticInjector, hardMode, useDragonEgg);
 
         return registered;
     }
@@ -211,6 +248,42 @@ public final class DracFunFusionComponentRegistry {
                         gold, draconium, gold,
                         draconium, diamond, draconium,
                         gold, draconium, gold));
+    }
+
+    private static int registerFusionUnplaceable(
+            SFDracFun2 addon,
+            ItemGroup group,
+            SlimefunItemStack item,
+            boolean hardMode,
+            boolean useDragonEgg) {
+        FusionRecipeSpec spec = FusionRecipeCatalog.requireByOutput(
+                hardMode, useDragonEgg, item.getItemId());
+        return registerUnplaceable(
+                addon,
+                group,
+                item,
+                DracFunRecipeTypes.fusion(spec.tier()),
+                spec.toGuideRecipe());
+    }
+
+    private static int registerFusionSimple(
+            SFDracFun2 addon,
+            ItemGroup group,
+            SlimefunItemStack item,
+            boolean hardMode,
+            boolean useDragonEgg) {
+        if (SlimefunItem.getById(item.getItemId()) != null) {
+            return 0;
+        }
+        FusionRecipeSpec spec = FusionRecipeCatalog.requireByOutput(
+                hardMode, useDragonEgg, item.getItemId());
+        new EnergyCorePieceItem(
+                        group,
+                        item,
+                        DracFunRecipeTypes.fusion(spec.tier()),
+                        spec.toGuideRecipe())
+                .register(addon);
+        return 1;
     }
 
     private static ItemStack required(String id) {

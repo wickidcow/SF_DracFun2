@@ -192,6 +192,17 @@ public final class FusionRecipeCatalog {
         return List.copyOf(recipes);
     }
 
+    public static FusionRecipeSpec requireByOutput(
+            boolean hardMode,
+            boolean useDragonEgg,
+            String outputId) {
+        return create(hardMode, useDragonEgg).stream()
+                .filter(recipe -> recipe.outputId().equals(outputId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        "No audited DracFun 2.0.10 Fusion recipe for " + outputId));
+    }
+
     private static FusionRecipeSpec recipe(
             FusionTier tier,
             String outputId,
