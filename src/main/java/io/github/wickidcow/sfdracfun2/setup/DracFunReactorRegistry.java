@@ -7,6 +7,8 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.reactor.ReactorMachine;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -14,8 +16,8 @@ import org.bukkit.inventory.ItemStack;
 /**
  * Restores the observable DracFun 2.0.10 Draconic Reactor crafting progression.
  *
- * <p>Fusion-produced components are registered as real identities with NULL
- * recipes here; their actual acquisition recipes remain in FusionRecipeCatalog.</p>
+ * <p>Fusion-produced components retain their real Fusion Crafter recipe type and
+ * audited 3x3 guide recipe while runtime crafting remains in FusionRecipeCatalog.</p>
  */
 public final class DracFunReactorRegistry {
 
@@ -127,9 +129,9 @@ public final class DracFunReactorRegistry {
                         iron, iron, iron));
 
         // These three components are produced by Chaotic-tier Fusion Crafting.
-        registered += registerUnplaceable(addon, machines, energyInjector, RecipeType.NULL, new ItemStack[9]);
-        registered += registerUnplaceable(addon, machines, stabilizer, RecipeType.NULL, new ItemStack[9]);
-        registered += registerUnplaceable(addon, machines, reactorCore, RecipeType.NULL, new ItemStack[9]);
+        registered += registerFusionUnplaceable(addon, machines, energyInjector, hardMode);
+        registered += registerFusionUnplaceable(addon, machines, stabilizer, hardMode);
+        registered += registerFusionUnplaceable(addon, machines, reactorCore, hardMode);
 
         if (SlimefunItem.getById(reactor.getItemId()) == null) {
             ItemStack[] reactorRecipe = recipe(
@@ -141,6 +143,21 @@ public final class DracFunReactorRegistry {
         }
 
         return registered;
+    }
+
+    private static int registerFusionUnplaceable(
+            SFDracFun2 addon,
+            ItemGroup group,
+            SlimefunItemStack stack,
+            boolean hardMode) {
+        FusionRecipeSpec spec = FusionRecipeCatalog.requireByOutput(
+                hardMode, true, stack.getItemId());
+        return registerUnplaceable(
+                addon,
+                group,
+                stack,
+                DracFunRecipeTypes.fusion(spec.tier()),
+                spec.toGuideRecipe());
     }
 
     private static int registerUnplaceable(
