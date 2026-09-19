@@ -2,6 +2,7 @@ package io.github.wickidcow.sfdracfun2.modular;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -29,12 +30,17 @@ import org.bukkit.potion.PotionEffectType;
  */
 public final class ModularArmorEffectService implements Listener {
 
-    private static final long INITIAL_DELAY_TICKS = 20L;
+    // DracFun 2.0.10 scheduled shield work every 100 ticks and passive
+    // armor effects every 600 ticks. Keep one region-safe 100-tick task and
+    // run the passive portion every sixth pass.
+    private static final long INITIAL_DELAY_TICKS = 100L;
     private static final long PERIOD_TICKS = 100L;
+    private static final int PASSIVE_EVERY_PASSES = 6;
 
     private final SFDracFun2 plugin;
     private final Set<UUID> scheduled = ConcurrentHashMap.newKeySet();
     private final Map<UUID, FlightGrant> flightGrants = new ConcurrentHashMap<>();
+    private final Map<UUID, Integer> passivePasses = new ConcurrentHashMap<>();
     private final Map<UUID, Long> undyingCooldownUntil = new ConcurrentHashMap<>();
     private final Map<UUID, Long> invincibleUntil = new ConcurrentHashMap<>();
 
@@ -52,6 +58,21 @@ public final class ModularArmorEffectService implements Listener {
         schedule(event.getPlayer());
     }
 
+    @EventHandler(ignoreCancelled = true)
+    public void onArmorChange(PlayerArmorChangeEvent event) {
+        Player player = event.getPlayer();
+        ItemStack newItem = event.getNewItem();
+
+        if (newItem != null
+                && !newItem.getType().isAir()
+                && SlimefunItem.getByItem(newItem) instanceof ModularArmorItem) {
+            updateFlight(player, newItem);
+        } else if (event.getOldItem() != null
+                && SlimefunItem.getByItem(event.getOldItem()) instanceof ModularArmorItem) {
+            restoreFlight(player);
+        }
+    }
+
     private void schedule(Player player) {
         UUID uuid = player.getUniqueId();
         if (!scheduled.add(uuid)) {
@@ -64,6 +85,7 @@ public final class ModularArmorEffectService implements Listener {
                 () -> {
                     scheduled.remove(uuid);
                     flightGrants.remove(uuid);
+                    passivePasses.remove(uuid);
                     undyingCooldownUntil.remove(uuid);
                     invincibleUntil.remove(uuid);
                 },
@@ -82,7 +104,12 @@ public final class ModularArmorEffectService implements Listener {
             return;
         }
 
-        applyPassiveEffects(player, armor);
+        int pass = passivePasses.merge(player.getUniqueId(), 1, Integer::sum);
+        if (pass >= PASSIVE_EVERY_PASSES) {
+            passivePasses.put(player.getUniqueId(), 0);
+            applyPassiveEffects(player, armor);
+        }
+
         updateFlight(player, armor);
         regenerateShield(armor);
 
@@ -118,12 +145,16 @@ public final class ModularArmorEffectService implements Listener {
             return;
         }
 
+        boolean newlyGranted = !flightGrants.containsKey(uuid);
         flightGrants.computeIfAbsent(
                 uuid,
                 ignored -> new FlightGrant(player.getAllowFlight(), player.getFlySpeed()));
 
         player.setAllowFlight(true);
         player.setFlySpeed(clampFlightSpeed(flight / 1000.0F));
+        if (newlyGranted) {
+            player.setFlying(true);
+        }
     }
 
     private void restoreFlight(Player player) {
@@ -340,9 +371,10 @@ public final class ModularArmorEffectService implements Listener {
             return;
         }
 
+        player.removePotionEffect(type);
         player.addPotionEffect(new PotionEffect(
                 type,
-                140,
+                600,
                 Math.max(0, amplifier),
                 true,
                 false,
