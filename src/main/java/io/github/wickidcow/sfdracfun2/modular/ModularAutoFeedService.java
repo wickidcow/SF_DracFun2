@@ -69,7 +69,10 @@ public final class ModularAutoFeedService implements Listener {
         Player player = event.getPlayer();
         ItemStack food = player.getInventory().getItemInOffHand();
         Integer foodPoints = FOOD_POINTS.get(food.getType());
-        if (foodPoints == null || foodPoints <= 0 || food.getAmount() <= 0) {
+        if (!food.getType().isEdible()
+                || foodPoints == null
+                || foodPoints <= 0
+                || food.getAmount() <= 0) {
             return;
         }
 
@@ -172,6 +175,7 @@ public final class ModularAutoFeedService implements Listener {
         foods.put(Material.BEETROOT, 1);
         foods.put(Material.BEETROOT_SOUP, 6);
         foods.put(Material.BREAD, 5);
+        foods.put(Material.CAKE, 14);
         foods.put(Material.CARROT, 3);
         foods.put(Material.CHORUS_FRUIT, 4);
         foods.put(Material.COOKED_CHICKEN, 6);
@@ -186,6 +190,7 @@ public final class ModularAutoFeedService implements Listener {
         foods.put(Material.GOLDEN_CARROT, 6);
         foods.put(Material.HONEY_BOTTLE, 6);
         foods.put(Material.MELON_SLICE, 2);
+        foods.put(Material.MUSHROOM_STEM, 6);
         foods.put(Material.POTATO, 1);
         foods.put(Material.PUMPKIN_PIE, 8);
         foods.put(Material.RABBIT_STEW, 10);
