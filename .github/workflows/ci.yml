@@ -287,20 +287,21 @@ jobs:
         run: |
           set -euo pipefail
           GUIDE=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunItemGroups.java
+          grep -Fq 'String main = ChatColor.DARK_PURPLE + "DracFun"' "$GUIDE"
           grep -Fq 'Material.NETHERITE_INGOT' "$GUIDE"
-          grep -Fq 'DracFun Materials' "$GUIDE"
+          grep -Fq 'ChatColor.GREEN + "Materials"' "$GUIDE"
           grep -Fq 'Material.BEACON' "$GUIDE"
-          grep -Fq 'DracFun Energy Core' "$GUIDE"
-          grep -Fq 'Material.IRON_CHESTPLATE' "$GUIDE"
-          grep -Fq 'Wyvern Gear' "$GUIDE"
-          grep -Fq 'Draconic Gear' "$GUIDE"
-          grep -Fq 'Material.NETHER_STAR' "$GUIDE"
-          grep -Fq 'Chaotic Gear' "$GUIDE"
-          grep -Fq 'DracFun Modules' "$GUIDE"
-          grep -Fq 'Material.REDSTONE_TORCH' "$GUIDE"
-          grep -Fq 'DracFun Electric' "$GUIDE"
+          grep -Fq 'ChatColor.RED + "EnergyCore"' "$GUIDE"
+          grep -Fq 'Material.LEATHER_HELMET' "$GUIDE"
+          grep -Fq 'ChatColor.DARK_PURPLE + "WyvernGear"' "$GUIDE"
+          grep -Fq 'ChatColor.GOLD + "DraconicGear"' "$GUIDE"
+          grep -Fq 'Color.BLACK' "$GUIDE"
+          grep -Fq 'ChatColor.DARK_GRAY + "ChaoticGear"' "$GUIDE"
+          grep -Fq 'ChatColor.AQUA + "Modules"' "$GUIDE"
           grep -Fq 'Material.RESPAWN_ANCHOR' "$GUIDE"
-          grep -Fq 'Draconic Reactor' "$GUIDE"
+          grep -Fq 'ChatColor.YELLOW + "Electric"' "$GUIDE"
+          grep -Fq 'Material.CRYING_OBSIDIAN' "$GUIDE"
+          grep -Fq 'ChatColor.GOLD + "Reactor"' "$GUIDE"
 
       - name: Verify original modular registration themes
         shell: bash
