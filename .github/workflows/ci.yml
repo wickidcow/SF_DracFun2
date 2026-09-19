@@ -56,11 +56,11 @@ jobs:
             exit 1
           fi
 
-      - name: Verify exact DracFun 2.0.20 runtime IDs
+      - name: Verify exact DracFun 2.0.10 runtime IDs
         shell: bash
         run: |
           set -euo pipefail
-          # Verified from DracFun 2.0.20 bytecode:
+          # Verified from DracFun 2.0.10 bytecode:
           # ModuleTier.createModule = <family key>_<tier>_MODULE
           # GearType.createItem = DRACFUN_<tier>_<gear type>
           grep -R -Fq 'DRACFUN_AOE_BASIC_MODULE' src/main
@@ -105,7 +105,7 @@ jobs:
           grep -Fq 'menu.consumeItem(input, 1, true);' "$FUSION"
           grep -Fq 'findRecipeByOutput(outputId)' "$FUSION"
           if grep -Fq 'Cancelled: inputs changed' "$FUSION"; then
-            echo 'Fusion still uses Reborn reservation/cancellation semantics instead of 2.0.20 commit-at-start behavior.' >&2
+            echo 'Fusion still uses Reborn reservation/cancellation semantics instead of 2.0.10 commit-at-start behavior.' >&2
             exit 1
           fi
 
@@ -360,7 +360,7 @@ jobs:
             exit 1
           fi
 
-      - name: Verify restored DracFun 2.0.20 runtime behavior
+      - name: Verify restored DracFun 2.0.10 runtime behavior
         shell: bash
         run: |
           set -euo pipefail
@@ -516,7 +516,7 @@ jobs:
             exit 1
           fi
 
-      - name: Verify exact DracFun 2.0.20 recipe parity
+      - name: Verify exact DracFun 2.0.10 recipe parity
         shell: bash
         run: |
           set -euo pipefail
