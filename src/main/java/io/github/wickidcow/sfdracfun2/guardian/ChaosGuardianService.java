@@ -261,9 +261,7 @@ public final class ChaosGuardianService implements Listener {
                 PersistentDataType.INTEGER,
                 crystals.size());
 
-        snapshotParticipants(
-                        dragon,
-                        new Location(dragon.getWorld(), 0D, 0D, 0D));
+        snapshotParticipants(dragon, dragon.getLocation());
 
         for (EnderCrystal crystal : crystals) {
             Slimefun.runSyncFor(crystal, () -> {
@@ -353,7 +351,7 @@ public final class ChaosGuardianService implements Listener {
                     }
 
                     Vector direction = target.toVector()
-                            .subtract(dragon.getEyeLocation().toVector())
+                            .subtract(dragon.getLocation().toVector())
                             .normalize();
                     dragon.launchProjectile(DragonFireball.class, direction);
                 });
