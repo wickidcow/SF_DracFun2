@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.fusion.LegacyModularFusionRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.modular.GearType;
@@ -29,6 +30,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.inventory.EquipmentSlotGroup;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
@@ -105,11 +107,10 @@ public final class DracFunModularRegistry {
         ItemStack draconium = requiredItem(
                 hardMode ? "DRACFUN_DRACONIUM_BLOCK" : "DRACFUN_DRACONIUM_INGOT");
 
-        SlimefunItemStack stack = new SlimefunItemStack(
+        SlimefunItemStack stack = LegacyTheme.BASIC_MODULAR.stack(
                 id,
                 Material.HEART_OF_THE_SEA,
-                "&dModule Core",
-                "&7Foundation component for DracFun modular upgrades.");
+                "Module Core");
 
         new UnplaceableBlock(
                         group,
@@ -135,8 +136,25 @@ public final class DracFunModularRegistry {
         }
 
         ItemStack base = new ItemStack(materialFor(type, tier));
-        ItemMeta meta = base.getItemMeta();
-        meta.setDisplayName(colorForTier(tier) + tierName(tier) + ' ' + displayName(type));
+        if (base.getItemMeta() instanceof LeatherArmorMeta leather) {
+            leather.setColor(switch (tier) {
+                case 1 -> Color.PURPLE;
+                case 2 -> Color.ORANGE;
+                case 3 -> Color.BLACK;
+                default -> Color.WHITE;
+            });
+            base.setItemMeta(leather);
+        }
+
+        LegacyTheme theme = modularTheme(tier);
+        List<String> originalLore = LegacyModularLore.defaultGearLore(type, tier);
+        SlimefunItemStack stack = theme.stack(
+                id,
+                base,
+                tierName(tier) + " Modular " + displayName(type),
+                originalLore.toArray(String[]::new));
+
+        ItemMeta meta = stack.getItemMeta();
         meta.setUnbreakable(true);
         meta.getPersistentDataContainer().set(LegacyDracFunKeys.ENERGY, PersistentDataType.INTEGER, 0);
         meta.getPersistentDataContainer().set(LegacyDracFunKeys.CAPACITY, PersistentDataType.INTEGER, 0);
@@ -145,19 +163,12 @@ public final class DracFunModularRegistry {
                 PersistentDataType.INTEGER,
                 fusionPowerForTier(tier));
 
-        meta.setLore(LegacyModularLore.defaultGearLore(type, tier));
-
-        if (meta instanceof LeatherArmorMeta leather) {
-            leather.setColor(switch (tier) {
-                case 1 -> Color.PURPLE;
-                case 2 -> Color.ORANGE;
-                case 3 -> Color.BLACK;
-                default -> Color.WHITE;
-            });
+        if (meta instanceof LeatherArmorMeta) {
             addArmorAttributes(addon, meta, tier);
         } else {
             addToolAttributes(addon, meta, type, tier);
         }
+        stack.setItemMeta(meta);
 
         FusionRecipeSpec fusionRecipe = gearFusionRecipes.stream()
                 .filter(spec -> spec.outputId().equals(id))
@@ -166,9 +177,6 @@ public final class DracFunModularRegistry {
                         "Missing audited Fusion guide recipe for " + id));
         RecipeType fusionRecipeType = DracFunRecipeTypes.fusion(fusionRecipe.tier());
         ItemStack[] guideRecipe = fusionRecipe.toGuideRecipe();
-
-        base.setItemMeta(meta);
-        SlimefunItemStack stack = new SlimefunItemStack(id, base);
         if (type == GearType.ARMOR) {
             new ModularArmorItem(group, stack, tier, fusionRecipeType, guideRecipe).register(addon);
         } else if (type == GearType.SWORD || type == GearType.STAFF) {
@@ -263,11 +271,14 @@ public final class DracFunModularRegistry {
             return 0;
         }
 
-        SlimefunItemStack stack = new SlimefunItemStack(
+        ItemStack moduleIcon = new ItemStack(materialFor(tier));
+        moduleIcon.addItemFlags(ItemFlag.HIDE_ITEM_SPECIFICS);
+        List<String> originalLore = LegacyModularLore.moduleLore(family, tier);
+        SlimefunItemStack stack = moduleTheme(tier).stack(
                 id,
-                materialFor(tier),
-                colorForModule(tier) + moduleTierName(tier) + ' ' + moduleName(family) + " Module",
-                LegacyModularLore.moduleLore(family, tier).toArray(String[]::new));
+                moduleIcon,
+                moduleTierName(tier) + ' ' + moduleName(family) + " Module",
+                originalLore.toArray(String[]::new));
         new ModuleItem(
                         group,
                         stack,
@@ -292,12 +303,10 @@ public final class DracFunModularRegistry {
         ItemStack moduleCore = requiredItem("DRACFUN_MODULE_CORE");
         ItemStack draconicCore = requiredItem("DRACFUN_DRACONIC_CORE");
 
-        SlimefunItemStack stack = new SlimefunItemStack(
+        SlimefunItemStack stack = LegacyTheme.MACHINE.stack(
                 id,
-                Material.SMITHING_TABLE,
-                "&dModule Integrator",
-                "&7Installs compatible modules into DracFun modular gear.",
-                "&7Can also remove all installed modules safely.");
+                Material.LODESTONE,
+                "Module Integrater");
         new ModuleIntegratorMachine(
                         group,
                         stack,
@@ -360,28 +369,28 @@ public final class DracFunModularRegistry {
 
     private static Material materialFor(ModuleTier tier) {
         return switch (tier) {
-            case BASIC -> Material.REDSTONE;
-            case WYVERN -> Material.AMETHYST_SHARD;
-            case DRACONIC -> Material.ECHO_SHARD;
-            case CHAOTIC -> Material.NETHER_STAR;
+            case BASIC -> Material.MUSIC_DISC_WAIT;
+            case WYVERN -> Material.MUSIC_DISC_MALL;
+            case DRACONIC -> Material.MUSIC_DISC_13;
+            case CHAOTIC -> Material.MUSIC_DISC_STAL;
         };
     }
 
-    private static ChatColor colorForTier(int tier) {
+    private static LegacyTheme modularTheme(int tier) {
         return switch (tier) {
-            case 1 -> ChatColor.LIGHT_PURPLE;
-            case 2 -> ChatColor.GOLD;
-            case 3 -> ChatColor.DARK_PURPLE;
-            default -> ChatColor.WHITE;
+            case 1 -> LegacyTheme.WYVERN_MODULAR;
+            case 2 -> LegacyTheme.DRACONIC_MODULAR;
+            case 3 -> LegacyTheme.CHAOTIC_MODULAR;
+            default -> throw new IllegalArgumentException("Gear tier must be 1-3, got " + tier);
         };
     }
 
-    private static ChatColor colorForModule(ModuleTier tier) {
+    private static LegacyTheme moduleTheme(ModuleTier tier) {
         return switch (tier) {
-            case BASIC -> ChatColor.WHITE;
-            case WYVERN -> ChatColor.LIGHT_PURPLE;
-            case DRACONIC -> ChatColor.GOLD;
-            case CHAOTIC -> ChatColor.DARK_PURPLE;
+            case BASIC -> LegacyTheme.BASIC_MODULAR;
+            case WYVERN -> LegacyTheme.WYVERN_MODULAR;
+            case DRACONIC -> LegacyTheme.DRACONIC_MODULAR;
+            case CHAOTIC -> LegacyTheme.CHAOTIC_MODULAR;
         };
     }
 
