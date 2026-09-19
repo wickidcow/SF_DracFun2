@@ -109,6 +109,18 @@ jobs:
             exit 1
           fi
 
+      - name: Verify audited Reactor cycle parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATE=src/main/java/io/github/wickidcow/sfdracfun2/reactor/ReactorState.java
+          REACTOR=src/main/java/io/github/wickidcow/sfdracfun2/reactor/ReactorMachine.java
+          grep -Fq 'REBORN_PROGRESS_MIGRATED' "$STATE"
+          grep -Fq 'boolean chargedCycle = ReactorState.progress(data) >= 0;' "$REACTOR"
+          grep -Fq 'if (!chargedCycle)' "$REACTOR"
+          grep -Fq 'ReactorState.bool(data, ReactorState.REBORN_PROGRESS_MIGRATED, true);' "$REACTOR"
+          grep -Fq 'ReactorState.progress(data, clampInt(Math.max(1L, reactable) * 120L));' "$REACTOR"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
