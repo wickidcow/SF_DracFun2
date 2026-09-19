@@ -91,8 +91,7 @@ public final class DracFunItemGroups {
         SlimefunItemStack guideIcon = new SlimefunItemStack(
                 "DRACFUN_GUIDE",
                 Material.DRAGON_HEAD,
-                "&5DracFun",
-                "&7DracFun 2.0.10 progression restored for Slimefun Legacy.");
+                "&5DracFun");
 
         dracFun = new NestedItemGroup(
                 new NamespacedKey(addon, "dracfun_nested"),
