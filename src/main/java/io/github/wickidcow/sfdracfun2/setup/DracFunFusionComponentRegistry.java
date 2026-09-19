@@ -7,7 +7,8 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
-import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;\nimport io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
+import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
+import io.github.wickidcow.sfdracfun2.compat.LegacyTheme;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
@@ -345,7 +346,7 @@ public final class DracFunFusionComponentRegistry {
     }
 
     private static SlimefunItemStack fusionOutput(
-            String id, Material material, String name, int fusionPower) {
+            LegacyTheme theme, String id, Material material, String name, int fusionPower) {
         SlimefunItemStack stack = theme.stack(id, material, name);
         ItemMeta meta = stack.getItemMeta();
         meta.getPersistentDataContainer().set(
