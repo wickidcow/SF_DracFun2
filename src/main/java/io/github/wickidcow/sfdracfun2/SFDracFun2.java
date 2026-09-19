@@ -2,6 +2,7 @@ package io.github.wickidcow.sfdracfun2;
 
 import io.github.thebusybiscuit.slimefun4.api.SlimefunAddon;
 import io.github.wickidcow.sfdracfun2.compat.LegacyCompatibilityRegistry;
+import io.github.wickidcow.sfdracfun2.compat.LegacyConfigMigration;
 import io.github.wickidcow.sfdracfun2.modular.CapacitorService;
 import io.github.wickidcow.sfdracfun2.modular.ModularArmorEffectService;
 import io.github.wickidcow.sfdracfun2.modular.ModularAutoFeedService;
@@ -43,6 +44,7 @@ public final class SFDracFun2 extends JavaPlugin implements SlimefunAddon {
         }
 
         saveDefaultConfig();
+        LegacyConfigMigration.migrateStagedDefaults(this);
 
         getLogger().info("SF_DracFun2 clean-room compatibility layer starting.");
         getLogger().info("Legacy compatibility target: DracFun " + LEGACY_DRACFUN_VERSION);
