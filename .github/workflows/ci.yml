@@ -360,6 +360,44 @@ jobs:
             exit 1
           fi
 
+      - name: Verify restored DracFun 2.0.10 runtime behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          MOD=src/main/java/io/github/wickidcow/sfdracfun2/modular/ModuleIntegratorMachine.java
+          FUSION=src/main/java/io/github/wickidcow/sfdracfun2/fusion/FusionCrafterMachine.java
+          INFUSER=src/main/java/io/github/wickidcow/sfdracfun2/machines/EnergyInfuserMachine.java
+          GUARD=src/main/java/io/github/wickidcow/sfdracfun2/guardian/ChaosGuardianService.java
+          REACTOR=src/main/java/io/github/wickidcow/sfdracfun2/reactor/ReactorMachine.java
+          CONFIG=src/main/resources/config.yml
+
+          grep -Fq 'Place your item on the left and modifier on the right!' "$MOD"
+          grep -Fq 'Click to Integrate!' "$MOD"
+          grep -Fq 'Unable to integrate module due to occupied output slot!' "$MOD"
+          grep -Fq 'Module integration is restricted to modular items exclusively!' "$MOD"
+          grep -Fq 'Invalid Module!' "$MOD"
+          grep -Fq 'This module is incompatible with the specified item type!' "$MOD"
+          grep -Fq 'The module surpasses the capabilities of the designated item!' "$MOD"
+          grep -Fq 'Unable to remove modules. Ensure all output slots are empty before proceeding!' "$MOD"
+
+          grep -Fq 'dracfun:dracfun.fusion_rotation' "$FUSION"
+          grep -Fq 'dracfun:dracfun.fusion_complete' "$FUSION"
+          grep -Fq 'dracfun:dracfun.electric_buzz' "$INFUSER"
+
+          grep -Fq 'In this realm, the invocation of the Chaos Guardian is strictly forbidden.' "$GUARD"
+          grep -Fq 'Did you, a mere mortal, truly believe that you could contend with the Guardian in such armor?' "$GUARD"
+          grep -Fq 'dracfun:dracfun.chaos_chamber_ambient' "$GUARD"
+          grep -Fq 'May luck guide you to triumph in the midst of chaos!' "$GUARD"
+          grep -Fq 'ThreadLocalRandom.current().nextInt(6, 12) + 6' "$GUARD"
+          grep -Fq 'dracfun:dracfun.beam' "$GUARD"
+          grep -Fq 'FluidCollisionMode.NEVER' "$GUARD"
+          grep -Fq 'A sturdier armor might have shielded you.' "$GUARD"
+          grep -Fq 'for (int i = 0; i <= ThreadLocalRandom.current().nextInt(3, 6); i++)' "$GUARD"
+
+          grep -Fq 'new IntRangeSetting(this, "explosion-on-break", 0, 4, 10)' "$REACTOR"
+          grep -Fq 'new DoubleRangeSetting(this, "explosion-multiplier", 0D, 0.25D, 1D)' "$REACTOR"
+          grep -Fq 'wither-minion-lifetime-ticks: 0' "$CONFIG"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
