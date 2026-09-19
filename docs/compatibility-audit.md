@@ -44,11 +44,11 @@ The old binary exposes systems for:
 - Draconic Reactor
 - Chaos Guardian encounter/invocation
 
-These systems will be restored independently so a failure in one subsystem does not prevent the rest of the addon from enabling.
+These systems are restored independently so a failure or intentional feature toggle in one subsystem does not prevent the rest of the addon from enabling.
 
 ## Identity audit details
 
-- `DRACFUN_GUIDE` is the legacy Slimefun guide/category icon identity, not a normal craftable item. SF_DracFun2 uses it as the icon for one shared `DracFun` ItemGroup and excludes it from inert placeholder registration.
+- `DRACFUN_GUIDE` is a real legacy Slimefun **BOOK** item. Reborn registers that book as an actual item and uses a separate identity-neutral icon for the nested `DracFun` guide parent so the item ID is not duplicated on the category icon.
 
 Not every Java field name in the old binary is the actual persisted Slimefun ID. Two generated families matter for migration:
 
@@ -75,7 +75,7 @@ A source-level coverage pass now accounts for every identity in `LegacyIdentityC
 - 56 module IDs are generated from every supported `ModuleFamily` / `ModuleTier` combination.
 - 3 Energy Core activator IDs are supplied by `EnergyCoreTier`.
 - 4 Fusion Crafter IDs are supplied by `FusionTier`.
-- `DRACFUN_GUIDE` is intentionally the shared guide-category icon identity rather than a normal Slimefun item.
+- `DRACFUN_GUIDE` is registered as the real legacy Guide book; the nested guide parent uses a separate plain icon.
 
 Total accounted legacy 2.0.10 identity surface: **134 / 134**. Feature toggles can still intentionally leave disabled subsystems represented by hidden compatibility placeholders at runtime.
 
@@ -87,7 +87,7 @@ Reborn preserves the same fallback through Slimefun Legacy's maintained `CustomI
 
 ### Runtime identity self-audit
 
-After feature registration and optional placeholder registration, Reborn performs a startup audit of the complete legacy identity surface. The audit reports the number of registered non-placeholder items, hidden placeholders, whether the `DRACFUN_GUIDE` category identity is present, and how many of the three pre-2.0.10 armor migration aliases are registered. With `compatibility.preserve-legacy-ids: true`, anything short of 134/134 legacy identities or 3/3 migration aliases produces a warning. When all restored feature flags are enabled, the audit also verifies that compatibility placeholders are not masking a subsystem registration failure. The only expected placeholder on the 134-ID main surface is `DRACFUN_DRAGON_EGG` when `options.use-dragon-egg: true` selects the vanilla Dragon Egg; the three older chestplate aliases are audited separately.
+After feature registration and optional placeholder registration, Reborn performs a startup audit of the complete legacy identity surface. The audit reports the number of registered non-placeholder items, hidden placeholders, whether the nested DracFun guide category is present, and how many of the three pre-2.0.10 armor migration aliases are registered. With `compatibility.preserve-legacy-ids: true`, anything short of 134/134 legacy identities or 3/3 migration aliases produces a warning. When all restored feature flags are enabled, the audit also verifies that compatibility placeholders are not masking a subsystem registration failure. The only expected placeholder on the 134-ID main surface is `DRACFUN_DRAGON_EGG` when `options.use-dragon-egg: true` selects the vanilla Dragon Egg; the three older chestplate aliases are audited separately.
 
 The Module Integrator and Item Converter both use the shared fail-closed `ProtectionCompat` bridge rather than maintaining separate reflective protection implementations.
 
@@ -139,18 +139,33 @@ AUTO_FEED also uses the separate family key `DRACFUN_AUTO_FEED` as a buffered-fo
 - When a food-level change would reach 12 or lower, the chestplate feeds the player from the buffer and plays the legacy burp sound.
 - On starvation damage, the chestplate feeds the player from the buffer but does not cancel the current starvation hit.
 - Reborn preserves offhand item metadata when consuming only part of a food stack; the old implementation rebuilt leftovers from material/amount and could discard metadata.
+- The 2.0.10 food lookup table is preserved together with its `Material.isEdible()` gate, including the legacy `CAKE = 14` and `MUSHROOM_STEM = 6` entries even though that gate makes those unusual entries non-actionable in normal use.
 
-### Energy Core and Guardian safety corrections
+### Energy Core safety correction and Guardian legacy behavior
 
 The Energy Core keeps 2.0.10's multiblock layouts and capacities, but replaces the old global `notComplete` flag with per-activator state. Because Slimefun Legacy's capacitor path does not consult `isEnergyNetActive()`, Reborn validates at the actual charge read/write boundary as well as from its synchronized ticker. The result is cached in memory for the current game tick (never written as per-tick block data): a known broken structure returns zero supply, rejects new charge, and clears stored charge, while an `UNKNOWN` validation caused only by unloaded neighboring data retains the last-known state and never destroys charge. The in-memory cache entry is removed when the activator is broken.
 
-Chaos Guardian crystal cages are terrain-safe in both directions. Reborn only places cage blocks into air, records the exact coordinates and materials it created, persists that record on the crystal for restart recovery, and removes only those exact unchanged blocks during cleanup. Pre-existing/player blocks in the cage shell are never deleted by the cleanup pass.
+Chaos Guardian crystal cages default to the observable DracFun 2.0.10 behavior: the full 5×5×5 cage volume is filled with iron bars and the top layer is replaced with an obsidian/crying-obsidian mix. Legacy behavior can overwrite existing blocks and leaves cages behind after the fight. Servers that prefer cleanup can enable `guardian.cleanup-crystal-cages: true`; Reborn tracks blocks that were originally air so cleanup does not blindly delete unrelated replacements.
 
-### 2.0.1 default feature set
+### 2.0.2 default feature set
 
-The restoration-era configuration originally left Energy Infuser, Item Converter, Fusion Crafting, modular gear, Energy Core, Reactor and Chaos Guardian disabled while those systems were being implemented. DracFun Reborn 2.0.1 now enables the complete restored feature set on fresh configurations. All feature flags remain independent and existing explicit server configuration values are never overwritten.
+The restoration-era configuration originally left Energy Infuser, Item Converter, Fusion Crafting, modular gear, Energy Core, Reactor and Chaos Guardian disabled while those systems were being implemented. DracFun Reborn 2.0.2 enables the complete restored feature set on fresh configurations. All feature flags remain independent and existing explicit server configuration values are never overwritten.
 
 The release workflow verifies that the packaged `config.yml` has all nine restored feature flags enabled, in addition to the existing cross-platform compilation, clean-room boundary and raw-JAR checks. Main-branch/tag builds also boot a real Paper 26.2 server with Slimefun Legacy 4.1.51 and the built JAR; the smoke test requires a completed server startup plus the exact 134/134 main identity and 3/3 migration-alias audit.
+
+### Legacy-exact defaults and intentional modern corrections
+
+DracFun Reborn 2.0.2 defaults to observable 2.0.10 behavior where doing so is compatible with modern servers. That includes several legacy quirks: the Chaos Orb is consumed before the armor check, the original unarmored Guardian punishment is retained, Guardian Withers have no forced lifetime by default, and Arrow Penetration preserves 2.0.10's integer-division bug by default. Set `compatibility.fix-broken-arrow-penetration: true` to opt into Reborn's corrected Bukkit pierce behavior.
+
+Implementation defects that would cause cross-machine corruption, unsafe threading, restart loss, or modern protection bypass are intentionally not reproduced:
+
+- Energy Core completeness is stored per activator instead of the original global static `notComplete` flag.
+- Player/entity/inventory work uses Paper/Folia-safe schedulers rather than asynchronous Bukkit mutation.
+- Fusion still commits inputs/energy at start like 2.0.10, but the pending output is persisted so restart/chunk unload cannot lose an already-paid result.
+- Extra AOE/HARVEST mutations avoid protected, custom, or Slimefun blocks and are dispatched through region-safe scheduling.
+- Removing modular flight restores the player's previous flight permission/speed instead of forcibly disabling flight granted by another system or game mode.
+- The Reactor retains the original per-item explosion settings/formulas while applying a configurable modern explosion-power ceiling.
+- Optional Guardian cage/Wither cleanup controls remain available even though fresh defaults follow the legacy encounter.
 
 ## Confirmed modern compatibility breakpoints
 
