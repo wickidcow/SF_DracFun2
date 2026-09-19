@@ -18,11 +18,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import org.bukkit.ChatColor;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
@@ -138,32 +140,19 @@ public final class ChaosGuardianService implements Listener {
         World world = player.getWorld();
         if (world.getEnvironment() != World.Environment.THE_END) {
             player.sendMessage(ChatColor.RED
-                    + "The Chaos Guardian can only be invoked in The End.");
+                    + "In this realm, the invocation of the Chaos Guardian is strictly forbidden.");
             return false;
         }
 
         DragonBattle battle = world.getEnderDragonBattle();
-        if (battle == null) {
-            player.sendMessage(ChatColor.RED
-                    + "This End world does not expose a dragon battle.");
+        if (battle == null || battle.getEnderDragon() != null) {
+            // DracFun 2.0.10 silently ignored invocation while no battle existed
+            // or while an Ender Dragon was already active.
             return false;
         }
 
-        if (battle.getEnderDragon() != null) {
-            player.sendMessage(ChatColor.RED
-                    + "A dragon battle is already active in this End world.");
-            return false;
-        }
-
+        // Retain Reborn's duplicate-invocation guard, but keep the legacy path silent.
         if (pendingWorlds.contains(world.getUID())) {
-            player.sendMessage(ChatColor.YELLOW
-                    + "A Chaos Guardian invocation is already in progress.");
-            return false;
-        }
-
-        if (!isWearingModularArmor(player)) {
-            player.sendMessage(ChatColor.RED
-                    + "The Chaos Guardian rejects challengers without DracFun modular armor.");
             return false;
         }
 
@@ -171,24 +160,34 @@ public final class ChaosGuardianService implements Listener {
             return false;
         }
 
+        // Exact 2.0.10 ordering: consume the orb before checking modular armor.
         invocationItem.setAmount(invocationItem.getAmount() - 1);
-        pendingWorlds.add(world.getUID());
+
+        if (!isWearingModularArmor(player)) {
+            player.sendMessage(ChatColor.RED
+                    + "Did you, a mere mortal, truly believe that you could contend with the Guardian in such armor?");
+            player.setHealth(0D);
+            return false;
+        }
 
         player.playSound(
                 player.getLocation(),
-                Sound.ENTITY_ENDER_DRAGON_GROWL,
-                2F,
-                0.65F);
-        player.sendMessage(ChatColor.DARK_PURPLE
-                + "The End begins to answer the Chaos Orb...");
+                "dracfun:dracfun.chaos_chamber_ambient",
+                SoundCategory.AMBIENT,
+                3F,
+                3F);
 
+        pendingWorlds.add(world.getUID());
         Location owner = world.getSpawnLocation();
+
         Slimefun.runSyncAt(owner, () -> {
             if (!plugin.isEnabled()) {
                 pendingWorlds.remove(world.getUID());
                 return;
             }
             initiateRespawn(battle);
+            player.sendMessage(ChatColor.GREEN
+                    + "May luck guide you to triumph in the midst of chaos!");
         }, 600L);
 
         Slimefun.runSyncAt(owner, () -> initializeWhenReady(world, battle, 0), 1260L);
@@ -305,7 +304,7 @@ public final class ChaosGuardianService implements Listener {
     }
 
     private void basicAttack(EnderDragon dragon, Player player) {
-        int shots = ThreadLocalRandom.current().nextInt(6, 12);
+        int shots = ThreadLocalRandom.current().nextInt(6, 12) + 6;
         for (int i = 0; i < shots; i++) {
             long delay = (long) i * 4L;
             Slimefun.runSyncFor(player, () -> {
@@ -370,15 +369,35 @@ public final class ChaosGuardianService implements Listener {
                     return;
                 }
 
+                Location dragonLocation = dragon.getLocation();
+                Vector direction = player.getLocation()
+                        .toVector()
+                        .subtract(dragonLocation.toVector())
+                        .normalize();
+                var trace = player.getWorld().rayTraceBlocks(
+                        dragonLocation,
+                        direction,
+                        256D,
+                        FluidCollisionMode.NEVER,
+                        true);
+                if (trace == null
+                        || (trace.getHitBlock() != null
+                                && trace.getHitBlock().getType() == Material.OBSIDIAN)) {
+                    return;
+                }
+
+                spawnLegacyLaser(player.getWorld(), dragonLocation, player.getLocation());
+
                 double damage = Math.min(laserDamageCap, pulse * 250D);
                 player.damage(damage);
-                player.getWorld().createExplosion(player.getLocation(), 5.0F, false, false);
-                player.getWorld().spawnParticle(Particle.FLAME, player.getLocation(), 24);
+                player.getLocation().createExplosion(5.0F, false, false);
+                spawnLegacyHugeExplosion(player, 3);
                 player.playSound(
                         player.getLocation(),
-                        Sound.ENTITY_GENERIC_EXPLODE,
-                        1.25F,
-                        1.6F);
+                        "dracfun:dracfun.beam",
+                        SoundCategory.BLOCKS,
+                        3F,
+                        3F);
             }, 60L + (long) i * 10L);
         }
 
@@ -418,8 +437,7 @@ public final class ChaosGuardianService implements Listener {
     }
 
     private void witherAttack(EnderDragon dragon, Player player) {
-        int count = ThreadLocalRandom.current().nextInt(3, 6);
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i <= ThreadLocalRandom.current().nextInt(3, 6); i++) {
             Location spawn = player.getLocation().clone().add(
                     ThreadLocalRandom.current().nextInt(-4, 4),
                     ThreadLocalRandom.current().nextInt(0, 4),
@@ -561,13 +579,8 @@ public final class ChaosGuardianService implements Listener {
         }
 
         player.damage(500D);
-        player.getWorld().createExplosion(player.getLocation(), 5.0F, false, false);
-        player.getWorld().spawnParticle(Particle.FLAME, player.getLocation(), 32);
-        player.playSound(
-                player.getLocation(),
-                Sound.ENTITY_GENERIC_EXPLODE,
-                1.25F,
-                0.75F);
+        player.getLocation().createExplosion(5.0F, false, false);
+        spawnLegacyHugeExplosion(player, 3);
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -608,7 +621,8 @@ public final class ChaosGuardianService implements Listener {
                 }
 
                 player.sendMessage(ChatColor.RED
-                        + "The collapsing Chaos battle overwhelms your unprotected armor.");
+                        + "As the Chaos Island crumbled, it enveloped you, burying you alive! "
+                        + "A sturdier armor might have shielded you. Here's to better luck on your next endeavor!");
                 player.setHealth(0D);
             });
         }
@@ -799,6 +813,33 @@ public final class ChaosGuardianService implements Listener {
     }
 
     private record CageBlock(int x, int y, int z) {}
+
+    private static void spawnLegacyLaser(World world, Location start, Location end) {
+        double step = start.distance(end) / 64D;
+        Vector direction = end.toVector().subtract(start.toVector()).normalize();
+        for (int i = 0; i < 64; i++) {
+            Location point = start.clone().add(direction.clone().multiply(i * step));
+            world.spawnParticle(Particle.FLAME, point, 3);
+        }
+    }
+
+    private static void spawnLegacyHugeExplosion(Player player, int count) {
+        Particle particle = particleByName("EXPLOSION_HUGE", "EXPLOSION_EMITTER", "EXPLOSION");
+        if (particle != null) {
+            player.spawnParticle(particle, player.getLocation(), count);
+        }
+    }
+
+    private static Particle particleByName(String... names) {
+        for (String name : names) {
+            try {
+                return Particle.valueOf(name);
+            } catch (IllegalArgumentException ignored) {
+                // Try the next cross-version particle name.
+            }
+        }
+        return null;
+    }
 
     private static boolean canBreakCrystal(Player player) {
         SlimefunItem item = SlimefunItem.getByItem(player.getInventory().getItemInMainHand());
