@@ -24,12 +24,15 @@ public final class DracFunMaterialRegistry {
         int registered = 0;
 
         if (SlimefunItem.getById("DRACFUN_GUIDE") == null) {
-            SlimefunItemStack guide = new SlimefunItemStack(
+            SlimefunItemStack guide = LegacyTheme.BASIC_CRAFTING.stack(
                     "DRACFUN_GUIDE",
                     Material.BOOK,
-                    "&5DracFun Guide",
-                    "&7Currently just a placeholder item for future guide.",
-                    "&7Good Luck and Have fun!");
+                    "DracFun Guide",
+                    "Currently just a placeholder item for future guide.",
+                    "I intend it to be a whole in game guide in later versions.",
+                    "For help just contact p_yt on discord.",
+                    "Alternatively you can join discord.gg/xFtghGVCVD and create ticket.",
+                    "Good Luck and Have fun!");
             new LegacyGuideItem(group, guide).register(addon);
             registered++;
         }
@@ -37,8 +40,7 @@ public final class DracFunMaterialRegistry {
         SlimefunItemStack ore = LegacyTheme.ORE.stack(
                 "DRACFUN_DRACONIUM_ORE",
                 Material.END_STONE,
-                "Ender Draconium Ore",
-                "&7A virtual ore resource found by GEO Miner in The End.");
+                "Ender Draconium Ore");
         SlimefunItemStack dust = LegacyTheme.BASIC_CRAFTING.stack(
                 "DRACFUN_DRACONIUM_DUST",
                 Material.NETHERITE_SCRAP,
