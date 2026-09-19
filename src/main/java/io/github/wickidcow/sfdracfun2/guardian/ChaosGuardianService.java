@@ -1,6 +1,7 @@
 package io.github.wickidcow.sfdracfun2.guardian;
 
 import com.destroystokyo.paper.event.entity.EnderDragonFireballHitEvent;
+import com.destroystokyo.paper.event.entity.EnderDragonShootFireballEvent;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
@@ -10,7 +11,6 @@ import io.github.wickidcow.sfdracfun2.modular.ModularArmorItem;
 import io.github.wickidcow.sfdracfun2.modular.ModularGearItem;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -89,6 +89,7 @@ public final class ChaosGuardianService implements Listener {
     private final int witherLifetimeTicks;
     private final double laserDamageCap;
     private final Set<UUID> pendingWorlds = ConcurrentHashMap.newKeySet();
+    private final Set<UUID> guardiansWithNaturalFireball = ConcurrentHashMap.newKeySet();
     private final Map<UUID, List<UUID>> participantSnapshots = new ConcurrentHashMap<>();
     private final Map<UUID, Map<CageBlock, Material>> cageBlocks = new ConcurrentHashMap<>();
 
@@ -285,7 +286,6 @@ public final class ChaosGuardianService implements Listener {
             return;
         }
 
-        double health = dragon.getHealth();
         World world = dragon.getWorld();
         Location origin = new Location(world, 0D, 0D, 0D);
         Collection<Player> participants = world.getNearbyPlayers(origin, 256D);
@@ -293,7 +293,29 @@ public final class ChaosGuardianService implements Listener {
                 dragon.getUniqueId(),
                 participants.stream().map(Player::getUniqueId).toList());
 
-        for (Player player : participants) {
+        // GuardianBattle.run() only replayed the attack event after the Guardian
+        // had naturally produced at least one DragonFireball.
+        if (guardiansWithNaturalFireball.contains(dragon.getUniqueId())) {
+            attackSnapshot(dragon);
+        }
+
+        schedulePulse(dragon);
+    }
+
+    private void attackSnapshot(EnderDragon dragon) {
+        List<UUID> snapshot = participantSnapshots.get(dragon.getUniqueId());
+        if (snapshot == null || snapshot.isEmpty()) {
+            return;
+        }
+
+        Set<UUID> ids = Set.copyOf(snapshot);
+        double health = dragon.getHealth();
+        World world = dragon.getWorld();
+        for (Player player : world.getPlayers()) {
+            if (!ids.contains(player.getUniqueId())) {
+                continue;
+            }
+
             Slimefun.runSyncFor(player, () -> {
                 if (!plugin.isEnabled()
                         || !player.isOnline()
@@ -309,8 +331,6 @@ public final class ChaosGuardianService implements Listener {
                 }
             });
         }
-
-        schedulePulse(dragon);
     }
 
     private void basicAttack(EnderDragon dragon, Player player) {
@@ -556,6 +576,17 @@ public final class ChaosGuardianService implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFireballShoot(EnderDragonShootFireballEvent event) {
+        EnderDragon dragon = event.getEntity();
+        if (!isGuardian(dragon)) {
+            return;
+        }
+
+        guardiansWithNaturalFireball.add(dragon.getUniqueId());
+        attackSnapshot(dragon);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onFireballHit(EnderDragonFireballHitEvent event) {
         DragonFireball fireball = event.getEntity();
         ProjectileSource shooter = fireball.getShooter();
@@ -603,6 +634,7 @@ public final class ChaosGuardianService implements Listener {
         }
 
         List<UUID> snapshot = participantSnapshots.remove(dragon.getUniqueId());
+        guardiansWithNaturalFireball.remove(dragon.getUniqueId());
         pendingWorlds.remove(dragon.getWorld().getUID());
 
         // DracFun 2.0.10 returned immediately when its PLAYERS snapshot was empty,
