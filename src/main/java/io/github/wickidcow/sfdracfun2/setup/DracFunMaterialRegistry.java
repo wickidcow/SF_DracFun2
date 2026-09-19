@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.WitherProofBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.items.EnderDraconiumOre;
+import io.github.wickidcow.sfdracfun2.items.LegacyGuideItem;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -19,6 +20,17 @@ public final class DracFunMaterialRegistry {
     public static int register(SFDracFun2 addon, boolean enableEndResource) {
         ItemGroup group = DracFunItemGroups.materials(addon);
         int registered = 0;
+
+        if (SlimefunItem.getById("DRACFUN_GUIDE") == null) {
+            SlimefunItemStack guide = new SlimefunItemStack(
+                    "DRACFUN_GUIDE",
+                    Material.BOOK,
+                    "&5DracFun Guide",
+                    "&7Currently just a placeholder item for future guide.",
+                    "&7Good Luck and Have fun!");
+            new LegacyGuideItem(group, guide).register(addon);
+            registered++;
+        }
 
         SlimefunItemStack ore = stack(
                 "DRACFUN_DRACONIUM_ORE",
