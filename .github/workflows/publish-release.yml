@@ -98,7 +98,7 @@ jobs:
           cat > release-notes.md <<'EOF'
           DracFun Reborn 2.0.2
 
-          Clean-room Slimefun Legacy reimplementation of the discontinued DracFun 2.0.20 addon.
+          Clean-room Slimefun Legacy reimplementation of the discontinued DracFun 2.0.10 addon.
 
           - Preserves the complete audited 134-ID DracFun 2.0.10 compatibility surface plus 3 migration aliases.
           - Restores Draconium progression, exact recipes/Fusion costs, Energy Infuser, Item Converter,
@@ -109,7 +109,7 @@ jobs:
           - Validated on Paper 1.21.11, Paper/Purpur 26.2, Paper/Purpur 26.3, and Folia 26.2.
           - Runtime-smoked on Paper 26.2 with Slimefun Legacy 4.1.51: 134/134 IDs and 3/3 aliases accounted for.
           - Universal release artifact is Java 21 bytecode.
-          - Remove the original DracFun 2.0.20 JAR before installing Reborn.
+          - Remove the original DracFun 2.0.10 JAR before installing Reborn.
 
           Release artifact: SFL_DracFun-Reborn2.0.2.jar
           EOF
@@ -117,6 +117,10 @@ jobs:
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$RELEASE_TAG" "$JAR" \
               --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$RELEASE_TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "DracFun Reborn 2.0.2" \
+              --notes-file release-notes.md
           else
             gh release create "$RELEASE_TAG" "$JAR" \
               --repo "$GITHUB_REPOSITORY" \
