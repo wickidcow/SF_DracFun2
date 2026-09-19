@@ -93,8 +93,8 @@ public final class ChaosGuardianService implements Listener {
         crystalCages = plugin.getConfig().getBoolean("guardian.crystal-cages-enabled", true);
         punishUnarmored = plugin.getConfig().getBoolean("guardian.punish-unarmored", true);
         witherLifetimeTicks = Math.max(
-                20,
-                plugin.getConfig().getInt("guardian.wither-minion-lifetime-ticks", 200));
+                0,
+                plugin.getConfig().getInt("guardian.wither-minion-lifetime-ticks", 0));
         laserDamageCap = Math.max(
                 1D,
                 plugin.getConfig().getDouble("guardian.laser-damage-cap", 5000D));
@@ -452,15 +452,17 @@ public final class ChaosGuardianService implements Listener {
             applyMultiplier(wither, new String[] {"GENERIC_FLYING_SPEED", "FLYING_SPEED"}, 2D);
             applyMultiplier(wither, new String[] {"GENERIC_ARMOR", "ARMOR"}, 8D);
 
-            Slimefun.runSyncFor(
-                    wither,
-                    () -> {
-                        if (wither.isValid()) {
-                            wither.remove();
-                        }
-                    },
-                    () -> {},
-                    witherLifetimeTicks);
+            if (witherLifetimeTicks > 0) {
+                Slimefun.runSyncFor(
+                        wither,
+                        () -> {
+                            if (wither.isValid()) {
+                                wither.remove();
+                            }
+                        },
+                        () -> {},
+                        witherLifetimeTicks);
+            }
         }
 
         // DracFun 2.0.10 followed the Wither phase with another basic
