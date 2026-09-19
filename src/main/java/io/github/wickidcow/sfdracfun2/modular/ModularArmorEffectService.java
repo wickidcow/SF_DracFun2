@@ -16,6 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -41,7 +42,7 @@ public final class ModularArmorEffectService implements Listener {
     private final Set<UUID> scheduled = ConcurrentHashMap.newKeySet();
     private final Map<UUID, FlightGrant> flightGrants = new ConcurrentHashMap<>();
     private final Map<UUID, Integer> passivePasses = new ConcurrentHashMap<>();
-    private final Map<UUID, Long> undyingCooldownUntil = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastUndyingAttempt = new ConcurrentHashMap<>();
     private final Map<UUID, Long> invincibleUntil = new ConcurrentHashMap<>();
 
     public ModularArmorEffectService(SFDracFun2 plugin) {
@@ -86,7 +87,7 @@ public final class ModularArmorEffectService implements Listener {
                     scheduled.remove(uuid);
                     flightGrants.remove(uuid);
                     passivePasses.remove(uuid);
-                    undyingCooldownUntil.remove(uuid);
+                    lastUndyingAttempt.remove(uuid);
                     invincibleUntil.remove(uuid);
                 },
                 INITIAL_DELAY_TICKS,
@@ -243,10 +244,70 @@ public final class ModularArmorEffectService implements Listener {
 
         if (absorbWithShield(event, armor)) {
             refreshChestplate(player, armor);
+        }
+    }
+
+    /**
+     * Preserves DracFun 2.0.10's Undying event contract.
+     *
+     * <p>The original addon handled Undying from the cancellable death event rather
+     * than pre-empting lethal damage. It also started the tier cooldown before
+     * checking whether the armor had enough stored charge. Both observable quirks
+     * are intentionally retained here.</p>
+     */
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+    public void onDeath(EntityDeathEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
             return;
         }
 
-        applyUndying(event, player, armor, now);
+        ItemStack armor = modularArmor(player);
+        if (armor == null) {
+            return;
+        }
+
+        ModuleTier tier = ModularData.highestTier(armor, ModuleFamily.UNDYING);
+        if (tier == null || tier == ModuleTier.BASIC) {
+            return;
+        }
+
+        UndyingSpec spec = undyingSpec(tier);
+        if (spec == null) {
+            return;
+        }
+
+        UUID uuid = player.getUniqueId();
+        long now = System.currentTimeMillis();
+        Long lastAttempt = lastUndyingAttempt.get(uuid);
+        if (lastAttempt != null
+                && now - lastAttempt < spec.cooldownSeconds() * 1000L) {
+            return;
+        }
+
+        // Exact 2.0.10 quirk: the cooldown begins even when charge is insufficient.
+        lastUndyingAttempt.put(uuid, now);
+
+        if (ModularData.getCharge(armor) < spec.chargeCost()) {
+            return;
+        }
+
+        ModularData.removeCharge(armor, spec.chargeCost());
+
+        event.setCancelled(true);
+        event.setDroppedExp(0);
+        event.setDeathSound(Sound.ITEM_TOTEM_USE);
+        event.setShouldPlayDeathSound(true);
+
+        var maxHealthAttribute =
+                player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        double maxHealth =
+                maxHealthAttribute == null ? player.getMaxHealth() : maxHealthAttribute.getValue();
+        event.setReviveHealth(Math.min(maxHealth, spec.reviveHealth()));
+
+        invincibleUntil.put(
+                uuid,
+                now + spec.invincibleSeconds() * 1000L);
+        refreshChestplate(player, armor);
     }
 
     private static boolean absorbWithShield(
@@ -282,58 +343,13 @@ public final class ModularArmorEffectService implements Listener {
         return true;
     }
 
-    private void applyUndying(
-            EntityDamageEvent event,
-            Player player,
-            ItemStack armor,
-            long now) {
-        if (event.getFinalDamage() < player.getHealth()) {
-            return;
-        }
-
-        ModuleTier tier = ModularData.highestTier(armor, ModuleFamily.UNDYING);
-        if (tier == null || tier == ModuleTier.BASIC) {
-            return;
-        }
-
-        UUID uuid = player.getUniqueId();
-        long cooldownUntil =
-                undyingCooldownUntil.getOrDefault(uuid, 0L);
-        if (cooldownUntil > now) {
-            return;
-        }
-
-        UndyingSpec spec = switch (tier) {
+    private static UndyingSpec undyingSpec(ModuleTier tier) {
+        return switch (tier) {
             case WYVERN -> new UndyingSpec(12, 6, 120, 4);
             case DRACONIC -> new UndyingSpec(15, 12, 60, 6);
             case CHAOTIC -> new UndyingSpec(24, 20, 45, 8);
             case BASIC -> null;
         };
-        if (spec == null || ModularData.getCharge(armor) < spec.chargeCost()) {
-            return;
-        }
-
-        ModularData.removeCharge(armor, spec.chargeCost());
-        undyingCooldownUntil.put(
-                uuid,
-                now + spec.cooldownSeconds() * 1000L);
-        invincibleUntil.put(
-                uuid,
-                now + spec.invincibleSeconds() * 1000L);
-
-        event.setCancelled(true);
-        event.setDamage(0D);
-        var maxHealth =
-                player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
-        player.setHealth(Math.min(
-                maxHealth == null ? spec.reviveHealth() : maxHealth.getValue(),
-                spec.reviveHealth()));
-        player.playSound(
-                player.getLocation(),
-                Sound.ITEM_TOTEM_USE,
-                1F,
-                1F);
-        refreshChestplate(player, armor);
     }
 
     private static ItemStack modularArmor(Player player) {

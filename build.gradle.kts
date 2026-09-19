@@ -37,7 +37,7 @@ dependencies {
 }
 
 group = "io.github.wickidcow"
-version = "2.0.3"
+version = "2.0.4"
 description = "Clean-room DracFun compatibility addon for Slimefun Legacy"
 
 java {

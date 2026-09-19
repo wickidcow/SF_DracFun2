@@ -6,11 +6,11 @@ Clean-room Slimefun Legacy reimplementation of the gameplay concepts and world-c
 
 ## Current project version
 
-**DracFun Reborn 2.0.3**
+**DracFun Reborn 2.0.4**
 
 Final release artifact:
 
-`SFL_DracFun-Reborn2.0.3.jar`
+`SFL_DracFun-Reborn2.0.4.jar`
 
 ## Targets
 
@@ -29,19 +29,21 @@ The implementation does not copy original method bodies, decompiled Java, textur
 
 ## Restored systems
 
-DracFun Reborn 2.0.3 includes the completed clean-room restoration of the audited 134-ID legacy surface, Draconium progression and End resource generation, Energy Infuser, Item Converter, Fusion Crafting, modular equipment/modules, Energy Core multiblocks, Draconic Reactor, and Chaos Guardian encounter.
+DracFun Reborn 2.0.4 includes the completed clean-room restoration of the audited 134-ID legacy surface, Draconium progression and End resource generation, Energy Infuser, Item Converter, Fusion Crafting, modular equipment/modules, Energy Core multiblocks, Draconic Reactor, and Chaos Guardian encounter.
 
-The 2.0.3 parity pass additionally restores or locks the original guide hierarchy, item presentation, machine GUIs, recipes and Fusion costs, Module Integrater behavior, modular gear attributes, Auto-Feed table/behavior, bow behavior, Reactor controls/status screen, Energy Core geometry/capacities, Guardian targeting/timing/attacks, legacy sounds, messages, and persisted modular keys.
+The 2.0.4 parity pass additionally restores or locks the original guide hierarchy, item presentation, machine GUIs, recipes and Fusion costs, Module Integrater behavior, modular gear attributes, Auto-Feed table/behavior, bow behavior, Reactor controls/status screen, Energy Core geometry/capacities, Guardian targeting/timing/attacks, legacy sounds, messages, and persisted modular keys.
 
-Fresh 2.0.3 configurations enable the complete restoration by default. Every major system remains independently toggleable under `features:`, and existing explicit server configuration values are respected.
+2.0.4 also restores the original Undying module's death-event revival contract, including its zero-XP revive path, tier revive health/invincibility values, and the legacy quirk where an eligible death starts the Undying cooldown before stored charge is checked.
 
-2.0.3 also detects the recognizable pre-completion development config that shipped only Materials enabled and safely migrates those old staged defaults to the completed feature set. Newer/manual feature choices are not overwritten.
+Fresh 2.0.4 configurations enable the complete restoration by default. Every major system remains independently toggleable under `features:`, and existing explicit server configuration values are respected.
+
+2.0.4 also detects the recognizable pre-completion development config that shipped only Materials enabled and safely migrates those old staged defaults to the completed feature set. Newer/manual feature choices are not overwritten.
 
 Remove the original **DracFun 2.0.10** JAR before installing Reborn. If both plugins are present, Reborn disables itself rather than risk duplicate `DRACFUN_*` registrations.
 
 ## Legacy-exact defaults and modern safety
 
-Where practical, 2.0.3 defaults to the observable DracFun 2.0.10 behavior—even when the old addon had quirks. For example, the original Arrow Penetration integer-division bug is preserved by default. Server owners can opt into the corrected pierce behavior with:
+Where practical, 2.0.4 defaults to the observable DracFun 2.0.10 behavior—even when the old addon had quirks. For example, the original Arrow Penetration integer-division bug is preserved by default. Server owners can opt into the corrected pierce behavior with:
 
 `compatibility.fix-broken-arrow-penetration: true`
 
@@ -59,7 +61,7 @@ Main/tag builds also perform a real Paper 26.2 boot smoke with Slimefun Legacy 4
 
 Release artifact naming is fixed to:
 
-`SFL_DracFun-Reborn2.0.3.jar`
+`SFL_DracFun-Reborn2.0.4.jar`
 
 ## Credits
 

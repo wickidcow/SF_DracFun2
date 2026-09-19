@@ -49,7 +49,7 @@ guardian:
   wither-minion-lifetime-ticks: 0
 
 features:
-  # DracFun Reborn 2.0.3 ships the completed restoration enabled on fresh installs.
+  # DracFun Reborn 2.0.4 ships the completed restoration enabled on fresh installs.
   # Every subsystem remains independently toggleable for staged rollouts or testing.
   materials: true
   end-resource: true

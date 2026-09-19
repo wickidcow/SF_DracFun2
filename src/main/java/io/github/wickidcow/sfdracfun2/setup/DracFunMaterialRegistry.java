@@ -28,7 +28,7 @@ public final class DracFunMaterialRegistry {
                     "DRACFUN_GUIDE",
                     Material.BOOK,
                     "DracFun Guide",
-                    "DracFun Reborn 2.0.3 progression guide.",
+                    "DracFun Reborn 2.0.4 progression guide.",
                     "Open the DracFun category to browse Materials, Energy Core,",
                     "Wyvern, Draconic and Chaotic Gear, Modules, Electric machines",
                     "and the Draconic Reactor.",
