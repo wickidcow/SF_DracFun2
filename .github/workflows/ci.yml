@@ -138,6 +138,24 @@ jobs:
             exit 1
           fi
 
+      - name: Verify Energy Core piece break parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          PIECE=src/main/java/io/github/wickidcow/sfdracfun2/energycore/EnergyCorePieceItem.java
+          CORE=src/main/java/io/github/wickidcow/sfdracfun2/energycore/EnergyCoreMachine.java
+          MAT=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
+          SHARED=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunSharedProgressionRegistry.java
+          REG=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunEnergyCoreRegistry.java
+          grep -Fq 'for (int x = -3; x <= 3; x++)' "$PIECE"
+          grep -Fq 'for (int y = -7; y <= 0; y++)' "$PIECE"
+          grep -Fq 'EnergyCoreMachine.invalidateImmediately(activator)' "$PIECE"
+          grep -Fq 'All stored energy has been expelled!' "$PIECE"
+          grep -Fq 'static boolean invalidateImmediately(Location location)' "$CORE"
+          grep -Fq 'new EnergyCorePieceItem(group, block' "$MAT"
+          grep -Fq 'new EnergyCorePieceItem(group, item, type, recipe)' "$SHARED"
+          grep -Fq 'new EnergyCorePieceItem(group, stack' "$REG"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
