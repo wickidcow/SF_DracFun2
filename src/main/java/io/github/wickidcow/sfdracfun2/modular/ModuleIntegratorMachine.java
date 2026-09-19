@@ -102,15 +102,18 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
         preset.drawBackground(new ItemStack(Material.LIME_STAINED_GLASS_PANE), moduleOutputBorder);
         preset.addItem(5, new ItemStack(Material.BLACK_STAINED_GLASS_PANE), ChestMenuUtils.getEmptyClickHandler());
         preset.addItem(23, new ItemStack(Material.BLACK_STAINED_GLASS_PANE), ChestMenuUtils.getEmptyClickHandler());
-        preset.addItem(11, button(Material.BOOK, "&aModule Integrator Guide",
-                "&7Place modular gear in slot 10.",
-                "&7Place a module in slot 12.",
-                "&7Removed modules appear below."), ChestMenuUtils.getEmptyClickHandler());
-        preset.addItem(INSTALL_BUTTON, button(Material.GREEN_STAINED_GLASS_PANE, "&aInstall Module"),
+        preset.addItem(11, button(
+                Material.BOOK,
+                "&aPlace your item on the left and modifier on the right!"),
                 ChestMenuUtils.getEmptyClickHandler());
-        preset.addItem(REMOVE_BUTTON, button(Material.BARRIER, "&cRemove All Modules",
-                "&7Returns installed modules to the",
-                "&7dedicated output slots below."), ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(
+                INSTALL_BUTTON,
+                button(Material.GREEN_STAINED_GLASS_PANE, "&aClick to Integrate!"),
+                ChestMenuUtils.getEmptyClickHandler());
+        preset.addItem(
+                REMOVE_BUTTON,
+                button(Material.BARRIER, "&cRemoves all modules from your item!"),
+                ChestMenuUtils.getEmptyClickHandler());
 
         preset.addMenuClickHandler(OUTPUT, (player, slot, clicked, action) -> !isEmpty(clicked));
         for (int slot : MODULE_OUTPUTS) {
@@ -120,25 +123,20 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
 
     private void install(BlockMenu menu, Player player) {
         if (!isEmpty(menu.getItemInSlot(OUTPUT))) {
-            error(player, "Take the existing output before installing another module.");
+            error(player, "Unable to integrate module due to occupied output slot!");
             return;
         }
 
         ItemStack gearInput = menu.getItemInSlot(GEAR_INPUT);
         ItemStack moduleInput = menu.getItemInSlot(MODULE_INPUT);
-        if (isEmpty(gearInput) || isEmpty(moduleInput)) {
-            error(player, "Insert one modular gear item and one module.");
-            return;
-        }
-
         SlimefunItem gearSf = SlimefunItem.getByItem(gearInput);
         SlimefunItem moduleSf = SlimefunItem.getByItem(moduleInput);
         if (!(gearSf instanceof ModularGearItem gear)) {
-            error(player, "The gear slot only accepts DracFun modular equipment.");
+            error(player, "Module integration is restricted to modular items exclusively!");
             return;
         }
         if (!(moduleSf instanceof ModuleItem module)) {
-            error(player, "The module slot only accepts DracFun modules.");
+            error(player, "Invalid Module!");
             return;
         }
 
@@ -159,30 +157,24 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
         menu.replaceExistingItem(GEAR_INPUT, null);
         consumeOne(menu, MODULE_INPUT, moduleInput);
         menu.replaceExistingItem(OUTPUT, resultStack);
-        player.sendMessage(ChatColor.GREEN + "Module installed.");
     }
 
     private void removeAll(BlockMenu menu, Player player) {
         if (!isEmpty(menu.getItemInSlot(OUTPUT))) {
-            error(player, "Take the existing output before removing modules.");
+            error(player, "Unable to remove modules due to occupied output slot!");
             return;
         }
         for (int slot : MODULE_OUTPUTS) {
             if (!isEmpty(menu.getItemInSlot(slot))) {
-                error(player, "Empty all module-return output slots before removing modules.");
+                error(player, "Unable to remove modules. Ensure all output slots are empty before proceeding!");
                 return;
             }
         }
 
         ItemStack gearInput = menu.getItemInSlot(GEAR_INPUT);
-        if (isEmpty(gearInput)) {
-            error(player, "Insert modular gear in the gear slot first.");
-            return;
-        }
-
         SlimefunItem gearSf = SlimefunItem.getByItem(gearInput);
         if (!(gearSf instanceof ModularGearItem gear)) {
-            error(player, "The gear slot only accepts DracFun modular equipment.");
+            error(player, "Module removal is restricted to modular items exclusively!");
             return;
         }
 
@@ -206,7 +198,6 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
 
         menu.replaceExistingItem(GEAR_INPUT, null);
         menu.replaceExistingItem(OUTPUT, resultStack);
-        player.sendMessage(ChatColor.GREEN + "Removed and returned " + returned + " module(s).");
     }
 
     private java.util.List<ItemStack> collectModules(ItemStack gear) {
@@ -269,11 +260,13 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
 
     private static String explain(ModuleInstallResult result) {
         return switch (result) {
-            case UNSUPPORTED_TIER -> "That module tier did not exist for this module family in DracFun 2.0.10.";
-            case MODULE_TIER_TOO_HIGH -> "The module tier is higher than the gear tier.";
-            case INCOMPATIBLE_GEAR -> "That module type cannot be installed in this kind of gear.";
-            case FAMILY_LIMIT_REACHED -> "This gear has reached the installation limit for that module type.";
-            case MODULE_POINTS_EXCEEDED -> "Installing that module would exceed the gear's module-point capacity.";
+            case UNSUPPORTED_TIER -> "Invalid Module!";
+            case MODULE_TIER_TOO_HIGH -> "The module surpasses the capabilities of the designated item!";
+            case INCOMPATIBLE_GEAR -> "This module is incompatible with the specified item type!";
+            case FAMILY_LIMIT_REACHED ->
+                    "The application of additional modules to this type is restricted due to the existing limit!";
+            case MODULE_POINTS_EXCEEDED ->
+                    "The application of additional modules to this item is restricted due to the existing limit!";
             case VALID -> "Module can be installed.";
         };
     }
