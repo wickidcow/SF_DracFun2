@@ -810,21 +810,7 @@ jobs:
           for feature in materials end-resource energy-infuser item-converter fusion-crafting modular-gear energy-core reactor chaos-guardian; do
             grep -Eq "^[[:space:]]{2}${feature}:[[:space:]]*true[[:space:]]*$" build/config.yml
           done
-          grep -Eq '^[[:space:]]{2}fix-broken-arrow-penetration:[[:space:]]*false[[:space:]]*          if unzip -l "$JAR" | grep -Eq 'me/phoenix/(dracfun|metrics)/'; then
-            echo 'Original DracFun implementation classes leaked into the clean-room artifact.' >&2
-            exit 1
-          fi
-          javap -verbose -classpath "$JAR" io.github.wickidcow.sfdracfun2.SFDracFun2 | grep -Fq 'major version: 65'
-          sha256sum "$JAR"
-
-      - name: Upload raw JAR artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: SFL_DracFun-Reborn2.0.2.jar
-          path: build/libs/SFL_DracFun-Reborn2.0.2.jar
-          archive: false
-          if-no-files-found: error
- build/config.yml
+          grep -Eq '^[[:space:]]{2}fix-broken-arrow-penetration:[[:space:]]*false[[:space:]]*$' build/config.yml
           if grep -Fq 'DracFun Reborn 2.0.1' build/config.yml; then
             echo 'Stale 2.0.1 branding remains in packaged 2.0.2 config.' >&2
             exit 1
@@ -843,3 +829,4 @@ jobs:
           path: build/libs/SFL_DracFun-Reborn2.0.2.jar
           archive: false
           if-no-files-found: error
+
