@@ -282,6 +282,26 @@ jobs:
           grep -Fq 'Make sure to enter plain item ONLY!' "$CONVERTER"
           grep -Fq 'Remove all the enchant and stuff before updating!' "$CONVERTER"
 
+      - name: Verify original DracFun guide presentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          GUIDE=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunItemGroups.java
+          grep -Fq 'Material.NETHERITE_INGOT' "$GUIDE"
+          grep -Fq 'DracFun Materials' "$GUIDE"
+          grep -Fq 'Material.BEACON' "$GUIDE"
+          grep -Fq 'DracFun Energy Core' "$GUIDE"
+          grep -Fq 'Material.IRON_CHESTPLATE' "$GUIDE"
+          grep -Fq 'Wyvern Gear' "$GUIDE"
+          grep -Fq 'Draconic Gear' "$GUIDE"
+          grep -Fq 'Material.NETHER_STAR' "$GUIDE"
+          grep -Fq 'Chaotic Gear' "$GUIDE"
+          grep -Fq 'DracFun Modules' "$GUIDE"
+          grep -Fq 'Material.REDSTONE_TORCH' "$GUIDE"
+          grep -Fq 'DracFun Electric' "$GUIDE"
+          grep -Fq 'Material.RESPAWN_ANCHOR' "$GUIDE"
+          grep -Fq 'Draconic Reactor' "$GUIDE"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
