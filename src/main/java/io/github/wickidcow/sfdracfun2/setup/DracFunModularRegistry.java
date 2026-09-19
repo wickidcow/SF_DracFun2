@@ -11,7 +11,7 @@ import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import io.github.wickidcow.sfdracfun2.fusion.LegacyModularFusionRecipeCatalog;
 import io.github.wickidcow.sfdracfun2.modular.GearType;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
-import io.github.wickidcow.sfdracfun2.modular.LegacyModuleRecipeCatalog;
+import io.github.wickidcow.sfdracfun2.modular.LegacyModuleRecipeCatalog;\nimport io.github.wickidcow.sfdracfun2.modular.LegacyModularLore;
 import io.github.wickidcow.sfdracfun2.modular.ModularArmorItem;
 import io.github.wickidcow.sfdracfun2.modular.ModularGearItem;
 import io.github.wickidcow.sfdracfun2.modular.ModularWeaponItem;
@@ -144,11 +144,7 @@ public final class DracFunModularRegistry {
                 PersistentDataType.INTEGER,
                 fusionPowerForTier(tier));
 
-        List<String> lore = new ArrayList<>();
-        lore.add(ChatColor.GRAY + "Energy: 0 / 0");
-        lore.add(ChatColor.GRAY + "Module Points: 0 / " + type.maxModulePoints(tier));
-        lore.add(ChatColor.DARK_GRAY + "DracFun Reborn compatibility item");
-        meta.setLore(lore);
+        meta.setLore(LegacyModularLore.defaultGearLore(type, tier));
 
         if (meta instanceof LeatherArmorMeta leather) {
             leather.setColor(switch (tier) {
@@ -270,9 +266,7 @@ public final class DracFunModularRegistry {
                 id,
                 materialFor(tier),
                 colorForModule(tier) + moduleTierName(tier) + ' ' + moduleName(family) + " Module",
-                "&7Module cost: &f" + family.pointCost(),
-                "&7Target: &f" + family.targetType().legacyName(),
-                "&8DracFun Reborn compatibility module");
+                LegacyModularLore.moduleLore(family, tier).toArray(String[]::new));
         new ModuleItem(
                         group,
                         stack,
