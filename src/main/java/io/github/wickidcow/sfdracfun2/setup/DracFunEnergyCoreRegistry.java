@@ -10,6 +10,8 @@ import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCoreMachine;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCorePieceItem;
 import io.github.wickidcow.sfdracfun2.energycore.EnergyCoreTier;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeCatalog;
+import io.github.wickidcow.sfdracfun2.fusion.FusionRecipeSpec;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -66,12 +68,14 @@ public final class DracFunEnergyCoreRegistry {
                             awakened, wyvernEnergyCore, awakened));
 
             // The Chaotic Energy Core is produced by Draconic-tier Fusion Crafting.
+            FusionRecipeSpec chaoticEnergyRecipe = FusionRecipeCatalog.requireByOutput(
+                    hardMode, true, chaoticEnergyCore.getItemId());
             registered += registerUnplaceable(
                     addon,
                     materials,
                     chaoticEnergyCore,
-                    RecipeType.NULL,
-                    new ItemStack[9]);
+                    DracFunRecipeTypes.fusion(chaoticEnergyRecipe.tier()),
+                    chaoticEnergyRecipe.toGuideRecipe());
         }
 
         return registered;
