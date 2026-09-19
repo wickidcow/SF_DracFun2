@@ -302,6 +302,23 @@ jobs:
           grep -Fq 'Material.RESPAWN_ANCHOR' "$GUIDE"
           grep -Fq 'Draconic Reactor' "$GUIDE"
 
+      - name: Verify original modular registration themes
+        shell: bash
+        run: |
+          set -euo pipefail
+          REG=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunModularRegistry.java
+          grep -Fq 'LegacyTheme.BASIC_MODULAR.stack' "$REG"
+          grep -Fq 'tierName(tier) + " Modular " + displayName(type)' "$REG"
+          grep -Fq 'case BASIC -> Material.MUSIC_DISC_WAIT;' "$REG"
+          grep -Fq 'case WYVERN -> Material.MUSIC_DISC_MALL;' "$REG"
+          grep -Fq 'case DRACONIC -> Material.MUSIC_DISC_13;' "$REG"
+          grep -Fq 'case CHAOTIC -> Material.MUSIC_DISC_STAL;' "$REG"
+          grep -Fq 'case 1 -> LegacyTheme.WYVERN_MODULAR;' "$REG"
+          grep -Fq 'case 2 -> LegacyTheme.DRACONIC_MODULAR;' "$REG"
+          grep -Fq 'case 3 -> LegacyTheme.CHAOTIC_MODULAR;' "$REG"
+          grep -Fq 'Material.LODESTONE' "$REG"
+          grep -Fq '"Module Integrater"' "$REG"
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
