@@ -204,6 +204,21 @@ jobs:
             exit 1
           fi
 
+      - name: Verify Module Integrator removal parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=src/main/java/io/github/wickidcow/sfdracfun2/modular/ModuleIntegratorMachine.java
+          grep -Fq 'setSize(54)' "$FILE"
+          grep -Fq '37, 38, 39, 40, 41, 42, 43' "$FILE"
+          grep -Fq '46, 47, 48, 49, 50, 51, 52' "$FILE"
+          grep -Fq 'Empty all module-return output slots before removing modules.' "$FILE"
+          grep -Fq 'menu.replaceExistingItem(MODULE_OUTPUTS[i], stack);' "$FILE"
+          if grep -Fq 'player.getInventory().addItem' "$FILE"; then
+            echo 'Module removal still bypasses the original machine output slots.' >&2
+            exit 1
+          fi
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
