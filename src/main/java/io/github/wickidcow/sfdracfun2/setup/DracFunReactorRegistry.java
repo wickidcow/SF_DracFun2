@@ -39,32 +39,32 @@ public final class DracFunReactorRegistry {
 
         SlimefunItemStack innerRotor = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_INNER_ROTOR",
-                Material.COPPER_INGOT,
+                Material.LIGHT_WEIGHTED_PRESSURE_PLATE,
                 "Reactor Stabilizer Inner Rotor");
         SlimefunItemStack outerRotor = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_OUTER_ROTOR",
-                Material.IRON_INGOT,
+                Material.HEAVY_WEIGHTED_PRESSURE_PLATE,
                 "Reactor Stabilizer Outer Rotor");
         SlimefunItemStack rotorAssembly = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_ROTOR_ASSEMBLY",
-                Material.PISTON,
+                Material.GILDED_BLACKSTONE,
                 "Reactor Stabilizer Rotor Assembly");
         SlimefunItemStack focusRing = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_FOCUS_RING",
-                Material.ENDER_EYE,
+                Material.GOLD_NUGGET,
                 "Reactor Stabilizer Focus Ring");
         SlimefunItemStack stabilizerFrame = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER_FRAME",
-                Material.IRON_BLOCK,
+                Material.BLACK_STAINED_GLASS,
                 "Reactor Stabilizer Frame");
 
         SlimefunItemStack energyInjector = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_ENERGY_INJECTOR",
-                Material.LIGHTNING_ROD,
+                Material.POLISHED_BLACKSTONE_PRESSURE_PLATE,
                 "Reactor Energy Injector");
         SlimefunItemStack stabilizer = LegacyTheme.REACTOR.stack(
                 "DRACFUN_REACTOR_STABILIZER",
-                Material.BEACON,
+                Material.TINTED_GLASS,
                 "Reactor Stabilizer");
         SlimefunItemStack reactorCore = LegacyTheme.REACTOR.stack(
                 "DRACFUN_DRACONIC_REACTOR_CORE",
@@ -72,7 +72,7 @@ public final class DracFunReactorRegistry {
                 "Draconic Reactor Core");
         SlimefunItemStack reactor = LegacyTheme.REACTOR.stack(
                 "DRACFUN_DRACONIC_REACTOR",
-                Material.CRYING_OBSIDIAN,
+                Material.ORANGE_GLAZED_TERRACOTTA,
                 "Draconic Reactor",
                 "&7Dangerous high-output reactor.",
                 "&7Uses Awakened Draconium Blocks as fuel.");
