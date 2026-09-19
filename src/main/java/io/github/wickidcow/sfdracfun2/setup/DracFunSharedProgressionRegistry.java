@@ -7,6 +7,7 @@ import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.items.blocks.UnplaceableBlock;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.items.DragonHeartItem;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -111,16 +112,7 @@ public final class DracFunSharedProgressionRegistry {
                 RecipeType.NULL,
                 emptyRecipe());
 
-        SlimefunItemStack dragonHeart = stack(
-                "DRACFUN_DRAGON_HEART",
-                Material.DRAGON_BREATH,
-                "&5Dragon Heart");
-        registered += registerUnplaceable(
-                addon,
-                materials,
-                dragonHeart,
-                RecipeType.NULL,
-                emptyRecipe());
+        registered += registerDragonHeart(addon);
 
         SlimefunItemStack smallChaos = stack(
                 "DRACFUN_SMALL_CHAOS_FRAGMENT",
@@ -172,6 +164,20 @@ public final class DracFunSharedProgressionRegistry {
         }
 
         return registered;
+    }
+
+    public static int registerDragonHeart(SFDracFun2 addon) {
+        String id = "DRACFUN_DRAGON_HEART";
+        if (SlimefunItem.getById(id) != null) {
+            return 0;
+        }
+
+        SlimefunItemStack dragonHeart = stack(
+                id,
+                Material.DRAGON_BREATH,
+                "&5Dragon Heart");
+        new DragonHeartItem(DracFunItemGroups.materials(addon), dragonHeart).register(addon);
+        return 1;
     }
 
     private static ItemStack required(String id) {
