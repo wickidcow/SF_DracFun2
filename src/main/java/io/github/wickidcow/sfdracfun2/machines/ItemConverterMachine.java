@@ -66,14 +66,16 @@ public final class ItemConverterMachine extends SlimefunItem {
             @Override
             public void init() {
                 setSize(27);
-                int[] background = new int[] {
-                    0, 1, 2, 3, 4, 5, 6, 7, 8,
-                    9, 11, 12, 14, 15, 17,
-                    18, 19, 20, 21, 22, 23, 24, 25, 26
-                };
-                drawBackground(background);
+
+                drawBackground(new int[] {3, 4, 5, 12, 14, 21, 22, 23});
+                drawBackground(
+                        ChestMenuUtils.getInputSlotTexture(),
+                        new int[] {0, 1, 2, 9, 11, 18, 19, 20});
+                drawBackground(
+                        ChestMenuUtils.getOutputSlotTexture(),
+                        new int[] {6, 7, 8, 15, 17, 24, 25, 26});
+
                 addItem(CONVERT, button(), ChestMenuUtils.getEmptyClickHandler());
-                addMenuClickHandler(OUTPUT, (player, slot, clicked, action) -> !isEmpty(clicked));
             }
 
             @Override
@@ -111,39 +113,33 @@ public final class ItemConverterMachine extends SlimefunItem {
 
     private void convert(BlockMenu menu, Player player) {
         if (!isEmpty(menu.getItemInSlot(OUTPUT))) {
-            player.sendMessage(ChatColor.RED + "Take the existing output first.");
             return;
         }
 
         ItemStack input = menu.getItemInSlot(INPUT);
         if (isEmpty(input)) {
-            player.sendMessage(ChatColor.RED + "Insert an old DracFun item first.");
             return;
         }
 
         String sourceId = sourceIdentity(input);
-        if (sourceId == null) {
-            player.sendMessage(ChatColor.RED + "That item does not contain a recognized DracFun identity.");
+        if (sourceId == null || sourceId.isEmpty()) {
             return;
         }
 
         String targetId = TARGETS.get(sourceId);
         if (targetId == null) {
-            player.sendMessage(ChatColor.RED + "That item was not supported by DracFun 2.0.10's converter.");
             return;
         }
 
         SlimefunItem target = SlimefunItem.getById(targetId);
         if (target == null || LegacyCompatibilityRegistry.isPlaceholder(target)) {
-            player.sendMessage(ChatColor.RED + "The replacement for " + targetId + " is not enabled or available on this server.");
             return;
         }
 
         ItemStack converted = target.getItem().clone();
         converted.setAmount(input.getAmount());
         menu.replaceExistingItem(INPUT, null);
-        menu.replaceExistingItem(OUTPUT, converted);
-        player.sendMessage(ChatColor.GREEN + "Converted legacy DracFun item to " + targetId + '.');
+        menu.pushItem(converted, OUTPUT);
     }
 
     /**
@@ -163,12 +159,12 @@ public final class ItemConverterMachine extends SlimefunItem {
     }
 
     private static ItemStack button() {
-        ItemStack item = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
+        ItemStack item = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.GREEN + "Convert Legacy Item");
+        meta.setDisplayName("Click to update your old DracFun Items!");
         meta.setLore(java.util.List.of(
-                ChatColor.YELLOW + "Use plain legacy items only.",
-                ChatColor.GRAY + "Extra enchantments/metadata are intentionally removed."));
+                ChatColor.YELLOW + "Make sure to enter plain item ONLY!",
+                ChatColor.YELLOW + "Remove all the enchant and stuff before updating!"));
         item.setItemMeta(meta);
         return item;
     }
