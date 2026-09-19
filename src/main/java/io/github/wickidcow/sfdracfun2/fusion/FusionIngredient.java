@@ -39,6 +39,17 @@ public record FusionIngredient(String slimefunId, Material material) {
         return SlimefunItem.getByItem(stack) == null && stack.getType() == material;
     }
 
+    public ItemStack toGuideItemStack() {
+        if (slimefunId != null) {
+            SlimefunItem item = SlimefunItem.getById(slimefunId);
+            if (item == null) {
+                throw new IllegalStateException("Fusion guide ingredient is not registered: " + slimefunId);
+            }
+            return item.getItem().clone();
+        }
+        return new ItemStack(material);
+    }
+
     public String description() {
         return slimefunId != null ? slimefunId : material.getKey().toString();
     }
