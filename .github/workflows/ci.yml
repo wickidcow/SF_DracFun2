@@ -240,6 +240,25 @@ jobs:
             exit 1
           fi
 
+      - name: Verify original item theme parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          THEME=src/main/java/io/github/wickidcow/sfdracfun2/compat/LegacyTheme.java
+          grep -Fq 'ORE("#C0C0C0", "Ore Resource")' "$THEME"
+          grep -Fq 'BASIC_CRAFTING("#800080", "Basic Crafting Component")' "$THEME"
+          grep -Fq 'ADVANCED_CRAFTING("#FFA500", "Advanced Crafting Component")' "$THEME"
+          grep -Fq 'END_GAME_CRAFTING("#333333", "End-Game Crafting Component")' "$THEME"
+          grep -Fq 'ENERGY_CORE("#FF0000", "Energy Core Component")' "$THEME"
+          grep -Fq 'FUSION_CRAFTING("#40E0D0", "Fusion Crafting Component")' "$THEME"
+          grep -Fq 'MACHINE("#FFFF00", "Electric Machine")' "$THEME"
+          grep -Fq 'MOB("#3A3B3C", "Mob Drop")' "$THEME"
+          grep -Fq 'REACTOR("#FFA500", "Draconic Reactor Part")' "$THEME"
+          grep -Fq 'LegacyTheme.ORE.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunMaterialRegistry.java
+          grep -Fq 'LegacyTheme.FUSION_CRAFTING.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunFusionComponentRegistry.java
+          grep -Fq 'LegacyTheme.ENERGY_CORE.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunEnergyCoreRegistry.java
+          grep -Fq 'LegacyTheme.REACTOR.stack' src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunReactorRegistry.java
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
