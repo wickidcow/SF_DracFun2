@@ -1,7 +1,6 @@
 package io.github.wickidcow.sfdracfun2.setup;
 
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
-import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.items.groups.NestedItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.groups.SubItemGroup;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
@@ -88,10 +87,10 @@ public final class DracFunItemGroups {
             return;
         }
 
-        SlimefunItemStack guideIcon = new SlimefunItemStack(
-                "DRACFUN_GUIDE",
-                Material.DRAGON_HEAD,
-                "&5DracFun");
+        ItemStack guideIcon = new ItemStack(Material.DRAGON_HEAD);
+        ItemMeta guideMeta = guideIcon.getItemMeta();
+        guideMeta.setDisplayName(ChatColor.DARK_PURPLE + "DracFun");
+        guideIcon.setItemMeta(guideMeta);
 
         dracFun = new NestedItemGroup(
                 new NamespacedKey(addon, "dracfun_nested"),

@@ -349,6 +349,17 @@ jobs:
           grep -Fq 'Alternatively you can join discord.gg/xFtghGVCVD and create ticket.' "$MAT"
           grep -Fq 'Good Luck and Have fun!' "$MAT"
 
+      - name: Verify parent guide icon does not reuse DRACFUN_GUIDE item ID
+        shell: bash
+        run: |
+          set -euo pipefail
+          GUIDE=src/main/java/io/github/wickidcow/sfdracfun2/setup/DracFunItemGroups.java
+          grep -Fq 'ItemStack guideIcon = new ItemStack(Material.DRAGON_HEAD);' "$GUIDE"
+          if grep -Fq 'SlimefunItemStack guideIcon' "$GUIDE"; then
+            echo 'Parent category icon must not reuse the DRACFUN_GUIDE Slimefun item identity.' >&2
+            exit 1
+          fi
+
       - name: Verify Paper 1.21.11 baseline
         run: gradle clean shadowJar -Pplatform=paper -PplatformVersion=1.21.11-R0.1-SNAPSHOT -PreleaseJvm=21 --stacktrace --no-daemon
 
