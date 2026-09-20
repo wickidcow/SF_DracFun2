@@ -27,6 +27,7 @@ public final class EnderDraconiumOre extends SlimefunItem implements GEOResource
     private final ItemSetting<Integer> minOres;
     private final ItemSetting<Integer> maxOres;
     private final ItemSetting<Integer> bonusOres;
+    private final ItemSetting<Integer> rarityDenominator;
 
     public EnderDraconiumOre(ItemGroup group, SlimefunItemStack stack, NamespacedKey key) {
         super(group, stack, RecipeType.GEO_MINER, new ItemStack[9]);
@@ -35,12 +36,18 @@ public final class EnderDraconiumOre extends SlimefunItem implements GEOResource
         this.minOres = new IntRangeSetting(this, "min-ores", 1, 8, 64);
         this.maxOres = new IntRangeSetting(this, "max-ores", 1, 12, 64);
         this.bonusOres = new IntRangeSetting(this, "bonus-ores", 1, 12, 64);
-        addItemSetting(minOres, maxOres, bonusOres);
+        this.rarityDenominator = new IntRangeSetting(this, "rarity-denominator", 1, 400, 1_000_000);
+        addItemSetting(minOres, maxOres, bonusOres, rarityDenominator);
     }
 
     @Override
     public int getDefaultSupply(World.Environment environment, Biome biome) {
         if (environment != World.Environment.THE_END) {
+            return 0;
+        }
+
+        int denominator = rarityDenominator.getValue();
+        if (ThreadLocalRandom.current().nextInt(denominator) != 0) {
             return 0;
         }
 
