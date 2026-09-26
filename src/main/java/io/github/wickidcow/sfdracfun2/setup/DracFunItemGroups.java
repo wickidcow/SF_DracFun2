@@ -102,42 +102,42 @@ public final class DracFunItemGroups {
                 addon,
                 "dracfun_material",
                 Material.NETHERITE_INGOT,
-                main.append(Component.text("Materials", NamedTextColor.GREEN));
+                main.append(Component.text("Materials", NamedTextColor.GREEN)));
         energyCore = subgroup(
                 addon,
                 "dracfun_energy_core",
                 Material.BEACON,
-                main.append(Component.text("EnergyCore", NamedTextColor.RED));
+                main.append(Component.text("EnergyCore", NamedTextColor.RED)));
         wyvernGear = armorSubgroup(
                 addon,
                 "dracfun_wyvern_gear",
                 Color.PURPLE,
-                main.append(Component.text("WyvernGear", NamedTextColor.DARK_PURPLE));
+                main.append(Component.text("WyvernGear", NamedTextColor.DARK_PURPLE)));
         draconicGear = armorSubgroup(
                 addon,
                 "dracfun_draconic_gear",
                 Color.ORANGE,
-                main.append(Component.text("DraconicGear", NamedTextColor.GOLD));
+                main.append(Component.text("DraconicGear", NamedTextColor.GOLD)));
         chaoticGear = armorSubgroup(
                 addon,
                 "dracfun_chaotic_gear",
                 Color.BLACK,
-                main.append(Component.text("ChaoticGear", NamedTextColor.DARK_GRAY));
+                main.append(Component.text("ChaoticGear", NamedTextColor.DARK_GRAY)));
         modules = subgroup(
                 addon,
                 "dracfun_module",
                 Material.HEART_OF_THE_SEA,
-                main.append(Component.text("Modules", NamedTextColor.AQUA));
+                main.append(Component.text("Modules", NamedTextColor.AQUA)));
         electric = subgroup(
                 addon,
                 "dracfun_electric",
                 Material.RESPAWN_ANCHOR,
-                main.append(Component.text("Electric", NamedTextColor.YELLOW));
+                main.append(Component.text("Electric", NamedTextColor.YELLOW)));
         reactor = subgroup(
                 addon,
                 "dracfun_reactor",
                 Material.CRYING_OBSIDIAN,
-                main.append(Component.text("Reactor", NamedTextColor.GOLD));
+                main.append(Component.text("Reactor", NamedTextColor.GOLD)));
     }
 
     private static SubItemGroup subgroup(
