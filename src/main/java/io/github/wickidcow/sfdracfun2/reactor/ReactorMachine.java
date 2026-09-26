@@ -914,7 +914,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                         NamedTextColor.RED,
                         "Core Temperature",
                         statLine(NamedTextColor.RED, temperature + " K"),
-                        ""));
+                        Component.empty()));
         fillStatsSlots(
                 CONTAINMENT_FIELD_STRENGTH,
                 statsItem(
@@ -922,7 +922,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                         NamedTextColor.AQUA,
                         "Containment Field Strength",
                         statRatio(NamedTextColor.AQUA, shield, maxShield),
-                        ""));
+                        Component.empty()));
         fillStatsSlots(
                 ENERGY_SATURATION,
                 statsItem(
@@ -930,7 +930,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                         NamedTextColor.GREEN,
                         "Energy Saturation",
                         statRatio(NamedTextColor.GREEN, saturation, maxSaturation),
-                        ""));
+                        Component.empty()));
         fillStatsSlots(
                 FUEL_CONVERSION_LEVEL,
                 statsItem(
@@ -938,7 +938,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                         NamedTextColor.YELLOW,
                         "Fuel Conversion Level",
                         fuelRatio(convertedFuel, reactableFuel),
-                        ""));
+                        Component.empty()));
 
         statsMenu.replaceExistingItem(
                 GENERATION_RATE_SLOT,
