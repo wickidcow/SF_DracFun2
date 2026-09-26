@@ -6,7 +6,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -50,8 +51,9 @@ public final class EnergyCorePieceItem extends SlimefunItem {
                 Location piece = event.getBlock().getLocation();
                 Location activator = findNearbyActivator(piece);
                 if (activator != null && EnergyCoreMachine.invalidateImmediately(activator)) {
-                    event.getPlayer().sendMessage(ChatColor.RED
-                            + "You broke a part of the core! All stored energy has been expelled!");
+                    event.getPlayer().sendMessage(
+                            Component.text("You broke a part of the core! All stored energy has been expelled!",
+                                    NamedTextColor.RED));
                 }
             }
         });

@@ -17,7 +17,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.annotation.Nonnull;
 import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -54,9 +55,10 @@ public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetCo
                 EnergyCoreStructure.Validation validation = tier.structure().validate(event.getBlock().getLocation());
                 if (validation == EnergyCoreStructure.Validation.COMPLETE) {
                     event.getPlayer().sendMessage(
-                            ChatColor.GREEN + "You have successfully built the Energy Core " + tier.displayName());
+                            Component.text("You have successfully built the Energy Core " + tier.displayName(),
+                                    NamedTextColor.GREEN));
                 } else if (validation == EnergyCoreStructure.Validation.INCOMPLETE) {
-                    event.getPlayer().sendMessage(ChatColor.RED + "The core is not completed yet!");
+                    event.getPlayer().sendMessage(Component.text("The core is not completed yet!", NamedTextColor.RED));
                 }
             }
         });
@@ -69,8 +71,8 @@ public final class EnergyCoreMachine extends SlimefunItem implements EnergyNetCo
                     @Nonnull java.util.List<ItemStack> drops) {
                 validationCache.remove(BlockKey.of(event.getBlock().getLocation()));
                 event.getPlayer().sendMessage(
-                        ChatColor.RED
-                                + "You broke a part of the core! All stored energy has been expelled!");
+                        Component.text("You broke a part of the core! All stored energy has been expelled!",
+                                NamedTextColor.RED));
             }
         });
 

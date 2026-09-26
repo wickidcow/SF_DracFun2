@@ -13,7 +13,8 @@ import java.util.Map;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -161,10 +162,10 @@ public final class ItemConverterMachine extends SlimefunItem {
     private static ItemStack button() {
         ItemStack item = new ItemStack(Material.GREEN_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName("Click to update your old DracFun Items!");
-        meta.setLore(java.util.List.of(
-                ChatColor.YELLOW + "Make sure to enter plain item ONLY!",
-                ChatColor.YELLOW + "Remove all the enchant and stuff before updating!"));
+        meta.displayName(Component.text("Click to update your old DracFun Items!"));
+        meta.lore(java.util.List.of(
+                Component.text("Make sure to enter plain item ONLY!", NamedTextColor.YELLOW),
+                Component.text("Remove all the enchant and stuff before updating!", NamedTextColor.YELLOW)));
         item.setItemMeta(meta);
         return item;
     }

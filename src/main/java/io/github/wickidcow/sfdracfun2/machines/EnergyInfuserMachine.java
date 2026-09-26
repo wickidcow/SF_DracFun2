@@ -18,7 +18,8 @@ import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
@@ -183,8 +184,8 @@ public final class EnergyInfuserMachine extends SlimefunItem implements EnergyNe
         // while preserving the original observable title and lore.
         ItemStack item = new ItemStack(Material.LIGHTNING_ROD);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.GREEN + "Current Power");
-        meta.setLore(java.util.List.of(ChatColor.GREEN + Long.toString(charge)));
+        meta.displayName(Component.text("Current Power", NamedTextColor.GREEN));
+        meta.lore(java.util.List.of(Component.text(Long.toString(charge), NamedTextColor.GREEN)));
         item.setItemMeta(meta);
         return item;
     }

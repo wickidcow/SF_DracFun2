@@ -20,7 +20,8 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
@@ -315,8 +316,8 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
         // copying the original bundled asset.
         ItemStack item = new ItemStack(Material.ARROW);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.GREEN + "Click To Start Fusion Crafting!");
-        meta.setLore(java.util.List.of(""));
+        meta.displayName(Component.text("Click To Start Fusion Crafting!", NamedTextColor.GREEN));
+        meta.lore(java.util.List.of(Component.empty()));
         item.setItemMeta(meta);
         return item;
     }
@@ -333,7 +334,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
     }
 
     private static void warning(Player player, String message) {
-        player.sendMessage(ChatColor.YELLOW + message);
+        player.sendMessage(Component.text(message, NamedTextColor.YELLOW));
     }
 
     @Override

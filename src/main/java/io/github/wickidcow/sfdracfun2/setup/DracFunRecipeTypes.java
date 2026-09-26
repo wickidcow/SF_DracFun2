@@ -3,13 +3,17 @@ package io.github.wickidcow.sfdracfun2.setup;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.wickidcow.sfdracfun2.fusion.FusionTier;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /** Guide RecipeTypes matching DracFun 2.0.10's four Fusion Crafter tiers. */
 public final class DracFunRecipeTypes {
+
+    private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
 
     private static RecipeType basic;
     private static RecipeType wyvern;
@@ -58,7 +62,7 @@ public final class DracFunRecipeTypes {
     private static RecipeType create(FusionTier tier, Material material) {
         ItemStack icon = new ItemStack(material);
         ItemMeta meta = icon.getItemMeta();
-        meta.setDisplayName(ChatColor.LIGHT_PURPLE + tier.displayName() + " Fusion Crafter");
+        meta.displayName(Component.text(tier.displayName() + " Fusion Crafter", NamedTextColor.LIGHT_PURPLE));
         icon.setItemMeta(meta);
 
         return new RecipeType(
@@ -66,6 +70,6 @@ public final class DracFunRecipeTypes {
                 icon,
                 null,
                 "",
-                ChatColor.GREEN + "Craft it using the " + tier.displayName() + " Fusion Crafter");
+                LEGACY.serialize(Component.text("Craft it using the " + tier.displayName() + " Fusion Crafter", NamedTextColor.GREEN)));
     }
 }

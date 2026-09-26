@@ -4,7 +4,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.groups.NestedItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.groups.SubItemGroup;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -89,64 +90,64 @@ public final class DracFunItemGroups {
 
         ItemStack guideIcon = new ItemStack(Material.DRAGON_HEAD);
         ItemMeta guideMeta = guideIcon.getItemMeta();
-        guideMeta.setDisplayName(ChatColor.DARK_PURPLE + "DracFun");
+        guideMeta.displayName(Component.text("DracFun", NamedTextColor.DARK_PURPLE));
         guideIcon.setItemMeta(guideMeta);
 
         dracFun = new NestedItemGroup(
                 new NamespacedKey(addon, "dracfun_nested"),
                 guideIcon);
 
-        String main = ChatColor.DARK_PURPLE + "DracFun";
+        Component main = Component.text("DracFun", NamedTextColor.DARK_PURPLE);
         materials = subgroup(
                 addon,
                 "dracfun_material",
                 Material.NETHERITE_INGOT,
-                main + ChatColor.GREEN + "Materials");
+                main.append(Component.text("Materials", NamedTextColor.GREEN));
         energyCore = subgroup(
                 addon,
                 "dracfun_energy_core",
                 Material.BEACON,
-                main + ChatColor.RED + "EnergyCore");
+                main.append(Component.text("EnergyCore", NamedTextColor.RED));
         wyvernGear = armorSubgroup(
                 addon,
                 "dracfun_wyvern_gear",
                 Color.PURPLE,
-                main + ChatColor.DARK_PURPLE + "WyvernGear");
+                main.append(Component.text("WyvernGear", NamedTextColor.DARK_PURPLE));
         draconicGear = armorSubgroup(
                 addon,
                 "dracfun_draconic_gear",
                 Color.ORANGE,
-                main + ChatColor.GOLD + "DraconicGear");
+                main.append(Component.text("DraconicGear", NamedTextColor.GOLD));
         chaoticGear = armorSubgroup(
                 addon,
                 "dracfun_chaotic_gear",
                 Color.BLACK,
-                main + ChatColor.DARK_GRAY + "ChaoticGear");
+                main.append(Component.text("ChaoticGear", NamedTextColor.DARK_GRAY));
         modules = subgroup(
                 addon,
                 "dracfun_module",
                 Material.HEART_OF_THE_SEA,
-                main + ChatColor.AQUA + "Modules");
+                main.append(Component.text("Modules", NamedTextColor.AQUA));
         electric = subgroup(
                 addon,
                 "dracfun_electric",
                 Material.RESPAWN_ANCHOR,
-                main + ChatColor.YELLOW + "Electric");
+                main.append(Component.text("Electric", NamedTextColor.YELLOW));
         reactor = subgroup(
                 addon,
                 "dracfun_reactor",
                 Material.CRYING_OBSIDIAN,
-                main + ChatColor.GOLD + "Reactor");
+                main.append(Component.text("Reactor", NamedTextColor.GOLD));
     }
 
     private static SubItemGroup subgroup(
             SFDracFun2 addon,
             String key,
             Material material,
-            String displayName) {
+            Component displayName) {
         ItemStack icon = new ItemStack(material);
         ItemMeta meta = icon.getItemMeta();
-        meta.setDisplayName(displayName);
+        meta.displayName(displayName);
         icon.setItemMeta(meta);
         return new SubItemGroup(
                 new NamespacedKey(addon, key),
@@ -157,11 +158,11 @@ public final class DracFunItemGroups {
             SFDracFun2 addon,
             String key,
             Color color,
-            String displayName) {
+            Component displayName) {
         ItemStack icon = new ItemStack(Material.LEATHER_HELMET);
         LeatherArmorMeta meta = (LeatherArmorMeta) icon.getItemMeta();
         meta.setColor(color);
-        meta.setDisplayName(displayName);
+        meta.displayName(displayName);
         icon.setItemMeta(meta);
         return new SubItemGroup(
                 new NamespacedKey(addon, key),

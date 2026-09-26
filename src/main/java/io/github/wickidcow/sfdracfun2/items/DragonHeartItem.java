@@ -7,7 +7,8 @@ import io.github.thebusybiscuit.slimefun4.api.items.settings.IntRangeSetting;
 import io.github.thebusybiscuit.slimefun4.api.recipes.RecipeType;
 import io.github.thebusybiscuit.slimefun4.core.attributes.NotPlaceable;
 import io.github.thebusybiscuit.slimefun4.core.attributes.RandomMobDrop;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -32,7 +33,7 @@ public final class DragonHeartItem extends SlimefunItem implements NotPlaceable,
         ItemStack[] recipe = new ItemStack[9];
         ItemStack dragon = new ItemStack(Material.DRAGON_HEAD);
         ItemMeta meta = dragon.getItemMeta();
-        meta.setDisplayName(ChatColor.WHITE + "Ender Dragon");
+        meta.displayName(Component.text("Ender Dragon", NamedTextColor.WHITE));
         dragon.setItemMeta(meta);
         recipe[4] = dragon;
         return recipe;
