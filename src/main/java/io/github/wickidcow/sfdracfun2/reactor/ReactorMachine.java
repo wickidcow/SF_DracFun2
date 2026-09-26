@@ -16,7 +16,6 @@ import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
 import io.github.wickidcow.sfdracfun2.compat.ProtectionCompat;
-import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
@@ -24,7 +23,9 @@ import me.mrCookieSlime.Slimefun.Objects.handlers.BlockTicker;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.SoundCategory;
@@ -122,40 +123,40 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                         SHIELD_SET,
                         controlItem(
                                 Material.CYAN_STAINED_GLASS_PANE,
-                                ChatColor.AQUA,
+                                NamedTextColor.AQUA,
                                 "Determine the energy allocation for the generation of a containment field."),
                         ChestMenuUtils.getEmptyClickHandler());
                 addItem(
                         MIN_SATURATION_SET,
                         controlItem(
                                 Material.GREEN_STAINED_GLASS_PANE,
-                                ChatColor.GREEN,
+                                NamedTextColor.GREEN,
                                 "Determine the saturation level prior to initiating the generation of energy."),
                         ChestMenuUtils.getEmptyClickHandler());
                 addItem(
                         FAILSAFE_SET,
                         controlItem(
                                 Material.YELLOW_STAINED_GLASS_PANE,
-                                ChatColor.RED,
+                                NamedTextColor.RED,
                                 "Toggle the fail-safe to ensure the automatic termination in the event of an emergency."),
                         ChestMenuUtils.getEmptyClickHandler());
                 addItem(
                         CHARGE,
-                        controlItem(Material.YELLOW_STAINED_GLASS_PANE, ChatColor.YELLOW, "Charge Reactor"),
+                        controlItem(Material.YELLOW_STAINED_GLASS_PANE, NamedTextColor.YELLOW, "Charge Reactor"),
                         ChestMenuUtils.getEmptyClickHandler());
                 addItem(
                         ACTIVATE,
-                        controlItem(Material.YELLOW_STAINED_GLASS_PANE, ChatColor.YELLOW, "Activate Reactor"),
+                        controlItem(Material.YELLOW_STAINED_GLASS_PANE, NamedTextColor.YELLOW, "Activate Reactor"),
                         ChestMenuUtils.getEmptyClickHandler());
                 addItem(
                         SHUTDOWN,
-                        controlItem(Material.YELLOW_STAINED_GLASS_PANE, ChatColor.YELLOW, "Shutdown Reactor"),
+                        controlItem(Material.YELLOW_STAINED_GLASS_PANE, NamedTextColor.YELLOW, "Shutdown Reactor"),
                         ChestMenuUtils.getEmptyClickHandler());
                 addItem(
                         STATUS,
                         controlItem(
                                 Material.BOOK,
-                                ChatColor.RED,
+                                NamedTextColor.RED,
                                 "Click to view the current operational status of the reactor."),
                         ChestMenuUtils.getEmptyClickHandler());
                 addMenuClickHandler(OUTPUT, (player, slot, clicked, action) -> !isEmpty(clicked));
@@ -699,7 +700,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         ReactorState.progress(
                 data,
                 clampInt((long) ReactorState.integer(data, ReactorState.REACTABLE_FUEL) * 120L));
-        player.sendMessage(ChatColor.GREEN + "The reactor has been charged!");
+        player.sendMessage(Component.text("The reactor has been charged!", NamedTextColor.GREEN));
     }
 
     private void activateReactor(Location location, Player player) {
@@ -717,7 +718,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
 
         ReactorState.phase(data, ReactorPhase.RUNNING);
         fillStatsSlots(REACTOR_STATUS, new ItemStack(Material.ORANGE_STAINED_GLASS_PANE));
-        player.sendMessage(ChatColor.GREEN + "The reactor has been activated!");
+        player.sendMessage(Component.text("The reactor has been activated!", NamedTextColor.GREEN));
         player.playSound(
                 player.getLocation(),
                 "dracfun:dracfun.core_sound",
@@ -740,7 +741,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         }
 
         fillStatsSlots(REACTOR_STATUS, new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
-        player.sendMessage(ChatColor.GREEN + "The reactor has been deactivated!");
+        player.sendMessage(Component.text("The reactor has been deactivated!", NamedTextColor.GREEN));
     }
 
     private static boolean shutdown(SlimefunBlockData data) {
@@ -789,8 +790,9 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         ReactorState.ensureDefaults(data);
         boolean enabled = !ReactorState.bool(data, ReactorState.FAILSAFE);
         ReactorState.bool(data, ReactorState.FAILSAFE, enabled);
-        player.sendMessage(
-                ChatColor.GREEN + "Fail-safe mechanism has been turned to " + (enabled ? "ON" : "OFF"));
+        player.sendMessage(Component.text(
+                "Fail-safe mechanism has been turned to " + (enabled ? "ON" : "OFF"),
+                NamedTextColor.GREEN));
     }
 
     private void configureShieldInput(BlockMenu menu, Location location, Player player) {
@@ -801,7 +803,9 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
             if (!usable(data) || value == null) {
                 message(
                         player,
-                        ChatColor.RED + "Invalid input! Your input should be within the range of 0 to 100.");
+                        Component.text(
+                                "Invalid input! Your input should be within the range of 0 to 100.",
+                                NamedTextColor.RED));
                 return;
             }
 
@@ -809,9 +813,9 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
             ReactorState.integer(data, ReactorState.SHIELD_INPUT, value);
             message(
                     player,
-                    ChatColor.GREEN
-                            + String.valueOf(value)
-                            + " J per tick will be used for the generation of a containment field.");
+                    Component.text(
+                            value + " J per tick will be used for the generation of a containment field.",
+                            NamedTextColor.GREEN));
         }));
     }
 
@@ -823,7 +827,9 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
             if (!usable(data) || value == null || value >= 100) {
                 message(
                         player,
-                        ChatColor.RED + "Invalid input! Your input should be within the range of 0 to 100.");
+                        Component.text(
+                                "Invalid input! Your input should be within the range of 0 to 100.",
+                                NamedTextColor.RED));
                 return;
             }
 
@@ -831,9 +837,9 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
             ReactorState.integer(data, ReactorState.MIN_SATURATION, value);
             message(
                     player,
-                    ChatColor.GREEN
-                            + String.valueOf(value)
-                            + "% of the max saturation level must be filled prior to the generation of energy.");
+                    Component.text(
+                            value + "% of the max saturation level must be filled prior to the generation of energy.",
+                            NamedTextColor.GREEN));
         }));
     }
 
@@ -905,31 +911,31 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                 CORE_TEMPERATURE,
                 statsItem(
                         Material.RED_STAINED_GLASS_PANE,
-                        ChatColor.RED,
+                        NamedTextColor.RED,
                         "Core Temperature",
-                        statLine(ChatColor.RED, temperature + " K"),
+                        statLine(NamedTextColor.RED, temperature + " K"),
                         ""));
         fillStatsSlots(
                 CONTAINMENT_FIELD_STRENGTH,
                 statsItem(
                         Material.CYAN_STAINED_GLASS_PANE,
-                        ChatColor.AQUA,
+                        NamedTextColor.AQUA,
                         "Containment Field Strength",
-                        statRatio(ChatColor.AQUA, shield, maxShield),
+                        statRatio(NamedTextColor.AQUA, shield, maxShield),
                         ""));
         fillStatsSlots(
                 ENERGY_SATURATION,
                 statsItem(
                         Material.LIME_STAINED_GLASS_PANE,
-                        ChatColor.GREEN,
+                        NamedTextColor.GREEN,
                         "Energy Saturation",
-                        statRatio(ChatColor.GREEN, saturation, maxSaturation),
+                        statRatio(NamedTextColor.GREEN, saturation, maxSaturation),
                         ""));
         fillStatsSlots(
                 FUEL_CONVERSION_LEVEL,
                 statsItem(
                         Material.YELLOW_STAINED_GLASS_PANE,
-                        ChatColor.YELLOW,
+                        NamedTextColor.YELLOW,
                         "Fuel Conversion Level",
                         fuelRatio(convertedFuel, reactableFuel),
                         ""));
@@ -938,30 +944,33 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
                 GENERATION_RATE_SLOT,
                 statsItem(
                         Material.RED_STAINED_GLASS_PANE,
-                        ChatColor.RED,
+                        NamedTextColor.RED,
                         "Generation Rate",
-                        ChatColor.WHITE + "This is the current RF/t being generated by the reactor.",
+                        Component.text("This is the current RF/t being generated by the reactor.", NamedTextColor.WHITE),
                         powerPerTick(generationRate)));
         statsMenu.replaceExistingItem(
                 FIELD_INPUT_RATE_SLOT,
                 statsItem(
                         Material.CYAN_STAINED_GLASS_PANE,
-                        ChatColor.AQUA,
+                        NamedTextColor.AQUA,
                         "Field Input Rate",
-                        ChatColor.WHITE
-                                + "This is the exact RF/t required to maintain the current field strength.",
-                        ChatColor.WHITE
-                                + "As field strength increases, this will increase exponentially.",
+                        Component.text(
+                                "This is the exact RF/t required to maintain the current field strength.",
+                                NamedTextColor.WHITE),
+                        Component.text(
+                                "As field strength increases, this will increase exponentially.",
+                                NamedTextColor.WHITE),
                         powerPerTick(fieldInputRate)));
         statsMenu.replaceExistingItem(
                 FUEL_CONVERSION_RATE_SLOT,
                 statsItem(
                         Material.YELLOW_STAINED_GLASS_PANE,
-                        ChatColor.YELLOW,
+                        NamedTextColor.YELLOW,
                         "Fuel Conversion Rate",
-                        ChatColor.WHITE + "This is how fast the reactor is currently using fuel.",
-                        ChatColor.WHITE + "As the reactor saturation increases, this will go down.",
-                        ChatColor.RED + "• " + ChatColor.WHITE + fuelUseRate + " nb/t"));
+                        Component.text("This is how fast the reactor is currently using fuel.", NamedTextColor.WHITE),
+                        Component.text("As the reactor saturation increases, this will go down.", NamedTextColor.WHITE),
+                        Component.text("• ", NamedTextColor.RED)
+                                .append(Component.text(fuelUseRate + " nb/t", NamedTextColor.WHITE))));
     }
 
     private void fillStatsSlots(int[] slots, ItemStack item) {
@@ -970,54 +979,57 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         }
     }
 
-    private static ItemStack controlItem(Material material, ChatColor color, String name) {
+    private static ItemStack controlItem(Material material, NamedTextColor color, String name) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(color + name);
+        meta.displayName(Component.text(name, color));
         item.setItemMeta(meta);
         return item;
     }
 
-    private static ItemStack statsItem(Material material, ChatColor color, String name, String... lore) {
+    private static ItemStack statsItem(Material material, NamedTextColor color, String name, Component... lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(color + name);
-        meta.setLore(java.util.Arrays.asList(lore));
+        meta.displayName(Component.text(name, color));
+        meta.lore(java.util.List.of(lore));
         item.setItemMeta(meta);
         return item;
     }
 
-    private static String statLine(ChatColor color, String value) {
-        return color + "• " + ChatColor.WHITE + value;
+    private static Component statLine(NamedTextColor color, String value) {
+        return Component.text("• ", color)
+                .append(Component.text(value, NamedTextColor.WHITE));
     }
 
-    private static String statRatio(ChatColor color, int value, int maximum) {
+    private static Component statRatio(NamedTextColor color, int value, int maximum) {
         int divisor = maximum + 1;
         int percent = divisor <= 0 ? 0 : (int) ((long) value * 100L / divisor);
-        return color + "• " + ChatColor.WHITE + value + "/" + divisor + " (" + percent + "%)";
+        return Component.text("• ", color)
+                .append(Component.text(value + "/" + divisor + " (" + percent + "%)", NamedTextColor.WHITE));
     }
 
-    private static String fuelRatio(int convertedFuel, int reactableFuel) {
+    private static Component fuelRatio(int convertedFuel, int reactableFuel) {
         int second = reactableFuel + 1;
         long total = Math.max(1L, (long) convertedFuel + second);
         int percent = (int) ((long) convertedFuel * 100L / total);
-        return ChatColor.YELLOW + "• " + ChatColor.WHITE + convertedFuel + "/" + second
-                + " (" + percent + "%)";
+        return Component.text("• ", NamedTextColor.YELLOW)
+                .append(Component.text(
+                        convertedFuel + "/" + second + " (" + percent + "%)",
+                        NamedTextColor.WHITE));
     }
 
-    private static String powerPerTick(int amount) {
-        return ChatColor.DARK_GRAY + "⚡" + ChatColor.YELLOW + " • " + ChatColor.GRAY + amount + " J/t";
+    private static Component powerPerTick(int amount) {
+        return Component.text("⚡", NamedTextColor.DARK_GRAY)
+                .append(Component.text(" • ", NamedTextColor.YELLOW))
+                .append(Component.text(amount + " J/t", NamedTextColor.GRAY));
     }
 
     private static ItemStack actionItem(Material material, String name, String... lore) {
+        LegacyComponentSerializer legacy = LegacyComponentSerializer.legacyAmpersand();
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-        List<String> lines = new ArrayList<>(lore.length);
-        for (String line : lore) {
-            lines.add(ChatColor.translateAlternateColorCodes('&', line));
-        }
-        meta.setLore(lines);
+        meta.displayName(legacy.deserialize(name));
+        meta.lore(java.util.Arrays.stream(lore).map(legacy::deserialize).toList());
         item.setItemMeta(meta);
         return item;
     }
@@ -1055,12 +1067,12 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
         }
     }
 
-    private static void message(Player player, String message) {
+    private static void message(Player player, Component message) {
         Slimefun.runSyncFor(player, () -> player.sendMessage(message));
     }
 
     private static void error(Player player, String message) {
-        player.sendMessage(ChatColor.RED + message);
+        player.sendMessage(Component.text(message, NamedTextColor.RED));
     }
 
     private static boolean isEmpty(ItemStack item) {
