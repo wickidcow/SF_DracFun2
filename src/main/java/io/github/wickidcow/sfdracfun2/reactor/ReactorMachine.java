@@ -294,7 +294,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
     }
 
     private void injectStoredEnergy(Location location, SlimefunBlockData data) {
-        long stored = getChargeLong(location, data);
+        long stored = getChargeLong(location, (ASlimefunDataContainer) data);
         int requested = ReactorState.integer(data, ReactorState.SHIELD_INPUT);
         int incoming = (int) Math.min(Integer.MAX_VALUE, Math.min(stored, Math.max(0, requested)));
         if (incoming <= 0) {
@@ -401,7 +401,7 @@ public final class ReactorMachine extends SlimefunItem implements EnergyNetProvi
             return;
         }
 
-        long available = ENERGY_CAPACITY - getChargeLong(location, data);
+        long available = ENERGY_CAPACITY - getChargeLong(location, (ASlimefunDataContainer) data);
         if (available < generation) {
             ReactorState.integer(data, ReactorState.GENERATION_RATE, 0);
             return;

@@ -1,5 +1,6 @@
 package io.github.wickidcow.sfdracfun2.fusion;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ASlimefunDataContainer;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -156,7 +157,7 @@ public final class FusionCrafterMachine extends SlimefunItem implements EnergyNe
             return;
         }
 
-        long charge = getChargeLong(block.getLocation(), data);
+        long charge = getChargeLong(block.getLocation(), (ASlimefunDataContainer) data);
         if (charge < recipe.energyCost()) {
             warning(player, "This Fusion Craft requires a minimum of " + recipe.energyCost() + "J of power!");
             return;

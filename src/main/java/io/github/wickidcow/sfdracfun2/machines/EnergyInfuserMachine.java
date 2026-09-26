@@ -1,5 +1,6 @@
 package io.github.wickidcow.sfdracfun2.machines;
 
+import com.xzavier0722.mc.plugin.slimefun4.storage.controller.ASlimefunDataContainer;
 import com.xzavier0722.mc.plugin.slimefun4.storage.controller.SlimefunBlockData;
 import io.github.thebusybiscuit.slimefun4.api.items.ItemGroup;
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
@@ -107,7 +108,7 @@ public final class EnergyInfuserMachine extends SlimefunItem implements EnergyNe
             return;
         }
 
-        long machineCharge = getChargeLong(block.getLocation(), data);
+        long machineCharge = getChargeLong(block.getLocation(), (ASlimefunDataContainer) data);
         if (menu.hasViewer()) {
             menu.replaceExistingItem(STATUS, statusItem(machineCharge));
         }
