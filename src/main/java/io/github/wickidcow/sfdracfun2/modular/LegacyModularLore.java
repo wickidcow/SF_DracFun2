@@ -3,7 +3,6 @@ package io.github.wickidcow.sfdracfun2.modular;
 import java.util.ArrayList;
 import java.util.List;
 import io.github.thebusybiscuit.slimefun4.utils.ChatUtils;
-import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -11,10 +10,10 @@ import org.bukkit.inventory.ItemStack;
  */
 public final class LegacyModularLore {
 
-    private static final String GOLD = ChatColor.GOLD.toString();
-    private static final String AQUA = ChatColor.AQUA.toString();
-    private static final String GREEN = ChatColor.GREEN.toString();
-    private static final String GRAY = ChatColor.GRAY.toString();
+    private static final String GOLD = "\u00A76";
+    private static final String AQUA = "\u00A7b";
+    private static final String GREEN = "\u00A7a";
+    private static final String GRAY = "\u00A77";
 
     private LegacyModularLore() {}
 

@@ -9,6 +9,9 @@ import io.github.wickidcow.sfdracfun2.modular.GearType;
 import io.github.wickidcow.sfdracfun2.modular.LegacyDracFunKeys;
 import io.github.wickidcow.sfdracfun2.modular.ModularArmorItem;
 import io.github.wickidcow.sfdracfun2.modular.ModularGearItem;
+import io.github.wickidcow.sfdracfun2.compat.PotionEffectCompat;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -19,7 +22,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import org.bukkit.ChatColor;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -147,8 +149,9 @@ public final class ChaosGuardianService implements Listener {
     public boolean invoke(Player player, ItemStack invocationItem) {
         World world = player.getWorld();
         if (world.getEnvironment() != World.Environment.THE_END) {
-            player.sendMessage(ChatColor.RED
-                    + "In this realm, the invocation of the Chaos Guardian is strictly forbidden.");
+            player.sendMessage(Component.text(
+                    "In this realm, the invocation of the Chaos Guardian is strictly forbidden.",
+                    NamedTextColor.RED));
             return false;
         }
 
@@ -172,8 +175,9 @@ public final class ChaosGuardianService implements Listener {
         invocationItem.setAmount(invocationItem.getAmount() - 1);
 
         if (!isWearingModularArmor(player)) {
-            player.sendMessage(ChatColor.RED
-                    + "Did you, a mere mortal, truly believe that you could contend with the Guardian in such armor?");
+            player.sendMessage(Component.text(
+                    "Did you, a mere mortal, truly believe that you could contend with the Guardian in such armor?",
+                    NamedTextColor.RED));
             player.setHealth(0D);
             return false;
         }
@@ -194,8 +198,9 @@ public final class ChaosGuardianService implements Listener {
                 return;
             }
             initiateRespawn(battle);
-            player.sendMessage(ChatColor.GREEN
-                    + "May luck guide you to triumph in the midst of chaos!");
+            player.sendMessage(Component.text(
+                    "May luck guide you to triumph in the midst of chaos!",
+                    NamedTextColor.GREEN));
         }, 600L);
 
         Slimefun.runSyncAt(owner, () -> initializeWhenReady(world, battle, 0), 1260L);
@@ -249,7 +254,7 @@ public final class ChaosGuardianService implements Listener {
                 "MAX_HEALTH");
         double targetHealth = maxHealth == null ? dragon.getHealth() : Math.min(2000D, maxHealth.getValue());
         dragon.setHealth(Math.max(1D, targetHealth));
-        dragon.setCustomName(ChatColor.DARK_RED + "Chaos Guardian");
+        dragon.customName(Component.text("Chaos Guardian", NamedTextColor.DARK_RED));
         tag(dragon, GUARDIAN);
 
         initializeBossBar(dragon.getBossBar());
@@ -493,7 +498,7 @@ public final class ChaosGuardianService implements Listener {
                 applyMultiplier(wither, new String[] {"GENERIC_MOVEMENT_SPEED", "MOVEMENT_SPEED"}, 2D);
                 applyMultiplier(wither, new String[] {"GENERIC_FLYING_SPEED", "FLYING_SPEED"}, 2D);
                 applyMultiplier(wither, new String[] {"GENERIC_ARMOR", "ARMOR"}, 8D);
-                wither.setCustomName(ChatColor.DARK_RED + "Guardian Wither");
+                wither.customName(Component.text("Guardian Wither", NamedTextColor.DARK_RED));
                 initializeBossBar(wither.getBossBar());
                 wither.lookAt(player);
                 wither.setTarget(player);
@@ -613,10 +618,7 @@ public final class ChaosGuardianService implements Listener {
         AreaEffectCloud cloud = event.getAreaEffectCloud();
         cloud.setDuration(cloud.getDuration() * 3);
 
-        PotionEffectType harm = PotionEffectType.getByName("HARM");
-        if (harm == null) {
-            harm = PotionEffectType.getByName("INSTANT_DAMAGE");
-        }
+        PotionEffectType harm = PotionEffectCompat.find("HARM", "INSTANT_DAMAGE");
         if (harm != null) {
             cloud.addCustomEffect(new PotionEffect(harm, 600, 2), true);
         }
@@ -697,9 +699,10 @@ public final class ChaosGuardianService implements Listener {
                     return;
                 }
 
-                player.sendMessage(ChatColor.RED
-                        + "As the Chaos Island crumbled, it enveloped you, burying you alive! "
-                        + "A sturdier armor might have shielded you. Here's to better luck on your next endeavor!");
+                player.sendMessage(Component.text(
+                        "As the Chaos Island crumbled, it enveloped you, burying you alive! "
+                                + "A sturdier armor might have shielded you. Here's to better luck on your next endeavor!",
+                        NamedTextColor.RED));
                 player.setHealth(0D);
             });
         }
@@ -1067,9 +1070,8 @@ public final class ChaosGuardianService implements Listener {
         return null;
     }
 
-    @SuppressWarnings("deprecation")
     private static void applyEffect(Player player, String effectName, int duration, int amplifier) {
-        PotionEffectType type = PotionEffectType.getByName(effectName);
+        PotionEffectType type = PotionEffectCompat.find(effectName);
         if (type != null) {
             player.addPotionEffect(new PotionEffect(type, duration, amplifier, true, false, false));
         }

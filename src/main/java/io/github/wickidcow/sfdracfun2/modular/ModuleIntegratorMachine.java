@@ -8,7 +8,9 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.BlockBreakHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.Slimefun;
 import io.github.thebusybiscuit.slimefun4.utils.ChestMenuUtils;
 import io.github.wickidcow.sfdracfun2.compat.ProtectionCompat;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -26,6 +28,9 @@ import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
  * contracts from DracFun 2.0.10 are preserved.</p>
  */
 public final class ModuleIntegratorMachine extends SlimefunItem {
+
+    private static final LegacyComponentSerializer LEGACY_AMPERSAND =
+            LegacyComponentSerializer.legacyAmpersand();
 
     private static final int GEAR_INPUT = 10;
     private static final int MODULE_INPUT = 12;
@@ -244,12 +249,12 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
     private static ItemStack button(Material material, String name, String... lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', name));
-        java.util.List<String> lines = new java.util.ArrayList<>();
+        meta.displayName(LEGACY_AMPERSAND.deserialize(name));
+        java.util.List<Component> lines = new java.util.ArrayList<>();
         for (String line : lore) {
-            lines.add(ChatColor.translateAlternateColorCodes('&', line));
+            lines.add(LEGACY_AMPERSAND.deserialize(line));
         }
-        meta.setLore(lines);
+        meta.lore(lines);
         item.setItemMeta(meta);
         return item;
     }
@@ -272,6 +277,6 @@ public final class ModuleIntegratorMachine extends SlimefunItem {
     }
 
     private static void error(Player player, String message) {
-        player.sendMessage(ChatColor.RED + message);
+        player.sendMessage(Component.text(message, NamedTextColor.RED));
     }
 }

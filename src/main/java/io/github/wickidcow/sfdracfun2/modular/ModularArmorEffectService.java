@@ -2,6 +2,7 @@ package io.github.wickidcow.sfdracfun2.modular;
 
 import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItem;
 import io.github.wickidcow.sfdracfun2.SFDracFun2;
+import io.github.wickidcow.sfdracfun2.compat.PotionEffectCompat;
 import com.destroystokyo.paper.event.player.PlayerArmorChangeEvent;
 import java.util.Map;
 import java.util.Set;
@@ -301,7 +302,7 @@ public final class ModularArmorEffectService implements Listener {
         var maxHealthAttribute =
                 player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
         double maxHealth =
-                maxHealthAttribute == null ? player.getMaxHealth() : maxHealthAttribute.getValue();
+                maxHealthAttribute == null ? 20D : maxHealthAttribute.getValue();
         event.setReviveHealth(Math.min(maxHealth, spec.reviveHealth()));
 
         invincibleUntil.put(
@@ -370,18 +371,11 @@ public final class ModularArmorEffectService implements Listener {
         player.getInventory().setChestplate(armor);
     }
 
-    @SuppressWarnings("deprecation")
     private static void addEffect(
             Player player,
             String[] names,
             int amplifier) {
-        PotionEffectType type = null;
-        for (String name : names) {
-            type = PotionEffectType.getByName(name);
-            if (type != null) {
-                break;
-            }
-        }
+        PotionEffectType type = PotionEffectCompat.find(names);
 
         if (type == null) {
             return;
